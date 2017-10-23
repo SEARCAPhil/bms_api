@@ -3,10 +3,10 @@ header('Access-Control-Allow-Origin: *');
 require_once('../../suppliers/Index/Index.php');
 require_once('../../config/database/connections.php');
 
-use Index\Index as Index;
+use Suppliers\Index as Index;
 
 $LIMIT=20;
-$status=0; //default
+$status='all'; 
 $page=1;
 
 /**
@@ -17,6 +17,9 @@ $page=1;
  * @return json
  */
 
+/**
+ * GET suppliers list
+ */ 
 if(isset($_GET)){
 	#instance
 	$index=new Index($DB);
@@ -24,12 +27,40 @@ if(isset($_GET)){
 	if(isset($_GET['page'])){
 		$page=(int) htmlentities(htmlspecialchars($_GET['page']));
 	}
-	#filter blocked or active companies
-	if(isset($_GET['status'])){
-		$status=(int) htmlentities(htmlspecialchars($_GET['status']));
+
+	if(!isset($_GET['id'])){
+
+		#filter blocked or active companies
+		if(isset($_GET['status'])){
+			$status=trim(strip_tags(htmlentities(htmlspecialchars($_GET['status']))));
+		}
+
+		switch ($status) {
+			case 'all':
+				$status_code=0;
+				break;
+			case 'blocked':
+				$status_code=1;
+				break;
+			
+			default:
+				$status_code=0;
+				break;
+		}
+		
+		echo @json_encode($index->lists($page,$LIMIT,$status_code));
 	}
 	
-	echo @json_encode($index->lists($page,$LIMIT,$status));
+}
+
+/**
+ * GET supplier's profile
+ */  
+if(isset($_GET['id'])){
+	$index=new Index($DB);
+	$id=(int) trim(strip_tags(htmlentities(htmlspecialchars($_GET['id']))));
+	$result=["data"=>@$index->view($id)];
+	echo @json_encode($result);
 }
 
 

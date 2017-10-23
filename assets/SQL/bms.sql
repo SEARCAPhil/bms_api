@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 17, 2017 at 07:40 AM
+-- Generation Time: Oct 23, 2017 at 10:57 AM
 -- Server version: 5.6.21-log
 -- PHP Version: 7.1.2
 
@@ -27,7 +27,7 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE IF NOT EXISTS `account` (
-  `id` int(11) NOT NULL,
+`id` int(11) NOT NULL,
   `company_id` int(11) NOT NULL,
   `username` varchar(255) DEFAULT NULL,
   `uid` varchar(255) DEFAULT NULL COMMENT 'contains openID from azure AD through O365 API',
@@ -35,7 +35,14 @@ CREATE TABLE IF NOT EXISTS `account` (
   `date_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `is_deleted` int(11) DEFAULT '0',
   `is_deactivated` int(11) DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `account`
+--
+
+INSERT INTO `account` (`id`, `company_id`, `username`, `uid`, `date_created`, `date_modified`, `is_deleted`, `is_deactivated`) VALUES
+(1, 1, 'jkga@searca.org', 'abc-test-token-1234', '2017-10-23 11:42:16', '2017-10-23 11:42:16', 0, 0);
 
 -- --------------------------------------------------------
 
@@ -121,7 +128,14 @@ CREATE TABLE IF NOT EXISTS `logs` (
   `message` text NOT NULL,
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
   `event` varchar(45) DEFAULT NULL COMMENT 'executed events includes CRUD for:\n\naccount\ncompany\nproducts\n\n'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `logs`
+--
+
+INSERT INTO `logs` (`id`, `account_id`, `message`, `date_created`, `event`) VALUES
+(1, 1, 'events.js:160\r\nthrow er; // Unhandled ''error'' event\r\n^\r\n\r\nError: C:/xampp/htdocs/popup-es/dist/src/js/popup-es.min.js: original.line and original.column are not numbers -- you probably meant to omit the original mapping entirely and only map the generated position. If so, pass null for the original mapping instead of an object with empty or null values.\r\nat SourceMapGenerator_validateMapping [as _validateMapping] (C:\\xampp\\htdocs\\popup-es\\node_modules\\source-map\\lib\\source-map-generator.js:276:15)', '2017-10-23 11:45:22', 'warnings');
 
 -- --------------------------------------------------------
 
@@ -132,11 +146,18 @@ CREATE TABLE IF NOT EXISTS `logs` (
 CREATE TABLE IF NOT EXISTS `price` (
 `id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
-  `price` float DEFAULT NULL,
+  `amount` float DEFAULT NULL,
   `currency` varchar(45) DEFAULT NULL,
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
   `date_modified` datetime DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `price`
+--
+
+INSERT INTO `price` (`id`, `product_id`, `amount`, `currency`, `date_created`, `date_modified`) VALUES
+(1, 1, 25000, 'PHP', '2017-10-23 00:00:00', '2017-10-23 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -156,7 +177,14 @@ CREATE TABLE IF NOT EXISTS `privilege` (
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
   `date_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `author_id` int(11) DEFAULT NULL COMMENT 'The one who assigned these privileges to you.\nMitigate the issue of finger pointing, looking for\nthe one who made the wrong settings for a specific account'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `privilege`
+--
+
+INSERT INTO `privilege` (`id`, `account_id`, `manage_company`, `manage_company_accessibility`, `update_company`, `manage_account`, `manage_product`, `manage_logs`, `date_created`, `date_modified`, `author_id`) VALUES
+(1, 1, 1, NULL, NULL, NULL, NULL, NULL, '2017-10-23 14:28:13', '2017-10-23 14:28:13', NULL);
 
 -- --------------------------------------------------------
 
@@ -171,7 +199,14 @@ CREATE TABLE IF NOT EXISTS `product` (
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
   `date_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `is_deleted` int(11) DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `product`
+--
+
+INSERT INTO `product` (`id`, `product_category_id`, `name`, `date_created`, `date_modified`, `is_deleted`) VALUES
+(1, 1, 'HP PRO (Unclassified)', '2017-10-23 10:02:01', '2017-10-23 10:02:01', 0);
 
 -- --------------------------------------------------------
 
@@ -188,7 +223,15 @@ CREATE TABLE IF NOT EXISTS `product_category` (
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
   `date_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `is_deleted` int(11) DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `product_category`
+--
+
+INSERT INTO `product_category` (`id`, `company_id`, `parent_id`, `name`, `description`, `date_created`, `date_modified`, `is_deleted`) VALUES
+(1, 1, NULL, 'Computers', NULL, '2017-10-23 09:13:16', '2017-10-23 09:13:16', 0),
+(2, 1, 1, 'Desktop', NULL, '2017-10-23 09:13:38', '2017-10-23 09:13:38', 0);
 
 -- --------------------------------------------------------
 
@@ -203,7 +246,14 @@ CREATE TABLE IF NOT EXISTS `product_template` (
   `logo` varchar(255) DEFAULT NULL,
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
   `date_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `product_template`
+--
+
+INSERT INTO `product_template` (`id`, `account_id`, `name`, `logo`, `date_created`, `date_modified`) VALUES
+(1, NULL, 'Laptop', NULL, '2017-10-23 14:53:26', '2017-10-23 14:53:26');
 
 -- --------------------------------------------------------
 
@@ -218,7 +268,15 @@ CREATE TABLE IF NOT EXISTS `product_template_specifications` (
   `active` int(11) DEFAULT NULL,
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
   `date_modified` datetime DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `product_template_specifications`
+--
+
+INSERT INTO `product_template_specifications` (`id`, `product_template_id`, `name`, `active`, `date_created`, `date_modified`) VALUES
+(1, 1, 'brand', 1, '2017-10-23 14:54:00', '2017-10-23 14:54:00'),
+(2, 1, 'model', 1, '2017-10-23 14:54:00', '2017-10-23 14:54:00');
 
 -- --------------------------------------------------------
 
@@ -239,7 +297,14 @@ CREATE TABLE IF NOT EXISTS `profile` (
   `position` varchar(255) DEFAULT NULL,
   `image` varchar(255) DEFAULT NULL,
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `profile`
+--
+
+INSERT INTO `profile` (`id`, `uid`, `profile_name`, `last_name`, `first_name`, `middle_name`, `email`, `department`, `department_alias`, `position`, `image`, `date_created`) VALUES
+(1, 1, 'Profile Name Sample', 'Last Name Sample', 'Fname', 'mname', 'email', 'Department Sample', 'Dept Allias', 'Position Sample', NULL, '2017-10-23 13:38:51');
 
 -- --------------------------------------------------------
 
@@ -256,7 +321,15 @@ CREATE TABLE IF NOT EXISTS `specifications` (
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
   `date_modified` datetime DEFAULT CURRENT_TIMESTAMP,
   `is_deleted` int(11) DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `specifications`
+--
+
+INSERT INTO `specifications` (`id`, `product_id`, `name`, `value`, `position`, `date_created`, `date_modified`, `is_deleted`) VALUES
+(2, 1, 'brand', 'HP', NULL, '2017-10-23 14:41:34', '2017-10-23 14:41:34', 0),
+(3, 1, 'model', 'EiteOne 800 G3', NULL, '2017-10-23 14:41:57', '2017-10-23 14:41:57', 0);
 
 --
 -- Indexes for dumped tables
@@ -351,6 +424,11 @@ ALTER TABLE `specifications`
 --
 
 --
+-- AUTO_INCREMENT for table `account`
+--
+ALTER TABLE `account`
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
+--
 -- AUTO_INCREMENT for table `account_session`
 --
 ALTER TABLE `account_session`
@@ -374,68 +452,56 @@ MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 -- AUTO_INCREMENT for table `logs`
 --
 ALTER TABLE `logs`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
 --
 -- AUTO_INCREMENT for table `price`
 --
 ALTER TABLE `price`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
 --
 -- AUTO_INCREMENT for table `privilege`
 --
 ALTER TABLE `privilege`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
 --
 -- AUTO_INCREMENT for table `product`
 --
 ALTER TABLE `product`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
 --
 -- AUTO_INCREMENT for table `product_category`
 --
 ALTER TABLE `product_category`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=3;
 --
 -- AUTO_INCREMENT for table `product_template`
 --
 ALTER TABLE `product_template`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
 --
 -- AUTO_INCREMENT for table `product_template_specifications`
 --
 ALTER TABLE `product_template_specifications`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=3;
 --
 -- AUTO_INCREMENT for table `profile`
 --
 ALTER TABLE `profile`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
 --
 -- AUTO_INCREMENT for table `specifications`
 --
 ALTER TABLE `specifications`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=4;
 --
 -- Constraints for dumped tables
 --
-
---
--- Constraints for table `account_session`
---
-ALTER TABLE `account_session`
-ADD CONSTRAINT `account_session` FOREIGN KEY (`account_id`) REFERENCES `account` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `price`
 --
 ALTER TABLE `price`
 ADD CONSTRAINT `product_price` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
-
---
--- Constraints for table `privilege`
---
-ALTER TABLE `privilege`
-ADD CONSTRAINT `account_privilege` FOREIGN KEY (`account_id`) REFERENCES `account` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `product`
@@ -454,12 +520,6 @@ ADD CONSTRAINT `product_category_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `
 --
 ALTER TABLE `product_template_specifications`
 ADD CONSTRAINT `product_template` FOREIGN KEY (`product_template_id`) REFERENCES `product_template` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
-
---
--- Constraints for table `profile`
---
-ALTER TABLE `profile`
-ADD CONSTRAINT `uid` FOREIGN KEY (`uid`) REFERENCES `account` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `specifications`
