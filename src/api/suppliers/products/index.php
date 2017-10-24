@@ -1,12 +1,16 @@
 <?php 
 header('Access-Control-Allow-Origin: *');
+require_once('../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../suppliers/Products/Products.php');
 require_once('../../../config/database/connections.php');
 
 use Suppliers\Products as Products;
+use Helpers\CleanStr as CleanStr;
 
 $LIMIT=20;
 $page=1;
+$clean_str=new CleanStr();
+$method=($_SERVER['REQUEST_METHOD']);
 
 /**
  * GET
@@ -16,7 +20,7 @@ $page=1;
  * @return json
  */
 
-if(isset($_GET)){
+if($method=="GET"){
 
 	#serve with page request
 	if(isset($_GET['page'])){
@@ -26,8 +30,7 @@ if(isset($_GET)){
 	/**
 	 * GET products per category
 	 **/
-	if(!isset($_GET['id'])&&!isset($_GET['param'])){
-		if(!isset($_GET['cid'])||!isset($_GET['cat'])) return 0;
+	if(!isset($_GET['id'])&&!isset($_GET['param'])&&(isset($_GET['cid'])&&$_GET['cat'])){
 		$cid=(int) htmlentities(htmlspecialchars($_GET['cid']));
 
 		#instance
@@ -85,5 +88,23 @@ if(isset($_GET)){
 
 }
 
+
+if($method=="POST"){
+	/**
+	 * POST product
+	 * */
+
+	$input=file_get_contents("php://input");
+	$data=(@json_decode($input));
+
+	#instance
+	$products=new Products($DB);
+	$name=isset($data->name)?$clean_str->clean($data->name):'';
+	$prod=$products->create($name);	
+	$data=["data"=>$prod];
+
+	echo @json_encode($data);
+
+}
 
 ?>

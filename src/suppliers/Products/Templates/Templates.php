@@ -39,6 +39,34 @@ class Templates{
 
 		return $results;		
 	}
+
+	/**
+	 * CREATE Template
+	 */
+	public function create($name,$account_id=NULL){
+		$results=[];
+		$SQL='INSERT INTO product_template(name,account_id) values(:name,:account_id)';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':name',$name);
+		$sth->bindParam(':account_id',$account_id);
+		$sth->execute();
+
+		return $this->DB->lastInsertId();
+
+	}
+
+	public function add_specs($product_template_id,$name){
+		$results=[];
+		$SQL='INSERT INTO product_template_specifications(product_template_id,name) values(:product_template_id,:name)';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':product_template_id',$product_template_id);
+		$sth->bindParam(':name',$name);
+		$sth->execute();
+
+		return $this->DB->lastInsertId();
+
+	}
+
 }
 
 ?>

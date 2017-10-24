@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 23, 2017 at 10:57 AM
+-- Generation Time: Oct 24, 2017 at 10:37 AM
 -- Server version: 5.6.21-log
 -- PHP Version: 7.1.2
 
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `account` (
 --
 
 INSERT INTO `account` (`id`, `company_id`, `username`, `uid`, `date_created`, `date_modified`, `is_deleted`, `is_deactivated`) VALUES
-(1, 1, 'jkga@searca.org', 'abc-test-token-1234', '2017-10-23 11:42:16', '2017-10-23 11:42:16', 0, 0);
+(1, 1, 'test@domain.org', 'abc-test-token-1234', '2017-10-23 11:42:16', '2017-10-24 16:36:10', 0, 0);
 
 -- --------------------------------------------------------
 
@@ -79,15 +79,14 @@ CREATE TABLE IF NOT EXISTS `company` (
   `logo` varchar(255) DEFAULT NULL,
   `status` int(11) NOT NULL,
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `company`
 --
 
 INSERT INTO `company` (`id`, `name`, `tagline`, `about`, `established_month`, `established_date`, `established_year`, `location`, `industry`, `logo`, `status`, `date_created`) VALUES
-(1, 'SEARCA', 'Southeast Asian Regional Center for Graduate Study and Research in Agriculture (SEARCA)', 'The Southeast Asian Regional Center for Graduate Study and Research in Agriculture (SEARCA) is a non-profit organization established by the Southeast Asian Ministers of Education Organization (SEAMEO) in 1966.\r\n\r\nFounded in 1965, SEAMEO is a chartered international organization whose purpose is to promote cooperation in education, science and culture in the Southeast Asian region. Its highest policymaking body is the SEAMEO Council, which comprises the Ministers of Education of the 11 SEAMEO Member Countries, namely: Brunei Darussalam, Cambodia, Indonesia, Lao PDR, Malaysia, Myanmar, the Philippines, Singapore, Thailand, Timor-Leste, and Vietnam.\r\n\r\nSEAMEO also has Associate Member Countries, namely: Australia, Canada, France, Germany, Netherlands, New Zealand, Spain, and the United Kingdom.\r\n\r\nThe Center derives its juridical personality from the SEAMEO Charter and possesses full capacity to contract; acquire, and dispose of, immovable and movable property; and institute legal proceedings. Moreover, SEARCA enjoys in the territory of each of its member states such privileges and immunities as are normally accorded United Nations institutions. Representatives of member states and officials of the Center shall similarly enjoy such privileges and immunities in the Philippines as are necessary for the exercise of their functions in connection with SEARCA and SEAMEO.', NULL, NULL, 1960, 'UPLB', 'Agriculture', 'http://www.searca.org/images/SEARCA-web-logo.png', 0, '2017-10-17 11:06:35'),
-(2, 'SEARCA copy', 'Southeast Asian Regional Center for Graduate Study and Research in Agriculture (SEARCA)', 'The Southeast Asian Regional Center for Graduate Study and Research in Agriculture (SEARCA) is a non-profit organization established by the Southeast Asian Ministers of Education Organization (SEAMEO) in 1966.\r\n\r\nFounded in 1965, SEAMEO is a chartered international organization whose purpose is to promote cooperation in education, science and culture in the Southeast Asian region. Its highest policymaking body is the SEAMEO Council, which comprises the Ministers of Education of the 11 SEAMEO Member Countries, namely: Brunei Darussalam, Cambodia, Indonesia, Lao PDR, Malaysia, Myanmar, the Philippines, Singapore, Thailand, Timor-Leste, and Vietnam.\r\n\r\nSEAMEO also has Associate Member Countries, namely: Australia, Canada, France, Germany, Netherlands, New Zealand, Spain, and the United Kingdom.\r\n\r\nThe Center derives its juridical personality from the SEAMEO Charter and possesses full capacity to contract; acquire, and dispose of, immovable and movable property; and institute legal proceedings. Moreover, SEARCA enjoys in the territory of each of its member states such privileges and immunities as are normally accorded United Nations institutions. Representatives of member states and officials of the Center shall similarly enjoy such privileges and immunities in the Philippines as are necessary for the exercise of their functions in connection with SEARCA and SEAMEO.', NULL, NULL, 1960, 'UPLB', 'Agriculture', 'http://www.searca.org/images/SEARCA-web-logo.png', 0, '2017-10-17 11:06:35');
+(1, 'SEARCA', 'Southeast Asian Regional Center for Graduate Study and Research in Agriculture (SEARCA)', 'The Southeast Asian Regional Center for Graduate Study and Research in Agriculture (SEARCA) is a non-profit organization established by the Southeast Asian Ministers of Education Organization (SEAMEO) in 1966.\r\n\r\nFounded in 1965, SEAMEO is a chartered international organization whose purpose is to promote cooperation in education, science and culture in the Southeast Asian region. Its highest policymaking body is the SEAMEO Council, which comprises the Ministers of Education of the 11 SEAMEO Member Countries, namely: Brunei Darussalam, Cambodia, Indonesia, Lao PDR, Malaysia, Myanmar, the Philippines, Singapore, Thailand, Timor-Leste, and Vietnam.\r\n\r\nSEAMEO also has Associate Member Countries, namely: Australia, Canada, France, Germany, Netherlands, New Zealand, Spain, and the United Kingdom.\r\n\r\nThe Center derives its juridical personality from the SEAMEO Charter and possesses full capacity to contract; acquire, and dispose of, immovable and movable property; and institute legal proceedings. Moreover, SEARCA enjoys in the territory of each of its member states such privileges and immunities as are normally accorded United Nations institutions. Representatives of member states and officials of the Center shall similarly enjoy such privileges and immunities in the Philippines as are necessary for the exercise of their functions in connection with SEARCA and SEAMEO.', NULL, NULL, 1960, 'UPLB', 'Agriculture', 'http://www.searca.org/images/SEARCA-web-logo.png', 0, '2017-10-17 11:06:35');
 
 -- --------------------------------------------------------
 
@@ -150,14 +149,17 @@ CREATE TABLE IF NOT EXISTS `price` (
   `currency` varchar(45) DEFAULT NULL,
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
   `date_modified` datetime DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `price`
 --
 
 INSERT INTO `price` (`id`, `product_id`, `amount`, `currency`, `date_created`, `date_modified`) VALUES
-(1, 1, 25000, 'PHP', '2017-10-23 00:00:00', '2017-10-23 00:00:00');
+(1, 1, 25000, 'PHP', '2017-10-23 00:00:00', '2017-10-23 00:00:00'),
+(4, 1, 100, 'PHP', '2017-10-24 11:37:22', '2017-10-24 11:37:22'),
+(5, 1, 100, 'PHP', '2017-10-24 15:27:49', '2017-10-24 15:27:49'),
+(6, 1, 250, 'USD', '2017-10-24 15:28:21', '2017-10-24 15:28:21');
 
 -- --------------------------------------------------------
 
@@ -194,19 +196,19 @@ INSERT INTO `privilege` (`id`, `account_id`, `manage_company`, `manage_company_a
 
 CREATE TABLE IF NOT EXISTS `product` (
 `id` int(11) NOT NULL,
-  `product_category_id` int(11) NOT NULL,
+  `product_category_id` int(11) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
   `date_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `is_deleted` int(11) DEFAULT '0'
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `product`
 --
 
 INSERT INTO `product` (`id`, `product_category_id`, `name`, `date_created`, `date_modified`, `is_deleted`) VALUES
-(1, 1, 'HP PRO (Unclassified)', '2017-10-23 10:02:01', '2017-10-23 10:02:01', 0);
+(1, 1, 'HP PRO (Unclassified)', '2017-10-23 10:02:01', '2017-10-24 10:59:57', 0);
 
 -- --------------------------------------------------------
 
@@ -246,7 +248,7 @@ CREATE TABLE IF NOT EXISTS `product_template` (
   `logo` varchar(255) DEFAULT NULL,
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
   `date_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `product_template`
@@ -265,10 +267,10 @@ CREATE TABLE IF NOT EXISTS `product_template_specifications` (
 `id` int(11) NOT NULL,
   `product_template_id` int(11) NOT NULL,
   `name` varchar(255) DEFAULT NULL,
-  `active` int(11) DEFAULT NULL,
+  `active` int(11) DEFAULT '1',
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
   `date_modified` datetime DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `product_template_specifications`
@@ -321,7 +323,7 @@ CREATE TABLE IF NOT EXISTS `specifications` (
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
   `date_modified` datetime DEFAULT CURRENT_TIMESTAMP,
   `is_deleted` int(11) DEFAULT '0'
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `specifications`
@@ -437,7 +439,7 @@ MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 -- AUTO_INCREMENT for table `company`
 --
 ALTER TABLE `company`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=3;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=8;
 --
 -- AUTO_INCREMENT for table `currency`
 --
@@ -457,7 +459,7 @@ MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
 -- AUTO_INCREMENT for table `price`
 --
 ALTER TABLE `price`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=7;
 --
 -- AUTO_INCREMENT for table `privilege`
 --
@@ -467,7 +469,7 @@ MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
 -- AUTO_INCREMENT for table `product`
 --
 ALTER TABLE `product`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=7;
 --
 -- AUTO_INCREMENT for table `product_category`
 --
@@ -477,12 +479,12 @@ MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=3;
 -- AUTO_INCREMENT for table `product_template`
 --
 ALTER TABLE `product_template`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=4;
 --
 -- AUTO_INCREMENT for table `product_template_specifications`
 --
 ALTER TABLE `product_template_specifications`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=3;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=4;
 --
 -- AUTO_INCREMENT for table `profile`
 --
@@ -492,7 +494,7 @@ MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
 -- AUTO_INCREMENT for table `specifications`
 --
 ALTER TABLE `specifications`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=4;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=7;
 --
 -- Constraints for dumped tables
 --

@@ -56,4 +56,31 @@ if(isset($_GET)){
 }
 
 
+/**
+ * POST Template
+ */  
+if(isset($_GET['test_post'])){
+	
+	#instance
+	$templates=new Templates($DB);
+	$input=file_get_contents("php://input");
+	$temp=$templates->create('TEST_TEMPLATE');
+
+	$data=["data"=>$temp];
+	echo @json_encode($data);
+}
+
+/**
+ * POST template specs
+ * */
+if(isset($_GET['test_post_specs'])){
+#instance
+	$templates=new Templates($DB);
+	$input=file_get_contents("php://input");
+	$temp=$templates->add_specs(1,'width');
+
+	$data=["data"=>$temp];
+	echo @json_encode($data);
+}
+
 ?>
