@@ -83,6 +83,33 @@ if($method=="POST"){
 
 	$data=(@json_decode($input));
 
+	$action=isset($data->action)?$clean_str->clean($data->action):'';
+
+	//remove
+	if($action=='remove'){
+		$id=isset($data->id)?$clean_str->clean($data->id):'';
+
+		$res=@$index->remove($id);
+		echo $res;
+	}
+
+	//block
+	if($action=='block'){
+		$id=isset($data->id)?$clean_str->clean($data->id):'';
+
+		$res=@$index->block($id);
+		echo $res;
+	}
+
+	//unblock
+	if($action=='unblock'){
+		$id=isset($data->id)?$clean_str->clean($data->id):'';
+
+		$res=@$index->unblock($id);
+		echo $res;
+	}
+
+	//proceed to adding
 	$name=isset($data->name)?$clean_str->clean($data->name):'';
 	$tagline=isset($data->tagline)?$clean_str->clean($data->tagline):'';
 	$about=isset($data->about)?$clean_str->clean($data->about):'';

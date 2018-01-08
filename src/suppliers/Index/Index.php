@@ -70,6 +70,28 @@ class Index{
 		return $this->DB->lastInsertId();
 
 	}
+
+	public function set_status($id,$status){
+		$SQL='UPDATE company set status=:status where id=:id';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':id',$id);
+		$sth->bindParam(':status',$status);
+		$sth->execute();
+
+		return $sth->rowCount();
+	}
+
+	public function remove($id){
+		return self::set_status($id,1);
+	}
+
+	public function block($id){
+		return self::set_status($id,2);
+	}
+
+	public function unblock($id){
+		return self::set_status($id,0);
+	}
 }
 
 ?>

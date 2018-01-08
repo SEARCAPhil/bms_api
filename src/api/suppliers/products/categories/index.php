@@ -34,7 +34,7 @@ if(isset($_GET)){
 	}
 
 	
-	$category=$categories->get_parent_categories(1,$page,$LIMIT);
+	$category=$categories->get_parent_categories($_GET['cid'],$page,$LIMIT);
 	$category=is_array($category)?$category:[];
 
 	for($x=0;$x<count($category);$x++){
@@ -45,13 +45,13 @@ if(isset($_GET)){
 		#sub-categories
 		if(isset($_GET['sub'])){
 			$id=$category[$x]->id;
-			$category[$x]->sub_categories[]=$categories->get_children_categories(1,$page,$LIMIT);
+			$category[$x]->sub_categories[]=$categories->get_children_categories($_GET['cid'],$page,$LIMIT);
 		}
 		
 		#products
 		if(isset($_GET['prod'])){
 			#get initial product list
-			$category[$x]->products[]=$products->get_products(1,$page,$LIMIT);
+			$category[$x]->products[]=$products->get_products($_GET['cid'],$page,$LIMIT);
 		}
 	}
 
