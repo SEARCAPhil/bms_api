@@ -2,8 +2,16 @@
 header('Access-Control-Allow-Origin: *');
 require_once('../../../suppliers/Accounts/Accounts.php');
 require_once('../../../config/database/connections.php');
+require_once('../../../helpers/CleanStr/CleanStr.php');
+require_once('../../../suppliers/Logs/Logs.php');
+
+
 
 use Suppliers\Accounts as Accounts;
+use Helpers\CleanStr as CleanStr;
+use Suppliers\Logs as Logs;
+
+$clean_str=new CleanStr();
 
 $LIMIT=20;
 $page=1;
@@ -80,5 +88,73 @@ if(isset($_GET)){
 
 }
 
+
+if(isset($_POST)){
+	/**
+	 * POST Account
+	 * */
+
+	$input=file_get_contents("php://input");
+	$data=(@json_decode($input));
+
+	#instance
+	$accounts=new Accounts($DB);
+	$username=isset($data->username)?$clean_str->clean($data->username):'';
+	$password=isset($data->password)?$clean_str->clean($data->password):'';
+	$id=(int) isset($data->id)?$clean_str->clean($data->id):'';
+	$action=isset($data->action)?$clean_str->clean($data->action):'';
+
+
+	if($action=="remove"){
+
+		if(empty($id)) return 0;
+		
+		//ID in the body is not the company ID
+		//account's primary id is used for deleting account
+		$acc=$accounts->remove($id);	
+		$data=["data"=>$acc];
+
+		echo @json_encode($data);
+		return 0;
+	}
+
+
+	if($action=="block"){
+
+		if(empty($id)) return 0;
+		
+		//ID in the body is not the company ID
+		//account's primary id is used for deleting account
+		$acc=$accounts->block($id);	
+		$data=["data"=>$acc];
+
+		echo @json_encode($data);
+		return 0;
+	}
+
+
+
+	if($action=="unblock"){
+
+		if(empty($id)) return 0;
+		
+		//ID in the body is not the company ID
+		//account's primary id is used for deleting account
+		$acc=$accounts->unblock($id);	
+		$data=["data"=>$acc];
+
+		echo @json_encode($data);
+		return 0;
+	}
+
+
+	if(empty($id)||empty($username)||empty($password)||empty($action)) return 0;
+
+
+	$acc=$accounts->create($id,$username,$password);	
+	$data=["data"=>$acc];
+
+	echo @json_encode($data);
+}
 
 ?>

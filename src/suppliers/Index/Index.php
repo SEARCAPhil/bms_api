@@ -71,6 +71,40 @@ class Index{
 
 	}
 
+
+	/**
+	 * UPDATE Supplier
+	 */
+	public function update($params=[]){
+		//parameters
+		$results=[];
+		$name=isset($params["name"])?$params["name"]:'';
+		$tagline=isset($params["tagline"])?$params["tagline"]:'';
+		$about=isset($params["about"])?$params["about"]:'';
+		$established_month=isset($params["established_month"])?$params["established_month"]:'00';
+		$established_date=isset($params["established_date"])?$params["established_date"]:'00';	
+		$established_year=isset($params["established_year"])?$params["established_year"]:'0000';
+		$location=isset($params["location"])?$params["location"]:'';	
+		$industry=isset($params["industry"])?$params["industry"]:'';
+		$id=isset($params["id"])?$params["id"]:'';
+		//query
+		$SQL='UPDATE company set name=:name,tagline=:tagline,about=:about,established_month=:established_month,established_date=:established_date,established_year=:established_year,location=:location,industry=:industry where id=:id';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':name',$name);
+		$sth->bindParam(':tagline',$tagline);
+		$sth->bindParam(':about',$about);
+		$sth->bindParam(':established_month',$established_month);
+		$sth->bindParam(':established_date',$established_date);
+		$sth->bindParam(':established_year',$established_year);
+		$sth->bindParam(':location',$location);
+		$sth->bindParam(':industry',$industry);
+		$sth->bindParam(':id',$id);
+		$sth->execute();
+
+		return $sth->rowCount();
+
+	}
+
 	public function set_status($id,$status){
 		$SQL='UPDATE company set status=:status where id=:id';
 		$sth=$this->DB->prepare($SQL);

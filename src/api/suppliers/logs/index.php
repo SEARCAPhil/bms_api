@@ -5,7 +5,7 @@ require_once('../../../config/database/connections.php');
 
 use Suppliers\Logs as Logs;
 
-$LIMIT=20;
+$LIMIT=30;
 $page=1;
 
 /**
@@ -26,18 +26,18 @@ if(isset($_GET)){
 	/**
 	 * GET logs
 	 * */
-	if(isset($_GET['acc'])){
+	if(isset($_GET['id'])){
 		#instance
 		$logs=new Logs($DB);
 
-		$acc=(int) utf8_encode(trim(strip_tags(htmlentities(htmlspecialchars($_GET['acc'])))));
+		$id=(int) utf8_encode(trim(strip_tags(htmlentities(htmlspecialchars($_GET['id'])))));
 
 		#serve with page request
 		if(isset($_GET['event'])){
 			$event=utf8_encode(trim(strip_tags(htmlentities(htmlspecialchars($_GET['event'])))));
-			$log=$logs->get_logs_event($acc,$event,$page,$LIMIT);
+			$log=$logs->get_logs_event($id,$event,$page,$LIMIT);
 		}else{
-			$log=$logs->get_logs($acc,$page,$LIMIT);
+			$log=$logs->get_logs($id,$page,$LIMIT);
 		}
 
 		

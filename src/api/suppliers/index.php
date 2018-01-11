@@ -3,8 +3,10 @@ header('Access-Control-Allow-Origin: *');
 require_once('../../suppliers/Index/Index.php');
 require_once('../../helpers/CleanStr/CleanStr.php');
 require_once('../../config/database/connections.php');
+require_once('../../suppliers/Logs/Logs.php');
 
 use Suppliers\Index as Index;
+use Suppliers\Logs as Logs;
 use Helpers\CleanStr as CleanStr;
 
 $LIMIT=20;
@@ -12,6 +14,7 @@ $status='all';
 $page=1;
 
 $clean_str=new CleanStr();
+$logs = new Logs($DB);
 
 /**
  * GET suppliers list
@@ -99,6 +102,11 @@ if($method=="POST"){
 
 		$res=@$index->block($id);
 		echo $res;
+
+		//log to sytem
+		if(!empty($res)){
+			$logs->log($data->id,'Account has been blocked','account');
+		}
 	}
 
 	//unblock
@@ -107,6 +115,11 @@ if($method=="POST"){
 
 		$res=@$index->unblock($id);
 		echo $res;
+
+		//log to sytem
+		if(!empty($res)){
+			$logs->log($data->id,'Account has been unblocked','account');
+		}
 	}
 
 	//proceed to adding
@@ -121,6 +134,35 @@ if($method=="POST"){
 	
 	//required
 	if(empty($name)) return 0;
+
+
+	//update
+	// ID is required
+	if($action=='update'){
+
+		$id=(int) isset($data->id)?$clean_str->clean($data->id):'';
+
+		//must not be epty
+		if(empty($id)) return 0;
+
+
+		$result=$index->update([
+			"name"=>$name,
+			"tagline"=>$tagline,
+			"about"=>$about,
+			"established_date"=>$established_date,
+			"established_month"=>$established_month,
+			"established_year"=>$established_year,
+			"location"=>$location,
+			"industry"=>$industry,
+			"id"=>$id
+		]);
+
+		$data=["data"=>$result];
+		echo @json_encode($data);
+		return 0;
+
+	}
 
 	$result=$index->create([
 		"name"=>$name,
