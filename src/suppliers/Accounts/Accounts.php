@@ -113,6 +113,17 @@ class Accounts{
 		return $sth->rowCount();
 	}
 
+	public function set_password($id,$password){
+		$password=sha1($password);
+		$SQL='UPDATE account set password=:password where id=:id';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':id',$id);
+		$sth->bindParam(':password',$password);
+		$sth->execute();
+
+		return $sth->rowCount();
+	}
+
 	public function remove($id){
 		return self::set_status($id,1);
 	}
