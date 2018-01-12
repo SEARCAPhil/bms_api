@@ -104,10 +104,13 @@ if(isset($_POST)){
 	$id=(int) isset($data->id)?$clean_str->clean($data->id):'';
 	$action=isset($data->action)?$clean_str->clean($data->action):'';
 
+	//prevent empty primary key
+	if(empty($id)) return 0;
+
 
 	if($action=="remove"){
 
-		if(empty($id)) return 0;
+		
 		
 		//ID in the body is not the company ID
 		//account's primary id is used for deleting account
@@ -121,7 +124,7 @@ if(isset($_POST)){
 
 	if($action=="block"){
 
-		if(empty($id)) return 0;
+		
 		
 		//ID in the body is not the company ID
 		//account's primary id is used for deleting account
@@ -136,11 +139,22 @@ if(isset($_POST)){
 
 	if($action=="unblock"){
 
-		if(empty($id)) return 0;
+		
 		
 		//ID in the body is not the company ID
 		//account's primary id is used for deleting account
 		$acc=$accounts->unblock($id);	
+		$data=["data"=>$acc];
+
+		echo @json_encode($data);
+		return 0;
+	}
+
+	if($action=="change_pass"){
+
+		if(empty($password)) return 0;
+
+		$acc=$accounts->set_password($id,$password);	
 		$data=["data"=>$acc];
 
 		echo @json_encode($data);
