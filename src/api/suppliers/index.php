@@ -50,7 +50,7 @@ if($method=="GET"){
 				$status_code=0;
 				break;
 			case 'blocked':
-				$status_code=1;
+				$status_code=2;
 				break;
 			
 			default:

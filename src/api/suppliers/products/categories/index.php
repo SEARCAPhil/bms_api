@@ -3,9 +3,14 @@ header('Access-Control-Allow-Origin: *');
 require_once('../../../../suppliers/Products/Categories/Categories.php');
 require_once('../../../../suppliers/Products/Products.php');
 require_once('../../../../config/database/connections.php');
+require_once('../../../../helpers/CleanStr/CleanStr.php');
+
 
 use Suppliers\Products\Categories as Categories;
 use Suppliers\Products as Products;
+use Helpers\CleanStr as CleanStr;
+
+$clean_str=new CleanStr();
 
 $LIMIT=20;
 $status=0; //default
@@ -19,7 +24,9 @@ $page=1;
  * @return json
  */
 
-if(isset($_GET)){
+$method=($_SERVER['REQUEST_METHOD']);
+
+if($method=='GET'){
 	if(!isset($_GET['cid'])) return 0;
 
 	$cid=(int) trim(strip_tags(htmlentities(htmlspecialchars($_GET['cid']))));
@@ -60,6 +67,49 @@ if(isset($_GET)){
 
 	echo @json_encode($data);
 	
+}
+
+
+if($method=='POST'){
+	/**
+	 * POST Account
+	 * */
+
+	$input=file_get_contents("php://input");
+	$data=(@json_decode($input));
+
+	#instance
+	$categories=new Categories($DB);
+	$name=isset($data->name)?$clean_str->clean($data->name):'';
+	$description=isset($data->description)?$clean_str->clean($data->description):'';
+	$id=(int) isset($data->id)?$clean_str->clean($data->id):'';
+	$action=isset($data->action)?$clean_str->clean($data->action):'';
+
+	//prevent empty primary key
+	if(empty($id)) return 0;
+
+
+	if($action=="remove"){
+
+		
+		
+		//ID in the body is not the company ID
+		//account's primary id is used for deleting account
+		$cat=$categories->remove($id);	
+		$data=["data"=>$cat];
+
+		echo @json_encode($data);
+		return 0;
+	}
+
+
+	if(empty($id)||empty($name)||empty($description)||empty($action)) return 0;
+
+
+	$cat=$categories->create($id,$name,$description);	
+	$data=["data"=>$cat];
+
+	echo @json_encode($data);
 }
 
 
