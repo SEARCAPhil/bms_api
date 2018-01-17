@@ -14,7 +14,7 @@ class Specifications{
 
 	public function view($id){
 		$results=[];
-		$SQL='SELECT * FROM specifications WHERE product_id=:id and is_deleted=0 ORDER BY position';
+		$SQL='SELECT * FROM specifications WHERE product_id=:id ORDER BY position';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id',$id,\PDO::PARAM_INT);
 		$sth->execute();
@@ -36,6 +36,21 @@ class Specifications{
 
 		return $this->DB->lastInsertId();
 
+	}
+
+	public function set_status($id,$status){
+		$SQL='UPDATE specification set status=:status where id=:id';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':id',$id);
+		$sth->bindParam(':status',$status);
+		$sth->execute();
+
+		return $sth->rowCount();
+	}
+
+	
+	public function remove($id){
+		return self::set_status($id,1);
 	}
 
 

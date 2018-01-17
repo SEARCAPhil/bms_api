@@ -25,6 +25,35 @@ class Categories{
 
 	}
 
+	public function update($id,$name,$description){
+
+		$SQL='UPDATE product_category set name=:name , description=:description where id=:id';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':id',$id);
+		$sth->bindParam(':name',$name);
+		$sth->bindParam(':description',$description);
+		$sth->execute();
+
+		return $sth->rowCount();
+	}
+
+	public function view($id){
+		$results=[];
+		$SQL='SELECT * from product_category where id=:id';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':id',$id,\PDO::PARAM_INT);
+		
+		$sth->execute();
+		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
+			
+			$results[]=$row;
+		}	
+		
+		
+
+		return $results;
+	}
+
 
 	public function get_parent_categories($company_id,$page=0,$limit=20){
 		$results=[];
@@ -59,7 +88,7 @@ class Categories{
 	}
 
 
-		public function set_status($id,$status){
+	public function set_status($id,$status){
 		$SQL='UPDATE product_category set status=:status where id=:id';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id',$id);

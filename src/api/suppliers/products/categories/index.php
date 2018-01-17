@@ -26,8 +26,8 @@ $page=1;
 
 $method=($_SERVER['REQUEST_METHOD']);
 
-if($method=='GET'){
-	if(!isset($_GET['cid'])) return 0;
+if($method=='GET'&&isset($_GET['cid'])){
+	
 
 	$cid=(int) trim(strip_tags(htmlentities(htmlspecialchars($_GET['cid']))));
 
@@ -70,6 +70,23 @@ if($method=='GET'){
 }
 
 
+if($method=='GET'&&isset($_GET['id'])){
+
+
+	$id=(int) trim(strip_tags(htmlentities(htmlspecialchars($_GET['id']))));
+	
+	#instance
+	$categories=new Categories($DB);
+
+	$category=$categories->view($id);
+
+	$data=["data"=>$category];
+
+	echo @json_encode($data);
+
+
+}
+
 if($method=='POST'){
 	/**
 	 * POST Account
@@ -92,10 +109,16 @@ if($method=='POST'){
 	if($action=="remove"){
 
 		
-		
-		//ID in the body is not the company ID
-		//account's primary id is used for deleting account
 		$cat=$categories->remove($id);	
+		$data=["data"=>$cat];
+
+		echo @json_encode($data);
+		return 0;
+	}
+
+	if($action=="update"){
+		
+		$cat=$categories->update($id,$name,$description);	
 		$data=["data"=>$cat];
 
 		echo @json_encode($data);

@@ -20,10 +20,29 @@ class Products{
 		$this->specs=new Specs($this->DB);
 	}
 
-	public function get_products($category_id,$page=0,$limit=20){
+	public function create($category_id=NULL,$name,$specs=[]){
+		$results=[];
+		$SQL='INSERT INTO product(name,product_category_id) values(:name,:product_category_id)';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':name',$name);
+		$sth->bindParam(':product_category_id',$category_id); 
+		$sth->execute();
+		$lastId=$this->DB->lastInsertId();
+
+		if($lastId&&count($specs)>0){
+			foreach ($specs as $key => $value) {
+				$this->specs->add($lastId,$key,$value);
+			}
+		}
+
+		return $lastId;
+
+	}
+
+	public function get_products($category_id,$page=0,$limit=30){
 		$results=[];
 		$page=$page<2?0:$page-1;
-		$SQL='SELECT * FROM product WHERE product_category_id=:id and is_deleted=0 ORDER BY name ASC LIMIT :offset,:lim';
+		$SQL='SELECT * FROM product WHERE product_category_id=:id and status!=1 ORDER BY name ASC LIMIT :offset,:lim';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id',$category_id,\PDO::PARAM_INT);
 		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
@@ -71,18 +90,23 @@ class Products{
 		return $results;
 	}
 
-
-	public function create($name,$category_id=NULL){
-		$results=[];
-		$SQL='INSERT INTO product(name,product_category_id) values(:name,:product_category_id)';
+	public function set_status($id,$status){
+		$SQL='UPDATE product set status=:status where id=:id';
 		$sth=$this->DB->prepare($SQL);
-		$sth->bindParam(':name',$name);
-		$sth->bindParam(':product_category_id',$category_id); 
+		$sth->bindParam(':id',$id);
+		$sth->bindParam(':status',$status);
 		$sth->execute();
 
-		return $this->DB->lastInsertId();
-
+		return $sth->rowCount();
 	}
+
+	
+	public function remove($id){
+		return self::set_status($id,1);
+	}
+
+
+
 
 }
 

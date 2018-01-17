@@ -27,31 +27,6 @@ if($method=="GET"){
 		$page=(int) htmlentities(htmlspecialchars($_GET['page']));
 	}
 
-	/**
-	 * GET products per category
-	 **/
-	if(!isset($_GET['id'])&&!isset($_GET['param'])&&(isset($_GET['cid'])&&$_GET['cat'])){
-		$cid=(int) htmlentities(htmlspecialchars($_GET['cid']));
-
-		#instance
-		$products=new Products($DB);
-
-
-		#serve with page request
-		if(isset($_GET['cat'])){
-			$category=(int) trim(strip_tags(htmlentities(htmlspecialchars($_GET['cat']))));
-		}
-
-		
-		$prod=$products->get_products($category,$page,$LIMIT);
-		
-		
-
-		$data=["data"=>$prod];
-
-		echo @json_encode($data);
-	} 
-
 
 	/**
 	 * GET product details
@@ -89,6 +64,31 @@ if($method=="GET"){
 }
 
 
+if($method=="GET"){
+
+	#serve with page request
+	if(isset($_GET['page'])){
+		$page=(int) htmlentities(htmlspecialchars($_GET['page']));
+	}
+
+	/**
+	 * GET products per category
+	 **/
+	if(isset($_GET['cid'])&&!isset($_GET['id'])){
+		$cid=(int) htmlentities(htmlspecialchars($_GET['cid']));
+
+		#instance
+		$products=new Products($DB);
+		
+		$prod=$products->get_products($cid,$page,$LIMIT);
+		
+		$data=["data"=>$prod];
+
+		echo @json_encode($data);
+	} 
+}
+
+
 if($method=="POST"){
 	/**
 	 * POST product
@@ -100,10 +100,31 @@ if($method=="POST"){
 	#instance
 	$products=new Products($DB);
 	$name=isset($data->name)?$clean_str->clean($data->name):'';
-	$prod=$products->create($name);	
+	$description=isset($data->description)?$clean_str->clean($data->description):'';
+	$action=isset($data->action)?$clean_str->clean($data->action):'';
+	$id=(int) isset($data->id)?$clean_str->clean($data->id):'';
+	
+	if(empty($id)) return 0;	
+
+	//remove
+	if($action=='remove'){
+		$prod=$products->remove($id);
+		$data=["data"=>$prod];
+		echo @json_encode($data);
+		return 0;
+	}
+
+	//create
+	if(!empty($description)){
+		$prod=$products->create($id,$name,['description'=>$description]);
+	}else{
+		$prod=$products->create($id,$name);
+	}
+		
 	$data=["data"=>$prod];
 
 	echo @json_encode($data);
+	
 
 }
 
