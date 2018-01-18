@@ -20,12 +20,12 @@ class Products{
 		$this->specs=new Specs($this->DB);
 	}
 
-	public function create($category_id=NULL,$name,$specs=[]){
+	public function create($cid,$name,$specs=[]){
 		$results=[];
-		$SQL='INSERT INTO product(name,product_category_id) values(:name,:product_category_id)';
+		$SQL='INSERT INTO product(name,company_id) values(:name,:company_id)';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':name',$name);
-		$sth->bindParam(':product_category_id',$category_id); 
+		$sth->bindParam(':company_id',$cid); 
 		$sth->execute();
 		$lastId=$this->DB->lastInsertId();
 
@@ -39,12 +39,30 @@ class Products{
 
 	}
 
-	public function get_products($category_id,$page=0,$limit=30){
+	public function get_products_per_category($category_id,$page=0,$limit=30){
 		$results=[];
 		$page=$page<2?0:$page-1;
 		$SQL='SELECT * FROM product WHERE product_category_id=:id and status!=1 ORDER BY name ASC LIMIT :offset,:lim';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id',$category_id,\PDO::PARAM_INT);
+		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
+		$sth->bindParam(':offset',$page,\PDO::PARAM_INT);
+		$sth->execute();
+		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
+			$row->prices=$this->prices->view($row->id,0,10);
+			$row->specs=$this->specs->view($row->id);
+			$results[]=$row;
+		}
+
+		return $results;	
+	}
+
+	public function get_products_per_company($cid,$page=0,$limit=30){
+		$results=[];
+		$page=$page<2?0:$page-1;
+		$SQL='SELECT * FROM product WHERE company_id=:id and status!=1 ORDER BY name ASC LIMIT :offset,:lim';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':id',$cid,\PDO::PARAM_INT);
 		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
 		$sth->bindParam(':offset',$page,\PDO::PARAM_INT);
 		$sth->execute();

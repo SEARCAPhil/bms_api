@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 15, 2018 at 10:39 AM
+-- Generation Time: Jan 18, 2018 at 10:44 AM
 -- Server version: 5.6.21-log
 -- PHP Version: 7.1.2
 
@@ -173,12 +173,13 @@ CREATE TABLE IF NOT EXISTS `privilege` (
 
 CREATE TABLE IF NOT EXISTS `product` (
 `id` int(11) NOT NULL,
+  `company_id` int(11) NOT NULL,
   `product_category_id` int(11) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
   `date_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `is_deleted` int(11) DEFAULT '0'
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+  `status` int(11) NOT NULL
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -195,7 +196,7 @@ CREATE TABLE IF NOT EXISTS `product_category` (
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
   `date_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `status` int(11) NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -263,7 +264,7 @@ CREATE TABLE IF NOT EXISTS `specifications` (
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
   `date_modified` datetime DEFAULT CURRENT_TIMESTAMP,
   `is_deleted` int(11) DEFAULT '0'
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
 
 --
 -- Indexes for dumped tables
@@ -315,7 +316,7 @@ ALTER TABLE `logs`
 -- Indexes for table `price`
 --
 ALTER TABLE `price`
- ADD PRIMARY KEY (`id`), ADD KEY `product_id` (`product_id`);
+ ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `privilege`
@@ -327,7 +328,7 @@ ALTER TABLE `privilege`
 -- Indexes for table `product`
 --
 ALTER TABLE `product`
- ADD PRIMARY KEY (`id`), ADD KEY `product_category_id` (`product_category_id`);
+ ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `product_category`
@@ -412,12 +413,12 @@ MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
 -- AUTO_INCREMENT for table `product`
 --
 ALTER TABLE `product`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=18;
 --
 -- AUTO_INCREMENT for table `product_category`
 --
 ALTER TABLE `product_category`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=10;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=16;
 --
 -- AUTO_INCREMENT for table `product_template`
 --
@@ -437,22 +438,10 @@ MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
 -- AUTO_INCREMENT for table `specifications`
 --
 ALTER TABLE `specifications`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=4;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=15;
 --
 -- Constraints for dumped tables
 --
-
---
--- Constraints for table `price`
---
-ALTER TABLE `price`
-ADD CONSTRAINT `product_price` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
-
---
--- Constraints for table `product`
---
-ALTER TABLE `product`
-ADD CONSTRAINT `product_category` FOREIGN KEY (`product_category_id`) REFERENCES `product_category` (`id`);
 
 --
 -- Constraints for table `product_category`

@@ -80,7 +80,7 @@ if($method=="GET"){
 		#instance
 		$products=new Products($DB);
 		
-		$prod=$products->get_products($cid,$page,$LIMIT);
+		$prod=$products->get_products_per_company($cid,$page,$LIMIT);
 		
 		$data=["data"=>$prod];
 
