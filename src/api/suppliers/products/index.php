@@ -74,13 +74,40 @@ if($method=="GET"){
 	/**
 	 * GET products per category
 	 **/
-	if(isset($_GET['cid'])&&!isset($_GET['id'])){
+	if(isset($_GET['cid'])&&!isset($_GET['id'])&&!isset($_GET['cat'])){
 		$cid=(int) htmlentities(htmlspecialchars($_GET['cid']));
 
 		#instance
 		$products=new Products($DB);
 		
 		$prod=$products->get_products_per_company($cid,$page,$LIMIT);
+		
+		$data=["data"=>$prod];
+
+		echo @json_encode($data);
+	} 
+}
+
+
+
+
+if($method=="GET"){
+
+	#serve with page request
+	if(isset($_GET['page'])){
+		$page=(int) htmlentities(htmlspecialchars($_GET['page']));
+	}
+
+	/**
+	 * GET products per category
+	 **/
+	if(isset($_GET['cat'])&&!isset($_GET['id'])){
+		$cat=(int) htmlentities(htmlspecialchars($_GET['cat']));
+
+		#instance
+		$products=new Products($DB);
+		
+		$prod=$products->get_products_per_category($cat,$page,$LIMIT);
 		
 		$data=["data"=>$prod];
 
