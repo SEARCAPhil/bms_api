@@ -2,9 +2,11 @@
 header('Access-Control-Allow-Origin: *');
 require_once('../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../suppliers/Products/Products.php');
+require_once('../../../suppliers/Products/Prices/Prices.php');
 require_once('../../../config/database/connections.php');
 
 use Suppliers\Products as Products;
+use Suppliers\Products\Prices as Prices;
 use Helpers\CleanStr as CleanStr;
 
 $LIMIT=20;
@@ -129,6 +131,13 @@ if($method=="POST"){
 	$name=isset($data->name)?$clean_str->clean($data->name):'';
 	$description=isset($data->description)?$clean_str->clean($data->description):'';
 	$action=isset($data->action)?$clean_str->clean($data->action):'';
+
+	#price
+	$price=isset($data->price)?$data->price:[];
+
+	$currency=isset($price->currency)?$price->currency:'PHP';
+	$amount=isset($price->amount)?$price->amount:'00.00';
+
 	$id=(int) isset($data->id)?$clean_str->clean($data->id):'';
 	
 	if(empty($id)) return 0;	
@@ -147,8 +156,15 @@ if($method=="POST"){
 	}else{
 		$prod=$products->create($id,$name);
 	}
-		
+		 
 	$data=["data"=>$prod];
+
+	//set price
+	if(!empty($amount)){
+		$prices=new Prices($DB);
+		//add prices
+		$prices->add($prod,$amount,$currency);
+	}
 
 	echo @json_encode($data);
 	

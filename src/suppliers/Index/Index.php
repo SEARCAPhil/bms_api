@@ -80,6 +80,7 @@ class Index{
 		$results=[];
 		$name=isset($params["name"])?$params["name"]:'';
 		$tagline=isset($params["tagline"])?$params["tagline"]:'';
+		$alias=isset($params["alias"])?$params["alias"]:'';
 		$about=isset($params["about"])?$params["about"]:'';
 		$established_month=isset($params["established_month"])?$params["established_month"]:'00';
 		$established_date=isset($params["established_date"])?$params["established_date"]:'00';	
@@ -88,7 +89,7 @@ class Index{
 		$industry=isset($params["industry"])?$params["industry"]:'';
 		$id=isset($params["id"])?$params["id"]:'';
 		//query
-		$SQL='UPDATE company set name=:name,tagline=:tagline,about=:about,established_month=:established_month,established_date=:established_date,established_year=:established_year,location=:location,industry=:industry where id=:id';
+		$SQL='UPDATE company set name=:name,tagline=:tagline,about=:about,established_month=:established_month,established_date=:established_date,established_year=:established_year,location=:location,industry=:industry,alias=:alias where id=:id';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':name',$name);
 		$sth->bindParam(':tagline',$tagline);
@@ -98,6 +99,7 @@ class Index{
 		$sth->bindParam(':established_year',$established_year);
 		$sth->bindParam(':location',$location);
 		$sth->bindParam(':industry',$industry);
+		$sth->bindParam(':alias',$alias);
 		$sth->bindParam(':id',$id);
 		$sth->execute();
 

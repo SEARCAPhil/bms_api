@@ -131,6 +131,7 @@ if($method=="POST"){
 	$established_year=isset($data->established_year)?$clean_str->clean($data->established_year):'';
 	$location=isset($data->location)?$clean_str->clean($data->location):'';
 	$industry=isset($data->industry)?$clean_str->clean($data->industry):'';
+	$alias=isset($data->alias)?$clean_str->clean($data->alias):'';
 	
 	//required
 	if(empty($name)) return 0;
@@ -155,6 +156,7 @@ if($method=="POST"){
 			"established_year"=>$established_year,
 			"location"=>$location,
 			"industry"=>$industry,
+			"alias"=>$alias,
 			"id"=>$id
 		]);
 
