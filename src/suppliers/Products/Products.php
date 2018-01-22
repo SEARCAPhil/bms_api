@@ -39,10 +39,25 @@ class Products{
 
 	}
 
+	//update field based on name
+	public function update($id,$name){
+
+	
+		$SQL='UPDATE product set name=:name where id=:id';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':id',$id);
+		$sth->bindParam(':name',$name);
+		
+		
+		$sth->execute();
+
+		return $sth->rowCount();
+	}
+
 	public function get_products_per_category($category_id,$page=0,$limit=30){
 		$results=[];
 		$page=$page<2?0:$page-1;
-		$SQL='SELECT * FROM product WHERE product_category_id=:id and status!=1 ORDER BY name ASC LIMIT :offset,:lim';
+		$SQL='SELECT * FROM product WHERE product_category_id=:id  and status!=1 ORDER BY name ASC LIMIT :offset,:lim';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id',$category_id,\PDO::PARAM_INT);
 		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
@@ -60,7 +75,7 @@ class Products{
 	public function get_products_per_company($cid,$page=0,$limit=30){
 		$results=[];
 		$page=$page<2?0:$page-1;
-		$SQL='SELECT * FROM product WHERE company_id=:id and status!=1 ORDER BY name ASC LIMIT :offset,:lim';
+		$SQL='SELECT product.*,product_category.name as category FROM product LEFT JOIN product_category on product_category.id=product.product_category_id WHERE product.company_id=:id and product.status!=1 ORDER BY name ASC LIMIT :offset,:lim';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id',$cid,\PDO::PARAM_INT);
 		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);

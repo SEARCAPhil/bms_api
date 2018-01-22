@@ -28,6 +28,19 @@ class Prices{
 		return $results;	
 	}
 
+	public function info($id){
+		$results=[];
+		$SQL='SELECT * FROM price WHERE id=:id ORDER BY id DESC LIMIT 1';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':id',$id,\PDO::PARAM_INT);
+		$sth->execute();
+		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
+			$results[]=$row;
+		}
+
+		return $results;	
+	}
+
 
 	public function add($product_id,$amount,$currency){
 		$results=[];
@@ -39,6 +52,35 @@ class Prices{
 		$sth->execute();
 		
 		return $this->DB->lastInsertId();	
+	}
+
+	//update field based on name
+	public function update($id,$currency='',$amount=''){
+
+		if(!empty($currency)&&empty($amount)){
+			$SQL='UPDATE price set currency=:currency where id=:id';
+			$sth=$this->DB->prepare($SQL);
+			$sth->bindParam(':id',$id);
+			$sth->bindParam(':currency',$currency);
+		}
+		if(empty($currency)&&!empty($amount)){
+			$SQL='UPDATE price set amount=:amount where id=:id';
+			$sth=$this->DB->prepare($SQL);
+			$sth->bindParam(':id',$id);
+			$sth->bindParam(':amount',$amount);
+		}
+
+		if(!empty($currency)&&!empty($amount)){
+			$SQL='UPDATE price set currency=:currency , amount=:amount where id=:id';
+			$sth=$this->DB->prepare($SQL);
+			$sth->bindParam(':id',$id);
+			$sth->bindParam(':currency',$currency);
+			$sth->bindParam(':amount',$amount);
+		}
+		
+		$sth->execute();
+
+		return $sth->rowCount();
 	}
 
 

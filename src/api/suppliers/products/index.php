@@ -138,13 +138,33 @@ if($method=="POST"){
 	$currency=isset($price->currency)?$price->currency:'PHP';
 	$amount=isset($price->amount)?$price->amount:'00.00';
 
-	$id=(int) isset($data->id)?$clean_str->clean($data->id):'';
-	
-	if(empty($id)) return 0;	
 
 	//remove
 	if($action=='remove'){
-		$prod=$products->remove($id);
+		//id is an array for removal of multiple items
+		$ids=isset($data->id)?$data->id:[];
+
+		for($x=0;$x<count($ids);$x++){
+			$prod=$products->remove($ids[$x]);
+		}
+
+		$data=["data"=>$prod];
+		echo @json_encode($data);
+		return 0;
+	}
+
+
+	
+
+	//REQUIRED
+	$id=(int) isset($data->id)?$clean_str->clean($data->id):'';
+	if(empty($id)) return 0;	
+
+	//update
+	if($action=='update'){
+		
+		$prod=$products->update($id,$name);
+		
 		$data=["data"=>$prod];
 		echo @json_encode($data);
 		return 0;
