@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 18, 2018 at 10:44 AM
+-- Generation Time: Jan 25, 2018 at 10:33 AM
 -- Server version: 5.6.21-log
 -- PHP Version: 7.1.2
 
@@ -139,11 +139,11 @@ CREATE TABLE IF NOT EXISTS `logs` (
 CREATE TABLE IF NOT EXISTS `price` (
 `id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
-  `amount` float DEFAULT NULL,
+  `amount` double DEFAULT NULL,
   `currency` varchar(45) DEFAULT NULL,
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
   `date_modified` datetime DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -179,7 +179,7 @@ CREATE TABLE IF NOT EXISTS `product` (
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
   `date_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `status` int(11) NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -263,8 +263,8 @@ CREATE TABLE IF NOT EXISTS `specifications` (
   `position` int(11) DEFAULT NULL COMMENT 'move specification up or down',
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
   `date_modified` datetime DEFAULT CURRENT_TIMESTAMP,
-  `is_deleted` int(11) DEFAULT '0'
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
+  `status` int(11) DEFAULT '0'
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8;
 
 --
 -- Indexes for dumped tables
@@ -403,7 +403,7 @@ MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=9;
 -- AUTO_INCREMENT for table `price`
 --
 ALTER TABLE `price`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=7;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=15;
 --
 -- AUTO_INCREMENT for table `privilege`
 --
@@ -413,7 +413,7 @@ MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
 -- AUTO_INCREMENT for table `product`
 --
 ALTER TABLE `product`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=18;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=25;
 --
 -- AUTO_INCREMENT for table `product_category`
 --
@@ -438,7 +438,7 @@ MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
 -- AUTO_INCREMENT for table `specifications`
 --
 ALTER TABLE `specifications`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=15;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=32;
 --
 -- Constraints for dumped tables
 --
