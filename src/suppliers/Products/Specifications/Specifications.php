@@ -14,7 +14,7 @@ class Specifications{
 
 	public function view($id){
 		$results=[];
-		$SQL='SELECT * FROM specifications WHERE product_id=:id ORDER BY position';
+		$SQL='SELECT * FROM specifications WHERE product_id=:id and status=0 ORDER BY position';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id',$id,\PDO::PARAM_INT);
 		$sth->execute();
@@ -38,8 +38,23 @@ class Specifications{
 
 	}
 
+	public function update($id,$name,$val){
+
+	
+		$SQL='UPDATE specifications set name=:name,value=:value where id=:id';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':id',$id);
+		$sth->bindParam(':name',$name);
+		$sth->bindParam(':value',$val);
+		
+		
+		$sth->execute();
+
+		return $sth->rowCount();
+	}
+
 	public function set_status($id,$status){
-		$SQL='UPDATE specification set status=:status where id=:id';
+		$SQL='UPDATE specifications set status=:status where id=:id';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id',$id);
 		$sth->bindParam(':status',$status);

@@ -35,11 +35,27 @@ if($method=="POST"){
 	$id=isset($data->id)?$clean_str->clean($data->id):'';
 	$name=isset($data->name)?$clean_str->clean($data->name):'';
 	$val=isset($data->value)?$clean_str->clean($data->value):'';
+	$action=isset($data->action)?$clean_str->clean($data->action):'';
 
 	#required
-	if(empty($id)||empty($name)||empty($val)) return 0;
+	if(empty($id)) return 0;
 
-	$prod_specs=$specs->add($id,$name,$val);
+
+	if($action=='create'){
+		if(empty($name)||empty($val)) return 0;
+		$prod_specs=$specs->add($id,$name,$val);
+	}
+
+	if($action=='update'){
+		if(empty($name)||empty($val)) return 0;
+		$prod_specs=$specs->update($id,$name,$val);
+	}
+
+	if($action=='remove'){
+		$prod_specs=$specs->remove($id);
+	}
+
+	
 		
 	$data=["data"=>$prod_specs];
 
