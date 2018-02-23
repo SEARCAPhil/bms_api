@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 25, 2018 at 10:33 AM
+-- Generation Time: Feb 23, 2018 at 10:24 AM
 -- Server version: 5.6.21-log
 -- PHP Version: 7.1.2
 
@@ -54,6 +54,106 @@ CREATE TABLE IF NOT EXISTS `account_session` (
   `validity` datetime DEFAULT NULL,
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `bidding`
+--
+
+CREATE TABLE IF NOT EXISTS `bidding` (
+`id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text NOT NULL,
+  `deadline` date NOT NULL,
+  `status` int(11) NOT NULL,
+  `created_by` int(11) NOT NULL,
+  `date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `bidding_attachments`
+--
+
+CREATE TABLE IF NOT EXISTS `bidding_attachments` (
+`id` int(11) NOT NULL,
+  `bidding_id` int(11) NOT NULL,
+  `account_id` int(11) DEFAULT NULL,
+  `filename` varchar(255) NOT NULL,
+  `original_filename` varchar(255) NOT NULL,
+  `size` float NOT NULL,
+  `type` varchar(100) NOT NULL,
+  `date_created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `status` int(11) NOT NULL,
+  `copy` varchar(255) NOT NULL DEFAULT 'original',
+  `original_copy_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `bidding_collaborators`
+--
+
+CREATE TABLE IF NOT EXISTS `bidding_collaborators` (
+`id` int(11) NOT NULL,
+  `bidding_id` int(11) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `bidding_requirements`
+--
+
+CREATE TABLE IF NOT EXISTS `bidding_requirements` (
+`id` int(11) NOT NULL,
+  `particular_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `unit` varchar(100) NOT NULL,
+  `budget_amount` double NOT NULL,
+  `budget_currency` varchar(50) NOT NULL DEFAULT 'PHP',
+  `bidding_excemption_request` int(11) NOT NULL,
+  `status` int(11) NOT NULL COMMENT 'excempted , normal , failure of bidding',
+  `date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `bidding_requirements_funds`
+--
+
+CREATE TABLE IF NOT EXISTS `bidding_requirements_funds` (
+`id` int(11) NOT NULL,
+  `bidding_requirements_id` int(11) NOT NULL,
+  `fund_type` varchar(255) NOT NULL,
+  `cost_center` varchar(255) NOT NULL,
+  `line_item` varchar(255) NOT NULL
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `bidding_requirements_specs`
+--
+
+CREATE TABLE IF NOT EXISTS `bidding_requirements_specs` (
+`id` int(11) NOT NULL,
+  `bidding_requirements_id` int(11) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `value` text,
+  `position` int(11) DEFAULT NULL COMMENT 'move specification up or down',
+  `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` datetime DEFAULT CURRENT_TIMESTAMP,
+  `status` int(11) DEFAULT '0'
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -133,6 +233,21 @@ CREATE TABLE IF NOT EXISTS `logs` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `particulars`
+--
+
+CREATE TABLE IF NOT EXISTS `particulars` (
+`id` int(11) NOT NULL,
+  `bidding_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `deadline` date NOT NULL,
+  `status` int(11) NOT NULL,
+  `date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `price`
 --
 
@@ -143,7 +258,7 @@ CREATE TABLE IF NOT EXISTS `price` (
   `currency` varchar(45) DEFAULT NULL,
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
   `date_modified` datetime DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -179,7 +294,7 @@ CREATE TABLE IF NOT EXISTS `product` (
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
   `date_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `status` int(11) NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -196,7 +311,7 @@ CREATE TABLE IF NOT EXISTS `product_category` (
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
   `date_modified` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `status` int(11) NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -264,7 +379,7 @@ CREATE TABLE IF NOT EXISTS `specifications` (
   `date_created` datetime DEFAULT CURRENT_TIMESTAMP,
   `date_modified` datetime DEFAULT CURRENT_TIMESTAMP,
   `status` int(11) DEFAULT '0'
-) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=79 DEFAULT CHARSET=utf8;
 
 --
 -- Indexes for dumped tables
@@ -281,6 +396,42 @@ ALTER TABLE `account`
 --
 ALTER TABLE `account_session`
  ADD PRIMARY KEY (`id`), ADD KEY `account_id` (`account_id`);
+
+--
+-- Indexes for table `bidding`
+--
+ALTER TABLE `bidding`
+ ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `bidding_attachments`
+--
+ALTER TABLE `bidding_attachments`
+ ADD PRIMARY KEY (`id`), ADD KEY `basket_id` (`bidding_id`), ADD KEY `profile_id` (`account_id`);
+
+--
+-- Indexes for table `bidding_collaborators`
+--
+ALTER TABLE `bidding_collaborators`
+ ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `bidding_requirements`
+--
+ALTER TABLE `bidding_requirements`
+ ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `bidding_requirements_funds`
+--
+ALTER TABLE `bidding_requirements_funds`
+ ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `bidding_requirements_specs`
+--
+ALTER TABLE `bidding_requirements_specs`
+ ADD PRIMARY KEY (`id`), ADD KEY `product_id` (`bidding_requirements_id`);
 
 --
 -- Indexes for table `company`
@@ -310,6 +461,12 @@ ALTER TABLE `industry`
 -- Indexes for table `logs`
 --
 ALTER TABLE `logs`
+ ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `particulars`
+--
+ALTER TABLE `particulars`
  ADD PRIMARY KEY (`id`);
 
 --
@@ -375,6 +532,36 @@ MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=10;
 ALTER TABLE `account_session`
 MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
+-- AUTO_INCREMENT for table `bidding`
+--
+ALTER TABLE `bidding`
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=10;
+--
+-- AUTO_INCREMENT for table `bidding_attachments`
+--
+ALTER TABLE `bidding_attachments`
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
+--
+-- AUTO_INCREMENT for table `bidding_collaborators`
+--
+ALTER TABLE `bidding_collaborators`
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=17;
+--
+-- AUTO_INCREMENT for table `bidding_requirements`
+--
+ALTER TABLE `bidding_requirements`
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=18;
+--
+-- AUTO_INCREMENT for table `bidding_requirements_funds`
+--
+ALTER TABLE `bidding_requirements_funds`
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=12;
+--
+-- AUTO_INCREMENT for table `bidding_requirements_specs`
+--
+ALTER TABLE `bidding_requirements_specs`
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=21;
+--
 -- AUTO_INCREMENT for table `company`
 --
 ALTER TABLE `company`
@@ -400,10 +587,15 @@ MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 ALTER TABLE `logs`
 MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=9;
 --
+-- AUTO_INCREMENT for table `particulars`
+--
+ALTER TABLE `particulars`
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=16;
+--
 -- AUTO_INCREMENT for table `price`
 --
 ALTER TABLE `price`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=15;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=24;
 --
 -- AUTO_INCREMENT for table `privilege`
 --
@@ -413,12 +605,12 @@ MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
 -- AUTO_INCREMENT for table `product`
 --
 ALTER TABLE `product`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=25;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=30;
 --
 -- AUTO_INCREMENT for table `product_category`
 --
 ALTER TABLE `product_category`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=16;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=17;
 --
 -- AUTO_INCREMENT for table `product_template`
 --
@@ -438,7 +630,7 @@ MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=2;
 -- AUTO_INCREMENT for table `specifications`
 --
 ALTER TABLE `specifications`
-MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=32;
+MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=79;
 --
 -- Constraints for dumped tables
 --
