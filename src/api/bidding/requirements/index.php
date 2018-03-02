@@ -54,6 +54,7 @@ if($method=="POST"){
 	$excempted=(int) isset($data->excempted)?$clean_str->clean($data->excempted):0;
 
 	$funds = isset($data->funds)?$data->funds:[];
+	$fundsToRemove = isset($data->fundsToRemove)?$data->fundsToRemove:null;
 
 	$specs = isset($data->specs)?$data->specs:[];
 
@@ -109,6 +110,7 @@ if($method=="POST"){
 				]);
 			}
 		}
+
 
 		// specs
 		if (count($specs) > 0 && $result > 0) {
@@ -181,6 +183,22 @@ if($method=="POST"){
 				if($fund_res) $fund_result = 1;
 			}
 		}
+
+
+
+
+		// remove funds
+
+		if (!is_null($fundsToRemove)) {
+			foreach($fundsToRemove as $key => $val) {
+				$fund_res = $req->remove_fund($key);
+				// proceed even if there is no changes in requirements
+				if($fund_res) $fund_result = 1;
+			}
+		}
+
+
+
 
 		//** This still proceeds with updating specs **
 		// specs

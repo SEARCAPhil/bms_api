@@ -3,7 +3,7 @@
  * @namespace Index
  * @description Handles company information
  * */
-namespace Bidding; 
+namespace Bidding\Requirements; 
 
 class Attachments{
 
@@ -15,7 +15,7 @@ class Attachments{
 		//parameters
 		$results=[];
 		//query
-		$SQL='INSERT INTO bidding_attachments(account_id, bidding_id, filename, original_filename, size, type, copy, original_copy_id) values(:account_id, :bidding_id, :filename, :original_filename, :size, :type, :copy, :original_copy_id)';
+		$SQL='INSERT INTO bidding_requirements_attachments(account_id, bidding_requirements_id, filename, original_filename, size, type, copy, original_copy_id) values(:account_id, :bidding_id, :filename, :original_filename, :size, :type, :copy, :original_copy_id)';
 
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':account_id',$id);
@@ -36,7 +36,7 @@ class Attachments{
 	public function lists($id, $page=1){
 		$results=[];
 
-		$SQL='SELECT * FROM bidding_attachments where account_id = :id';
+		$SQL='SELECT * FROM bidding_requirements_attachments where account_id = :id';
 
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id', $id);
@@ -55,7 +55,7 @@ class Attachments{
 	public function get_attachments($id){
 		$results=[];
 
-		$SQL='SELECT * FROM bidding_attachments where bidding_id = :id and status != 1';
+		$SQL='SELECT * FROM bidding_requirements_attachments where bidding_requirements_id = :id';
 
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id', $id);
@@ -74,7 +74,7 @@ class Attachments{
 	public function lists_original_copy_only($id, $page=1){
 		$results=[];
 
-		$SQL='SELECT * FROM bidding_attachments where account_id = :id and copy = "original" ';
+		$SQL='SELECT * FROM bidding_requirements_attachments where account_id = :id and copy = "original" ';
 
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id', $id);
@@ -92,7 +92,7 @@ class Attachments{
 	public function view($id){
 		$results=[];
 
-		$SQL='SELECT * FROM bidding_attachments where id = :id';
+		$SQL='SELECT * FROM bidding_requirements_attachments where id = :id';
 
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id', $id);
@@ -105,20 +105,6 @@ class Attachments{
 		}
 
 		return $results;
-	}
-
-	public function set_status($id,$status){
-		$SQL='UPDATE bidding_attachments set status=:status where id=:id';
-		$sth=$this->DB->prepare($SQL);
-		$sth->bindParam(':id',$id);
-		$sth->bindParam(':status',$status);
-		$sth->execute();
-
-		return $sth->rowCount();
-	}
-
-	public function remove($id){
-		return self::set_status($id,1);
 	}
 
 }

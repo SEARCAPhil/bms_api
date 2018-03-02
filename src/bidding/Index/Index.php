@@ -6,9 +6,11 @@
 namespace Bidding; 
 
 require_once(dirname(__FILE__).'/../Particulars/Particulars.php');
+require_once(dirname(__FILE__).'/../Attachments.php');
 
 
 use Bidding\Particulars;
+use Bidding\Attachments;
 
 
 class Index{
@@ -62,7 +64,7 @@ class Index{
 	public function lists_all($page=0,$limit=20,$status=0){
 		$results=[];
 		$page=$page<2?0:$page-1;
-		$SQL='SELECT * FROM bidding WHERE status = 1 OR status = 2 ORDER BY name ASC LIMIT :offset,:lim';
+		$SQL='SELECT bidding.*, profile.profile_name FROM bidding LEFT JOIN profile on profile.id = bidding.created_by WHERE bidding.status = 1 OR bidding.status = 2 ORDER BY bidding.name ASC LIMIT :offset,:lim';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
 		$sth->bindParam(':offset',$page,\PDO::PARAM_INT);
@@ -77,7 +79,7 @@ class Index{
 	public function lists_by_status($page=0,$limit=20,$status=0){
 		$results=['data'=>[]];
 		$page=$page<2?0:$page-1;
-		$SQL='SELECT * FROM bidding WHERE status=:status ORDER BY name ASC LIMIT :offset,:lim';
+		$SQL='SELECT bidding.*, profile.profile_name FROM bidding LEFT JOIN profile on profile.id = bidding.created_by WHERE bidding.status =:status ORDER BY bidding.name ASC LIMIT :offset,:lim';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':status',$status,\PDO::PARAM_INT);
 		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
@@ -92,10 +94,13 @@ class Index{
 
 	public function view($id,$particulars=0){
 		$results=[];	
-		$SQL='SELECT * FROM bidding WHERE id=:id AND status != 4';
+		$SQL='SELECT bidding.*, profile.profile_name FROM bidding LEFT JOIN profile on profile.id = bidding.created_by WHERE bidding.id=:id AND bidding.status != 4';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id',$id,\PDO::PARAM_INT);
 		$sth->execute();
+
+		$att = new Attachments($this->DB);
+
 		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
 			//get particulars
 			if($particulars){
@@ -104,6 +109,9 @@ class Index{
 			}
 
 			$row->collaborators = $this->get_collaborators($row->id);
+
+			$row->attachments = $att->get_attachments($row->id);
+
 
 
 			$results[]=$row;
@@ -128,6 +136,14 @@ class Index{
 
 	public function send($id){
 		return self::set_status($id,1);
+	}
+
+	public function closed($id){
+		return self::set_status($id,3);
+	}
+
+	public function open($id){
+		return self::set_status($id,3);
 	}
 
 

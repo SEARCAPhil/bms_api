@@ -1,11 +1,11 @@
 <?php 
 header('Access-Control-Allow-Origin: *');
-require_once('../../../bidding/Attachments.php');
-require_once('../../../helpers/CleanStr/CleanStr.php');
-require_once('../../../config/database/connections.php');
-require_once('../../../suppliers/Logs/Logs.php');
+require_once('../../../../bidding/Requirements/Attachments.php');
+require_once('../../../../helpers/CleanStr/CleanStr.php');
+require_once('../../../../config/database/connections.php');
+require_once('../../../../suppliers/Logs/Logs.php');
 
-use Bidding\Attachments as Attachments;
+use Bidding\Requirements\Attachments as Attachments;
 use Suppliers\Logs as Logs;
 use Helpers\CleanStr as CleanStr;
 
@@ -25,10 +25,9 @@ $dir = './../../../../public/uploads/';
  */ 
 $method=($_SERVER['REQUEST_METHOD']);
 
-// for uploading
-if($method=="POST" && isset($_FILES['files'])){
+if($method=="POST"){
 	$id = 1; //authot
-	$bidding_id = 4; //sample bidding only
+	$bidding_requirements_id = 1; //sample bidding requirements ID only
 	$file = ($_FILES['files']);
 
 	if(!isset($file['name'])) return 0;
@@ -54,31 +53,10 @@ if($method=="POST" && isset($_FILES['files'])){
 		// upload
 		if(move_uploaded_file($tmp_name, $dir.''.$new_file_name)){
 
-			$last_id = $att->create($id, $bidding_id, $new_file_name, $name, $size, $ext, 'original');
+			$last_id = $att->create($id, $bidding_requirements_id, $new_file_name, $name, $size, $ext, 'original');
 
 			echo $last_id;
 		}
-	}
-}
-
-
-if($method=="POST" && !isset($_FILES['files'])){
-	
-	$input=file_get_contents("php://input");
-
-
-	$data=(@json_decode($input));
-
-	$action=isset($data->action)?$clean_str->clean($data->action):'';
-
-	//remove
-	if($action=='remove'){
-		$id=(int)isset($data->id)?$clean_str->clean($data->id):'';
-
-		$res=@$att->remove($id);
-		$data=["data"=>$res];
-		echo @json_encode($data);
-		return 0;
 	}
 }
 

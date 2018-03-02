@@ -5,10 +5,15 @@
  * */
 namespace Bidding; 
 
+require_once('Attachments.php');
+
+use Bidding\Requirements\Attachments as Attachments;
+
 class Requirements{
 
 	public function __construct(\PDO $DB_CONNECTION){
 		$this->DB=$DB_CONNECTION;
+		$this->Att = new Attachments($this->DB);
 	}
 
 
@@ -16,7 +21,7 @@ class Requirements{
 		$results=[];
 
 		$SQL='SELECT * FROM bidding_requirements WHERE particular_id = :id and status !=1';
-		$SQL2='SELECT * FROM bidding_requirements_funds WHERE bidding_requirements_id = :id';
+		$SQL2='SELECT * FROM bidding_requirements_funds WHERE bidding_requirements_id = :id AND status != 1';
 		$SQL3='SELECT * FROM bidding_requirements_specs WHERE bidding_requirements_id = :id';
 
 		$sth=$this->DB->prepare($SQL);
@@ -41,6 +46,8 @@ class Requirements{
 			while($row3 =$sth3->fetch(\PDO::FETCH_OBJ)){
 				$row->specs[] = $row3; 
 			}
+
+			$row->attachments = $this->Att->get_attachments($row->id);
 			
 			$results[]=$row;
 		}
@@ -178,6 +185,16 @@ class Requirements{
 
 	public function set_status($id,$status){
 		$SQL='UPDATE bidding_requirements set status=:status where id=:id';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':id',$id);
+		$sth->bindParam(':status',$status);
+		$sth->execute();
+
+		return $sth->rowCount();
+	}
+
+	public function remove_fund($id,$status = 1){
+		$SQL='UPDATE bidding_requirements_funds set status=:status where id=:id';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id',$id);
 		$sth->bindParam(':status',$status);
