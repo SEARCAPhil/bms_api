@@ -68,6 +68,33 @@ if($method=="POST"){
 		$data=["data"=> $result];
 		echo @json_encode($data);	
 	}
+
+	if($action == 'send') {
+		$specs = isset($data->suppliers)?$data->suppliers:[];
+		$specs_ids = [];
+		$specs_sent = [];
+		foreach ($specs as $key => $value) {
+			if(!empty(trim($value))) {
+				array_push($specs_ids, (int) $key);
+			}
+		}
+
+		if (!empty($specs_ids)) {
+			for ($x=0; $x < count($specs_ids); $x++) {
+				$result = $req->send($id,$specs_ids[$x],0);
+				// add to sent items
+				if ($result) {
+					$specs_sent[$specs_ids[$x]] = $result;
+				}
+			}
+			
+
+			$data=["data"=> $specs_sent];
+			echo @json_encode($data);
+			exit;	
+		}
+
+	}
 	
 	
 	//required

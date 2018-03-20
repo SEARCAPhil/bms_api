@@ -11,14 +11,18 @@ class Index{
 		$this->DB=$DB_CONNECTION;
 	}
 
-	public function lists($page=0,$limit=20,$status=0){
+	public function lists($page=1,$limit=20,$status=0){
 		$results=['data'=>[]];
-		$page=$page<2?0:$page-1;
+		$page=$page>1?$page:1;
+
+		#set starting limit(page 1=10,page 2=20)
+		$start_page=$page<2?0:(integer)($page-1)*$limit;
+
 		$SQL='SELECT * FROM company WHERE status=:status ORDER BY name ASC LIMIT :offset,:lim';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':status',$status,\PDO::PARAM_INT);
 		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
-		$sth->bindParam(':offset',$page,\PDO::PARAM_INT);
+		$sth->bindParam(':offset',$start_page,\PDO::PARAM_INT);
 		$sth->execute();
 		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
 			$results['data'][]=$row;
@@ -35,6 +39,29 @@ class Index{
 		$sth->execute();
 		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
 			$results['data'][]=$row;
+		}
+
+		return $results;
+	}
+
+	public function search($param,$page = 1,$limit=2){
+		$results=[];
+		$page=$page>1?$page:1;
+
+		#set starting limit(page 1=10,page 2=20)
+		$start_page=$page<2?0:(integer)($page-1)*$limit;
+		$par = '%'.$param.'%';
+
+		$SQL='SELECT * FROM company WHERE (name LIKE :param or alias LIKE :param) and status!=4 ORDER BY name ASC LIMIT :offset,:lim';
+		$sth=$this->DB->prepare($SQL);
+
+		$sth->bindValue(':param',$par);
+		$sth->bindValue(':lim',$limit,\PDO::PARAM_INT);
+		$sth->bindValue(':offset',$start_page,\PDO::PARAM_INT);
+		$sth->execute();
+
+		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
+			$results[]=$row;
 		}
 
 		return $results;

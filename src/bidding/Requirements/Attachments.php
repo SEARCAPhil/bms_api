@@ -55,7 +55,7 @@ class Attachments{
 	public function get_attachments($id){
 		$results=[];
 
-		$SQL='SELECT * FROM bidding_requirements_attachments where bidding_requirements_id = :id';
+		$SQL='SELECT * FROM bidding_requirements_attachments where bidding_requirements_id = :id and status != 1';
 
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id', $id);
@@ -74,7 +74,7 @@ class Attachments{
 	public function lists_original_copy_only($id, $page=1){
 		$results=[];
 
-		$SQL='SELECT * FROM bidding_requirements_attachments where account_id = :id and copy = "original" ';
+		$SQL='SELECT * FROM bidding_requirements_attachments where account_id = :id and copy = "original" and status != 1 ';
 
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id', $id);
@@ -105,6 +105,20 @@ class Attachments{
 		}
 
 		return $results;
+	}
+
+	public function set_status($id,$status){
+		$SQL='UPDATE bidding_requirements_attachments set status=:status where id=:id';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':id',$id);
+		$sth->bindParam(':status',$status);
+		$sth->execute();
+
+		return $sth->rowCount();
+	}
+
+	public function remove($id){
+		return self::set_status($id,1);
 	}
 
 }

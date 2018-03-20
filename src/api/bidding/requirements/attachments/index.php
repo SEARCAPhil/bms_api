@@ -17,15 +17,14 @@ $clean_str=new CleanStr();
 $logs = new Logs($DB);
 $att = new Attachments($DB);
 
-$dir = './../../../../public/uploads/';
-
+$dir = './../../../../../public/uploads/';
 
 /**
  * GET suppliers list
  */ 
 $method=($_SERVER['REQUEST_METHOD']);
 
-if($method=="POST"){
+if($method=="POST" && isset($_FILES['files'])){
 	$id = 1; //authot
 	$bidding_requirements_id = 1; //sample bidding requirements ID only
 	$file = ($_FILES['files']);
@@ -48,15 +47,37 @@ if($method=="POST"){
 	if(in_array($ext, $allowed_format) && $size<$allowed_size){
 
 		// create directory if not exist
-		if(!is_dir($dir)) mkdir($dir,0777, true);
+		if(!is_dir($dir.''.$bidding_requirements_id)) mkdir($dir.''.$bidding_requirements_id,0777, true);
 
 		// upload
-		if(move_uploaded_file($tmp_name, $dir.''.$new_file_name)){
+		if(move_uploaded_file($tmp_name, $dir.''.$bidding_requirements_id.'/'.$new_file_name)){
 
 			$last_id = $att->create($id, $bidding_requirements_id, $new_file_name, $name, $size, $ext, 'original');
 
 			echo $last_id;
 		}
+	}
+}
+
+// remove or update attachments
+if($method=="POST" && !isset($_FILES['files'])){
+	$input=file_get_contents("php://input");
+
+	$data=(@json_decode($input));
+
+	$action=isset($data->action)?$clean_str->clean($data->action):'';
+
+	$id=(int) isset($data->id)?$data->id:null;
+
+	if (empty($id) || empty($action)) return 0;
+
+	//remove
+	if($action == 'remove'){
+
+		$res=@$att->remove($id);
+		$data=["data"=>$res];
+		echo @json_encode($data);
+		return 0;
 	}
 }
 

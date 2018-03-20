@@ -23,10 +23,12 @@ class Requirements{
 		$SQL='SELECT * FROM bidding_requirements WHERE particular_id = :id and status !=1';
 		$SQL2='SELECT * FROM bidding_requirements_funds WHERE bidding_requirements_id = :id AND status != 1';
 		$SQL3='SELECT * FROM bidding_requirements_specs WHERE bidding_requirements_id = :id';
+		$SQL4='SELECT bidding_requirements_invitation.*, company.name, company.alias FROM bidding_requirements_invitation LEFT JOIN company on company.id = bidding_requirements_invitation.supplier_id WHERE bidding_requirements_invitation.bidding_requirements_id = :id and bidding_requirements_invitation.status = 0';
 
 		$sth=$this->DB->prepare($SQL);
 		$sth2=$this->DB->prepare($SQL2);
 		$sth3=$this->DB->prepare($SQL3);
+		$sth4=$this->DB->prepare($SQL4);
 
 		$sth->bindParam(':id',$id,\PDO::PARAM_INT);
 		$sth->execute();
@@ -45,6 +47,15 @@ class Requirements{
 			$sth3->execute();
 			while($row3 =$sth3->fetch(\PDO::FETCH_OBJ)){
 				$row->specs[] = $row3; 
+			}
+
+
+			// recepients
+			$row->recepients = [];
+			$sth4->bindValue(':id',$row->id,\PDO::PARAM_INT);
+			$sth4->execute();
+			while($row4 =$sth4->fetch(\PDO::FETCH_OBJ)){
+				$row->recepients[] = $row4; 
 			}
 
 			$row->attachments = $this->Att->get_attachments($row->id);
@@ -181,6 +192,39 @@ class Requirements{
 
 		return $sth->rowCount();
 
+	}
+
+	public function send($id,$supplier_id,$account_id){
+		//parameters
+		$results=[];
+		//query
+		$SQL='INSERT INTO bidding_requirements_invitation(bidding_requirements_id,supplier_id,account_id) values(:bidding_requirements_id,:supplier_id,:account_id)';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':bidding_requirements_id',$id);
+		$sth->bindParam(':supplier_id',$supplier_id);
+		$sth->bindParam(':account_id',$account_id);
+		$sth->execute();
+
+		return $this->DB->lastInsertId();
+
+	}
+
+	public function set_recepient_status($id, $status){
+		//parameters
+		$results=[];
+		//query
+		$SQL='UPDATE bidding_requirements_invitation set status=:status where id = :id';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':id',$id);
+		$sth->bindParam(':status',$status);
+		$sth->execute();
+
+		return $sth->rowCount();
+
+	}
+
+	public function remove_recepients($id){
+		return self::set_recepient_status($id,1);
 	}
 
 	public function set_status($id,$status){

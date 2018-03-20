@@ -64,7 +64,7 @@ class Index{
 	public function lists_all($page=0,$limit=20,$status=0){
 		$results=[];
 		$page=$page<2?0:$page-1;
-		$SQL='SELECT bidding.*, profile.profile_name FROM bidding LEFT JOIN profile on profile.id = bidding.created_by WHERE bidding.status = 1 OR bidding.status = 2 ORDER BY bidding.name ASC LIMIT :offset,:lim';
+		$SQL='SELECT bidding.*, profile.profile_name FROM bidding LEFT JOIN profile on profile.id = bidding.created_by WHERE bidding.status !=4 and bidding.status !=0 ORDER BY bidding.name ASC LIMIT :offset,:lim';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
 		$sth->bindParam(':offset',$page,\PDO::PARAM_INT);
@@ -77,7 +77,7 @@ class Index{
 	}
 
 	public function lists_by_status($page=0,$limit=20,$status=0){
-		$results=['data'=>[]];
+		$results=[];
 		$page=$page<2?0:$page-1;
 		$SQL='SELECT bidding.*, profile.profile_name FROM bidding LEFT JOIN profile on profile.id = bidding.created_by WHERE bidding.status =:status ORDER BY bidding.name ASC LIMIT :offset,:lim';
 		$sth=$this->DB->prepare($SQL);
@@ -86,7 +86,7 @@ class Index{
 		$sth->bindParam(':offset',$page,\PDO::PARAM_INT);
 		$sth->execute();
 		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
-			$results['data'][]=$row;
+			$results[]=$row;
 		}
 
 		return $results;
@@ -139,11 +139,14 @@ class Index{
 	}
 
 	public function closed($id){
-		return self::set_status($id,3);
+		return self::set_status($id,5);
 	}
 
 	public function open($id){
-		return self::set_status($id,3);
+		return self::set_status($id,2);
+	}
+	public function failed($id){
+		return self::set_status($id,6);
 	}
 
 
@@ -179,6 +182,7 @@ class Index{
 
 		return $results;
 	}
+
 }
 
 

@@ -9,7 +9,7 @@ use Suppliers\Index as Index;
 use Suppliers\Logs as Logs;
 use Helpers\CleanStr as CleanStr;
 
-$LIMIT=20;
+$LIMIT=50;
 $status='all'; 
 $page=1;
 
@@ -36,7 +36,7 @@ if($method=="GET"){
 	 * @param  $limit default to 20 items
 	 * @return json
 	 */
-	if(!isset($_GET['id'])){
+	if(!isset($_GET['id'])&&!isset($_GET['param'])){
 		#instance
 		$index=new Index($DB);
 
@@ -59,6 +59,16 @@ if($method=="GET"){
 		}
 		
 		echo @json_encode($index->lists($page,$LIMIT,$status_code));
+	}
+
+	// search
+	if(!isset($_GET['id'])&&isset($_GET['param'])){
+		#instance
+		$index=new Index($DB);
+		$param=trim(strip_tags(htmlentities(htmlspecialchars($_GET['param']))));
+		$result=["data"=>@$index->search($param, $page)];
+		echo @json_encode($result);
+		exit;
 	}
 	
 

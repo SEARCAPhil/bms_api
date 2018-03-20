@@ -41,6 +41,7 @@ if($method=="GET"){
 	if(!isset($_GET['id'])){
 		#instance
 		$index=new Index($DB);
+		$status_filter = ['drafts','closed'];
 
 		#filter blocked or active companies
 		if(isset($_GET['status'])){
@@ -52,18 +53,26 @@ if($method=="GET"){
 				$status_code=0;
 				break;
 			case 'all':
-				$status_code=1;
+				$status_code=null;
 				break;
 			case 'closed':
 				$status_code=2;
 				break;
 			
 			default:
-				$status_code=1;
+				$status_code=null;
 				break;
 		}
+
+		if(in_array($status, $status_filter)) {
+			echo @json_encode($index->lists_by_status($page,$LIMIT,$status_code));
+		}
+
+		if(is_null($status_code)) {
+			echo @json_encode($index->lists_all($page,$LIMIT));
+		}
 		
-		echo @json_encode($index->lists_by_status($page,$LIMIT,$status_code));
+		
 	}
 	
 

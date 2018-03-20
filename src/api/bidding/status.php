@@ -36,11 +36,14 @@ if($method=="POST"){
 
 	if (!empty($id) && !empty($status)) {
 		switch ($status) {
-			case 0:
-				$res = @$index->open($id,$status);
+			case 2:
+				$res = @$index->open($id);
 				break;
-			case 3:
-				$res = @$index->close($id,$status);
+			case 5:
+				$res = @$index->closed($id);
+				break;
+			case 6:
+				$res = @$index->failed($id);
 				break;
 			
 			default:
