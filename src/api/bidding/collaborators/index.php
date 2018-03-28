@@ -48,7 +48,10 @@ if($method=="POST"){
 		for($x = 0; $x < count($emails); $x++) {
 			$res=$index->set_collaborators($id, $emails[$x]);
 
-			if($res > 0) array_push($result, $res);
+			if($res > 0) {
+				array_push($result, $res);
+				$index->send($id);
+			} 
 		}
 		
 	}

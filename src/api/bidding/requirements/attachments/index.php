@@ -4,10 +4,12 @@ require_once('../../../../bidding/Requirements/Attachments.php');
 require_once('../../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../../config/database/connections.php');
 require_once('../../../../suppliers/Logs/Logs.php');
+require_once('../../../../Auth/Session.php');
 
 use Bidding\Requirements\Attachments as Attachments;
 use Suppliers\Logs as Logs;
 use Helpers\CleanStr as CleanStr;
+use Auth\Session as Session;
 
 $LIMIT=20;
 $status='all'; 
@@ -16,6 +18,7 @@ $page=1;
 $clean_str=new CleanStr();
 $logs = new Logs($DB);
 $att = new Attachments($DB);
+$Ses = new Session($DB);
 
 $dir = './../../../../../public/uploads/';
 
@@ -25,9 +28,24 @@ $dir = './../../../../../public/uploads/';
 $method=($_SERVER['REQUEST_METHOD']);
 
 if($method=="POST" && isset($_FILES['files'])){
-	$id = 1; //authot
-	$bidding_requirements_id = 1; //sample bidding requirements ID only
+
+	if (!isset($_POST['id']) || !isset($_POST['token'])) exit;
+
+
+	// get privilege
+	// this is IMPORTANT for checking privilege
+	$token=htmlentities(htmlspecialchars($_POST['token']));
+
+	$current_session = $Ses->get($token);
+
+	if(!@$current_session[0]->role) exit;
+
+
+	$id = $current_session[0]->pid; //author
+	$bidding_requirements_id = (int) trim($_POST['id']);
 	$file = ($_FILES['files']);
+
+	
 
 	if(!isset($file['name'])) return 0;
 

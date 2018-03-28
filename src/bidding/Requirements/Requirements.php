@@ -6,14 +6,58 @@
 namespace Bidding; 
 
 require_once('Attachments.php');
+require_once(dirname(__FILE__).'/../Particulars/Particulars.php');
 
 use Bidding\Requirements\Attachments as Attachments;
+use Bidding\Particulars as Particulars;
+
 
 class Requirements{
 
 	public function __construct(\PDO $DB_CONNECTION){
 		$this->DB=$DB_CONNECTION;
 		$this->Att = new Attachments($this->DB);
+	}
+
+	public function view($id){
+		$results=[];
+		$SQL='SELECT * FROM bidding_requirements where id = :id and status != 1';
+		$SQL2='SELECT * FROM bidding_requirements_specs WHERE bidding_requirements_id = :id';
+		$SQL3='SELECT bidding_requirements_invitation.*, company.name, company.alias FROM bidding_requirements_invitation LEFT JOIN company on company.id = bidding_requirements_invitation.supplier_id WHERE bidding_requirements_invitation.bidding_requirements_id = :id and bidding_requirements_invitation.status = 0';
+
+
+
+		$sth=$this->DB->prepare($SQL);
+		$sth2=$this->DB->prepare($SQL2);
+		$sth3=$this->DB->prepare($SQL3);
+
+		$sth->bindParam(':id', $id);
+		$sth->execute();
+		
+		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
+			// specs
+			$row->specs = [];
+			$sth2->bindValue(':id',$row->id,\PDO::PARAM_INT);
+			$sth2->execute();
+
+			while($row2 =$sth2->fetch(\PDO::FETCH_OBJ)){
+				$row->specs[] = $row2; 
+			}
+
+			// recepients
+			$row->recepients = [];
+			$sth3->bindValue(':id',$row->id,\PDO::PARAM_INT);
+			$sth3->execute();
+			while($row3 =$sth3->fetch(\PDO::FETCH_OBJ)){
+				$row->recepients[] = $row3; 
+			}
+
+			// attachments
+			$row->attachments = $this->Att->get_attachments($row->id);
+
+			$results[]=$row;
+		}
+		return $results;
 	}
 
 

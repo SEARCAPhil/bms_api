@@ -65,7 +65,6 @@ class Particulars{
 
 	public function lists_by_parent($id, $includes_requirements = false){
 		$results=[];
-		$page=$page<2?0:$page-1;
 		$SQL='SELECT * FROM particulars WHERE bidding_id = :id and status != 1';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id',$id,\PDO::PARAM_INT);

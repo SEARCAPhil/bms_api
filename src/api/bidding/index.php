@@ -4,10 +4,12 @@ require_once('../../bidding/Index/Index.php');
 require_once('../../helpers/CleanStr/CleanStr.php');
 require_once('../../config/database/connections.php');
 require_once('../../suppliers/Logs/Logs.php');
+require_once('../../Auth/Session.php');
 
 use Bidding\Index as Index;
 use Suppliers\Logs as Logs;
 use Helpers\CleanStr as CleanStr;
+use Auth\Session as Session;
 
 $LIMIT=20;
 $status='all'; 
@@ -15,7 +17,9 @@ $page=1;
 
 $clean_str=new CleanStr();
 $logs = new Logs($DB);
+$Ses = new Session($DB);
 
+$result = [];
 /**
  * GET suppliers list
  */ 
@@ -29,6 +33,19 @@ if($method=="GET"){
 	if(isset($_GET['page'])){
 		$page=(int) htmlentities(htmlspecialchars($_GET['page']));
 	}
+
+		#serve with page request
+	if(!isset($_GET['token'])){
+		exit;
+	}
+
+	// get privilege
+	// this is IMPORTANT for checking privilege
+	$token=htmlentities(htmlspecialchars($_GET['token']));
+
+	$current_session = $Ses->get($token);
+
+	if(!@$current_session[0]->role) exit;
 
 
 	/**
@@ -64,12 +81,22 @@ if($method=="GET"){
 				break;
 		}
 
-		if(in_array($status, $status_filter)) {
-			echo @json_encode($index->lists_by_status($page,$LIMIT,$status_code));
-		}
 
-		if(is_null($status_code)) {
-			echo @json_encode($index->lists_all($page,$LIMIT));
+		// For ADMIN
+		if ($current_session[0]->role === 'admin') {
+			if(in_array($status, $status_filter)) {
+
+				if($status == 'draft') {
+					echo @json_encode($index->lists_all_drafts($current_session[0]->pid,$page,$LIMIT,$status_code));
+				} else {
+					echo @json_encode($index->lists_by_status($page,$LIMIT,$status_code));	
+				}
+				
+			}
+
+			if(is_null($status_code)) {
+				echo @json_encode($index->lists_all_received($current_session[0]->email,$page,$LIMIT));
+			}
 		}
 		
 		
@@ -102,6 +129,7 @@ if($method=="POST"){
 	$data=(@json_decode($input));
 
 	$action=isset($data->action)?$clean_str->clean($data->action):'';
+	$token = isset($data->token)?$data->token:'';
 
 	//remove
 	if($action=='remove'){
@@ -139,10 +167,14 @@ if($method=="POST"){
 		}
 	}
 
+
+
+	
 	//proceed to adding
-	$name=isset($data->name)?$clean_str->clean($data->name):'';
-	$description=isset($data->desc)?$clean_str->clean($data->desc):'';
-	$deadline=isset($data->deadline)?$data->deadline:null;
+	$name = isset($data->name)?$clean_str->clean($data->name):'';
+	$description = isset($data->desc)?$clean_str->clean($data->desc):'';
+	$deadline = isset($data->deadline)?$data->deadline:null;
+	$excemption = isset($data->excemption)?$data->excemption:0;
 	
 	
 	//required
@@ -168,13 +200,21 @@ if($method=="POST"){
 	}
 
 	if($action=='create'){
+		$tok = $Ses->get($token);
 
-		$result=$index->create([
-			"name"=>$name,
-			"description"=>$description,
-			"deadline"=>$deadline,
-			"created_by"=> 1
-		]);
+		if (@$tok[0]->pid) {
+
+			$result=$index->create([
+				"name"=>$name,
+				"description"=>$description,
+				"deadline"=>$deadline,
+				"excemption" => $excemption,
+				"created_by"=> $tok[0]->pid
+			]);
+
+		}
+
+
 	}
 
 	$data=["data"=>$result];

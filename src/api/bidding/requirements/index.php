@@ -260,4 +260,12 @@ if($method=="POST"){
 	
 }
 
+if($method=="GET" && isset($_GET['id'])){
+	$id=(int) htmlentities(htmlspecialchars($_GET['id']));
+
+	$res = $req->view($id);
+
+	echo @json_encode($res);
+}
+
 ?>
