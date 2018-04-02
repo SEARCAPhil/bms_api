@@ -95,7 +95,14 @@ if($method=="GET"){
 			}
 
 			if(is_null($status_code)) {
-				echo @json_encode($index->lists_all_received($current_session[0]->email,$page,$LIMIT));
+				echo @json_encode($index->lists_all_received($current_session[0]->pid,$page,$LIMIT));
+			}
+		}
+
+		// CBA
+		if ($current_session[0]->role === 'cba_assistant') {
+			if(is_null($status_code)) {
+				echo @json_encode($index->lists_all_received($current_session[0]->account_id,$page,$LIMIT));
 			}
 		}
 		
@@ -191,7 +198,7 @@ if($method=="POST"){
 		if(empty($id)) return 0;
 
 
-		$result=$index->update($id,$name,$description,$deadline);
+		$result=$index->update($id,$name,$description,$deadline,$excemption);
 
 		$data=["data"=>$result];
 		echo @json_encode($data);

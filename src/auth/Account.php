@@ -71,5 +71,25 @@ class Account{
 		}
 		return $results;
 	}
+
+	public function get_cba_assts($role, $page=0, $limit=20){
+		$results=[];
+		$page=$page<2?0:$page-1;
+
+		$SQL='SELECT account.username,account.id as id,account.status, account_role.role, profile.profile_name FROM account_role LEFT JOIN account ON account.id = account_role.account_id LEFT JOIN profile on profile.account_id=account.id WHERE account.status!=1 and account_role.role = :role  ORDER BY profile.first_name ASC LIMIT :offset,:lim';
+		$sth=$this->DB->prepare($SQL);
+		
+		$sth->bindParam(':role',$role);
+		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
+		$sth->bindParam(':offset',$page,\PDO::PARAM_INT);
+		$sth->execute();
+
+		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
+			$results[]=$row;
+
+		}
+
+		return $results;
+	}
 }
 ?>

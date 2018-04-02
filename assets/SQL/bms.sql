@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 28, 2018 at 06:12 AM
+-- Generation Time: Apr 02, 2018 at 12:36 PM
 -- Server version: 10.1.31-MariaDB
 -- PHP Version: 7.2.3
 
@@ -21,6 +21,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `bms`
 --
+CREATE DATABASE IF NOT EXISTS `bms` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+USE `bms`;
 
 -- --------------------------------------------------------
 
@@ -81,7 +83,7 @@ CREATE TABLE `bidding` (
   `name` varchar(255) NOT NULL,
   `description` text NOT NULL,
   `deadline` date NOT NULL,
-  `status` int(11) NOT NULL DEFAULT '1',
+  `status` int(11) NOT NULL DEFAULT '0',
   `excemption` int(11) NOT NULL DEFAULT '0',
   `created_by` int(11) NOT NULL,
   `date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -117,7 +119,7 @@ CREATE TABLE `bidding_attachments` (
 CREATE TABLE `bidding_collaborators` (
   `id` int(11) NOT NULL,
   `bidding_id` int(11) NOT NULL,
-  `email` varchar(255) NOT NULL,
+  `account_id` int(11) NOT NULL,
   `date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -619,31 +621,31 @@ ALTER TABLE `account_role`
 -- AUTO_INCREMENT for table `account_session`
 --
 ALTER TABLE `account_session`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `bidding`
 --
 ALTER TABLE `bidding`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `bidding_attachments`
 --
 ALTER TABLE `bidding_attachments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
 
 --
 -- AUTO_INCREMENT for table `bidding_collaborators`
 --
 ALTER TABLE `bidding_collaborators`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `bidding_requirements`
 --
 ALTER TABLE `bidding_requirements`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `bidding_requirements_attachments`
@@ -655,7 +657,7 @@ ALTER TABLE `bidding_requirements_attachments`
 -- AUTO_INCREMENT for table `bidding_requirements_funds`
 --
 ALTER TABLE `bidding_requirements_funds`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `bidding_requirements_invitation`
@@ -667,7 +669,7 @@ ALTER TABLE `bidding_requirements_invitation`
 -- AUTO_INCREMENT for table `bidding_requirements_specs`
 --
 ALTER TABLE `bidding_requirements_specs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT for table `company`

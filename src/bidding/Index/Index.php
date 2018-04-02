@@ -46,16 +46,17 @@ class Index{
 
 	}
 
-	public function update($id, $name, $description, $deadline){
+	public function update($id, $name, $description, $deadline, $excemption){
 		//parameters
 		$results=[];
 
 		//query
-		$SQL='UPDATE bidding SET  name=:name, description=:description, deadline=:deadline WHERE id = :id';
+		$SQL='UPDATE bidding SET  name=:name, description=:description, deadline=:deadline, excemption =:excemption WHERE id = :id';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':name',$name);
 		$sth->bindParam(':description',$description);
 		$sth->bindParam(':deadline',$deadline);
+		$sth->bindParam(':excemption',$excemption);
 		$sth->bindParam(':id',$id);
 		$sth->execute();
 
@@ -63,12 +64,15 @@ class Index{
 
 	}
 
-	public function lists_all_received($email,$page=0,$limit=20,$status=0){
+	public function lists_all_received($account_id,$page=0,$limit=20,$status=0){
 		$results=[];
 		$page=$page<2?0:$page-1;
-		$SQL='SELECT bidding.*, profile.profile_name, profile.email FROM bidding LEFT JOIN profile on profile.id = bidding.created_by LEFT JOIN account on account.id = profile.id LEFT JOIN bidding_collaborators on bidding_collaborators.email = profile.email WHERE (bidding.status !=4 and bidding.status !=0) AND (profile.email = :email) OR (bidding.created_by =:email) ORDER BY bidding.name ASC LIMIT :offset,:lim';
+		//$SQL='SELECT bidding.*, profile.profile_name, profile.email, bidding_collaborators.*  FROM bidding LEFT JOIN profile on profile.id = bidding.created_by LEFT JOIN bidding_collaborators on bidding_collaborators.account_id = profile.account_id WHERE (bidding.status !=4 and bidding.status !=0) AND (profile.account_id = :account_id) OR (account.id =:account_id) ORDER BY bidding.name ASC LIMIT :offset,:lim';
+
+		$SQL='SELECT bidding.*, bidding_collaborators.account_id,profile.profile_name FROM bidding_collaborators LEFT JOIN bidding on bidding.id = bidding_collaborators.bidding_id LEFT JOIN profile on profile.id = bidding.created_by  WHERE (bidding.status !=4 and bidding.status != 0) AND ((bidding.created_by = :account_id) OR ( bidding_collaborators.account_id = :account_id)) ORDER BY bidding.name ASC LIMIT :offset,:lim';
+
 		$sth=$this->DB->prepare($SQL);
-		$sth->bindValue(':email',$email);
+		$sth->bindValue(':account_id',$account_id);
 		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
 		$sth->bindParam(':offset',$page,\PDO::PARAM_INT);
 		$sth->execute();
@@ -184,18 +188,21 @@ class Index{
 	public function failed($id){
 		return self::set_status($id,6);
 	}
+	public function approve($id){
+		return self::set_status($id,3);
+	}
 
 
 	/** COLLABORATORS **/
-	public function set_collaborators($id, $email){
+	public function set_collaborators($id, $account_id){
 		//parameters
 		$results=[];
 		
 		//query
-		$SQL='INSERT INTO bidding_collaborators(bidding_id, email) values(:bidding_id, :email)';
+		$SQL='INSERT INTO bidding_collaborators(bidding_id, account_id) values(:bidding_id, :account_id)';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':bidding_id',$id);
-		$sth->bindParam(':email',$email);
+		$sth->bindParam(':account_id',$account_id);
 
 		$sth->execute();
 
@@ -207,7 +214,7 @@ class Index{
 	public function get_collaborators($id){
 		$results=[];
 		$page=$page<2?0:$page-1;
-		$SQL='SELECT * FROM bidding_collaborators WHERE bidding_id = :id';
+		$SQL='SELECT bidding_collaborators.*, profile.profile_name FROM bidding_collaborators LEFT JOIN profile on profile.account_id = bidding_collaborators.account_id WHERE bidding_id = :id';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id',$id,\PDO::PARAM_INT);
 

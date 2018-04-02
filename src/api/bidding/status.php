@@ -42,8 +42,14 @@ if($method=="POST"){
 			case 5:
 				$res = @$index->closed($id);
 				break;
+			case 3:
+				$res = @$index->approve($id);
+				break;
 			case 6:
 				$res = @$index->failed($id);
+				break;
+			case 1:
+				$res = @$index->send($id);
 				break;
 			
 			default:
