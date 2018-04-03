@@ -75,11 +75,13 @@ if($method=="POST"){
 
 	$data=(@json_decode($input));
 
-	$action=isset($data->action)?$clean_str->clean($data->action):'';
-	$atts=isset($data->attachments)?$data->attachments:null;
+	$action = isset($data->action)?$clean_str->clean($data->action):'';
+	$atts = isset($data->attachments)?$data->attachments:null;
+	$id = (int) isset($data->id)?$data->id:null;
 
+	if (!$id) exit;
 	// profile id here
-	$id =1;
+	$pid =1;
 	$result = [];
 
 	if($action === 'create') {
@@ -89,7 +91,7 @@ if($method=="POST"){
 				$preview = $att->view($key);
 				if ($preview[0]) {
 
-					$lastId = $att->create($id, $preview[0]->bidding_requirements_id, $preview[0]->filename, $preview[0]->original_filename, $preview[0]->size, $preview[0]->type, 'duplicate', $preview[0]->id);
+					$lastId = $att->create($pid, $id, $preview[0]->filename, $preview[0]->original_filename, $preview[0]->size, $preview[0]->type, 'duplicate', $preview[0]->id);
 					
 					// success
 					if( $lastId > 0) $result[] = array('id' => $lastId, 'filename' => $preview[0]->filename, 'original_filename' => $preview[0]->original_filename, 'type' => $preview[0]->type);

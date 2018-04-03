@@ -134,7 +134,7 @@ class Index{
 
 	public function view($id,$particulars=0){
 		$results=[];	
-		$SQL='SELECT bidding.*, profile.profile_name FROM bidding LEFT JOIN profile on profile.id = bidding.created_by WHERE bidding.id=:id AND bidding.status != 4';
+		$SQL='SELECT bidding.*, profile.profile_name , profile.position FROM bidding LEFT JOIN profile on profile.id = bidding.created_by WHERE bidding.id=:id AND bidding.status != 4';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id',$id,\PDO::PARAM_INT);
 		$sth->execute();
@@ -213,7 +213,6 @@ class Index{
 
 	public function get_collaborators($id){
 		$results=[];
-		$page=$page<2?0:$page-1;
 		$SQL='SELECT bidding_collaborators.*, profile.profile_name FROM bidding_collaborators LEFT JOIN profile on profile.account_id = bidding_collaborators.account_id WHERE bidding_id = :id';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id',$id,\PDO::PARAM_INT);

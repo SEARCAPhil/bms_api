@@ -31,9 +31,14 @@ if($method=="POST"){
 
 	// register
 	if(!isset($credential->uid)) {
+
 		// create($company_id, $username, $password, $uid)
 		// This is for creating Office365 account
-		$accountId = (int) @$acc->create(null, null, null, $input->id);
+		/*------------------------------------------------------
+		// DEFAULT : 1 = SEARCA
+		// username = @email
+		-------------------------------------------------------*/
+		$accountId = (int) @$acc->create(1, isset($input->mail) ? $input->mail : null, null, $input->id);
 
 		// if account successfully created, save profile to DB
 		if($accountId > 0) {
@@ -47,7 +52,7 @@ if($method=="POST"){
 
 			if($sessionId) {
 				$result['token'] = $token;
-				$result['role'] = $credential->role;
+				$result['role'] = @$credential->role;
 				echo json_encode($result);
 				exit;
 			}

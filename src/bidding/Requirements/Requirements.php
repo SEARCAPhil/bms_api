@@ -21,15 +21,18 @@ class Requirements{
 
 	public function view($id){
 		$results=[];
-		$SQL='SELECT * FROM bidding_requirements where id = :id and status != 1';
-		$SQL2='SELECT * FROM bidding_requirements_specs WHERE bidding_requirements_id = :id';
+		$SQL='SELECT bidding_requirements.*, particulars.bidding_id FROM bidding_requirements LEFT JOIN particulars on particulars.id = bidding_requirements.particular_id WHERE bidding_requirements.id = :id and bidding_requirements.status != 1';
+		$SQL2='SELECT * FROM bidding_requirements_specs WHERE bidding_requirements_id = :id AND status != 1';
 		$SQL3='SELECT bidding_requirements_invitation.*, company.name, company.alias FROM bidding_requirements_invitation LEFT JOIN company on company.id = bidding_requirements_invitation.supplier_id WHERE bidding_requirements_invitation.bidding_requirements_id = :id and bidding_requirements_invitation.status = 0';
+
+		$SQL4 = 'SELECT bidding_requirements_funds.* FROM bidding_requirements_funds WHERE bidding_requirements_funds.bidding_requirements_id = :id AND bidding_requirements_funds.status !=1';
 
 
 
 		$sth=$this->DB->prepare($SQL);
 		$sth2=$this->DB->prepare($SQL2);
 		$sth3=$this->DB->prepare($SQL3);
+		$sth4=$this->DB->prepare($SQL4);
 
 		$sth->bindParam(':id', $id);
 		$sth->execute();
@@ -50,6 +53,15 @@ class Requirements{
 			$sth3->execute();
 			while($row3 =$sth3->fetch(\PDO::FETCH_OBJ)){
 				$row->recepients[] = $row3; 
+			}
+
+
+			// recepients
+			$row->funds = [];
+			$sth4->bindValue(':id',$row->id,\PDO::PARAM_INT);
+			$sth4->execute();
+			while($row4 =$sth4->fetch(\PDO::FETCH_OBJ)){
+				$row->funds[] = $row4; 
 			}
 
 			// attachments
@@ -283,6 +295,17 @@ class Requirements{
 
 	public function remove_fund($id,$status = 1){
 		$SQL='UPDATE bidding_requirements_funds set status=:status where id=:id';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':id',$id);
+		$sth->bindParam(':status',$status);
+		$sth->execute();
+
+		return $sth->rowCount();
+	}
+
+
+	public function remove_specs($id,$status = 1){
+		$SQL='UPDATE bidding_requirements_specs set status=:status where id=:id';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id',$id);
 		$sth->bindParam(':status',$status);

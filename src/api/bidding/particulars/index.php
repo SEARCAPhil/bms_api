@@ -5,11 +5,13 @@ require_once('../../../bidding/Particulars/Particulars.php');
 require_once('../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../config/database/connections.php');
 require_once('../../../suppliers/Logs/Logs.php');
+require_once('../../../Auth/Session.php');
 
 use Bidding\Index as Index;
 use Bidding\Particulars as Particulars;
 use Suppliers\Logs as Logs;
 use Helpers\CleanStr as CleanStr;
+use Auth\Session as Session;
 
 $LIMIT=20;
 $status='all'; 
@@ -18,6 +20,7 @@ $page=1;
 $clean_str=new CleanStr();
 $logs = new Logs($DB);
 $part = new Particulars($DB);
+$Ses = new Session($DB);
 
 /**
  * GET suppliers list
@@ -79,6 +82,36 @@ if($method=="POST"){
 	$data=["data"=>$result];
 	echo @json_encode($data);
 	
+}
+
+
+if($method=="GET"){
+
+	if(!isset($_GET['token'])){
+		exit;
+	}
+
+	// get privilege
+	// this is IMPORTANT for checking privilege
+	$token=htmlentities(htmlspecialchars($_GET['token']));
+
+	$current_session = $Ses->get($token);
+
+	if(!@$current_session[0]->role) exit;
+
+
+	/**
+	 * GET
+	 * get all company list from the database
+	 * @param  $page page number
+	 * @param  $limit default to 20 items
+	 * @return json
+	 */
+	if(isset($_GET['id'])){
+		$id = (int) htmlentities(htmlspecialchars($_GET['id']));
+
+		echo json_encode($part->view($id));
+	}
 }
 
 ?>

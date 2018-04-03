@@ -56,6 +56,9 @@ if($method=="POST"){
 	$funds = isset($data->funds)?$data->funds:[];
 	$fundsToRemove = isset($data->fundsToRemove)?$data->fundsToRemove:null;
 
+	$specsToRemove = isset($data->specsToRemove)?$data->specsToRemove:null;
+
+
 	$specs = isset($data->specs)?$data->specs:[];
 
 	$extras = [];
@@ -221,6 +224,17 @@ if($method=="POST"){
 				$fund_res = $req->remove_fund($key);
 				// proceed even if there is no changes in requirements
 				if($fund_res) $fund_result = 1;
+			}
+		}
+
+
+		// remove specs
+
+		if (!is_null($specsToRemove)) {
+			foreach($specsToRemove as $key => $val) {
+				$specs_res = $req->remove_specs($key);
+				// proceed even if there is no changes in requirements
+				if($specs_res) $specs_result = 1;
 			}
 		}
 

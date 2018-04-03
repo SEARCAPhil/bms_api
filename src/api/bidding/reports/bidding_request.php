@@ -1,13 +1,101 @@
 <?php
 header('Access-Control-Allow-Origin: *');
+require_once('../../../bidding/Index/Index.php');
+require_once('../../../bidding/Particulars/Particulars.php');
+require_once('../../../helpers/CleanStr/CleanStr.php');
+require_once('../../../config/database/connections.php');
+require_once('../../../suppliers/Logs/Logs.php');
+require_once('../../../Auth/Session.php');
+require_once('../../../bidding/Requirements/Requirements.php');
+
 
 include_once(dirname(__FILE__).'/../../../../vendor/dompdf/lib/html5lib/Parser.php');
 include_once(dirname(__FILE__).'/../../../../vendor/dompdf/src/Autoloader.php');
+
 Dompdf\Autoloader::register();
 
 use Dompdf\Dompdf;
+use Bidding\Index as Bid;
+use Bidding\Particulars as Particulars;
+use Bidding\Requirements as Requirements;
+use Suppliers\Logs as Logs;
+use Helpers\CleanStr as CleanStr;
+use Auth\Session as Session;
 
 
+$clean_str=new CleanStr();
+$logs = new Logs($DB);
+$Part = new Particulars($DB);
+$Ses = new Session($DB);
+$Index = new Bid($DB);
+$Req= new Requirements($DB);
+
+if (!isset($_GET['id'])) exit;
+
+$id = htmlentities(htmlspecialchars($_GET['id']));
+
+$data = $Index->view($id);
+
+if (!$data[0]) {
+	exit;
+}
+
+$name = strtoupper($data[0]->profile_name);
+$date = date('m-d-Y');
+$bidding_name = strtoupper($data[0]->name);
+
+$parts = $Part->lists_by_parent($data[0]->id, true);
+
+// Particulars
+$partsSec = '';
+$letters = 'A';
+
+for($x = 0; $x < count($parts); $x++ ) {
+	$partName = strtoupper($parts[$x]->name);
+	$req_details = ($Req->lists_by_parent($parts[$x]->id));
+
+
+	$partsSec.= "  		
+
+  		<section style='text-align:left;margin-left:30px;'>
+  			<br/><br/><br/><br/>
+  			<p>
+	  			<b>{$letters}. {$partName}</b>
+	  		</p>";
+
+	  	// requirements
+	  	if ($req_details[0]) {
+
+	  		$req_count = 0;
+
+	  		for ($z = 0; $z < count($req_details); $z++) {
+
+	  			$req_count ++;
+
+	  			$partsSec.= " <div style='text-align:left;margin-left:25px;'>
+			  		<p>
+			  			<b>{$req_count}) {$req_details[0]->name}</b>
+			  		</p>";
+			  		if ($req_details[$z]->specs) {
+
+			  			for ($y = 0; $y < count($req_details[$z]->specs); $y++ ) {
+			  				$partsSec.= " <p>
+								&nbsp;&nbsp;&nbsp;&nbsp;{$req_details[$z]->specs[$y]->name} - {$req_details[$z]->specs[$y]->value} <br/>
+					  		</p>";
+			  			}
+
+				  	}
+
+			  	$partsSec.= " </div>";
+	  		}
+
+		 }
+	 
+	 $partsSec.= " </section>";
+	 $letters ++;
+}
+
+//var_dump($data[0]);
 $table= "
 	<div align='center'>
 <style>
@@ -47,7 +135,9 @@ $table= "
 	</thead>
 	<tbody>
 		<tr>
-			<td  style='height:300px;'></td>
+			<td  style='height:300px;'>
+			
+			</td>
 			<td></td>
 			<td></td>
 			<td></td>
@@ -78,13 +168,13 @@ $table= "
 
 	  <br/><br/>
 	 <div style='float:left;text-align:center; height:40px;width:300px;'>
-	 	<u><b>ADORACION T. ROBLES</b></u><br/>
-	 	Unit Head, Management Services and <br/> Executive Coordinator, OD
+	 	<u><b>{$name}</b></u><br/>
+	 	{$data[0]->position}
 	 </div>
 
  	<div style='float:left;text-align:center; height:40px;width:300px;margin-left:100px;'>
-	 	<u><b>ADORACION T. ROBLES</b></u><br/>
-	 	Unit Head, Management Services and <br/> Executive Coordinator, OD
+	 	<u><b>{$data[0]->certified_by}</b></u><br/>
+	 	{$data[0]->certified_by_position}
 	</div>
 
 	 <p class='breaker'>
@@ -105,13 +195,13 @@ $table= "
 
 	
 	<div style='float:left;text-align:center; height:100px;width:300px;'>
-	 	<u> <b>ADORACION T. ROBLES</b></u><br/>
-	 	Vice Chair, CBA
+	 	<u> <b>{$data[0]->recommended_by}</b></u><br/>
+	 	{$data[0]->recommended_by_position}
 	 </div>
 
  	<div style='float:left;text-align:center; height:100px;width:300px;margin-left:100px;'>
-	 	<u><b>GIL C. SAGUIGUIT, JR.</b></u><br/>
-	 	Director
+	 	<u><b>{$data[0]->approved_by}</b></u><br/>
+	 {$data[0]->approved_by_position}
 	</div>
 
 
@@ -173,7 +263,7 @@ $html = "<html>
 		<div style='float:left;text-align:center;width:100%;'>
 
 			<div style='margin-left:80%;text-align:center;'>
-				<div style='height:2px;'><p>dsadhjhgjhgjhgjhg</p></div>
+				<div style='height:2px;'><p>{$date}</p></div>
 				<div style='height:2px;border-bottom:1px solid #ccc;'>Date</div>
 			</div>
 		</div>
@@ -197,37 +287,16 @@ $html = "<html>
 
     <main class='page'>
 
-  		<center style='padding-top:30px;'>
+  		<center style='padding-top:35px;'>
   			<b><br/>
-  				IT EQUIPMENT FY 2017/2018 <br/>
+  				{$bidding_name} <br/>
   				STANDARD MINIMUM SPECIFICATIONS
   			</b>
   		</center>
 
-  		
+  		{$partsSec}
 
-  		<section style='text-align:left;margin-left:30px;'>
-  			<br/><br/><br/><br/>
-  			<p>
-	  			<b>A. STANDARD DESKTOP SPECIFICATIONS (21 UNITS)</b>
-	  		</p> 
-	  		<div style='text-align:left;margin-left:25px;'>
-		  		<p>
-		  			Processor - dual core 2.4 GHz+ (i5 or i7 series Intel processor or equivalent AMD)
-		  		</p>
-		  		<p>
-					RAM - 16 GB <br/
-					Hard Drive - 256 GB or larger solid state hard drive <br/
-					Graphics Card - any with DisplayPort/HDMI or DVI support - desktop only <br/
-					Wireless (for laptops) - 802.11ac (WPA2 support required) <br/
-					Monitor - 23 widescreen LCD with DisplayPort HDMI or DVI support - desktop only <br/
-					Operating System - Windows 10 Home or Professional editions, or Apple OS X 10.12.3 <br/
-					Warranty - 3 year warranty - desktop only <br/
-					Warranty - 4 year warranty with accidental damage protection - laptop only <br/
-					Backup Device - External hard drive and/or USB Flash Drive <br/
-		  		</p>
-		  	</div>
-	  	</section>
+
   </main>
 </body>
 </html>";

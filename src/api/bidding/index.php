@@ -83,7 +83,7 @@ if($method=="GET"){
 
 
 		// For ADMIN
-		if ($current_session[0]->role === 'admin') {
+		if ($current_session[0]->role === 'regular') {
 			if(in_array($status, $status_filter)) {
 
 				if($status == 'draft') {
@@ -100,7 +100,17 @@ if($method=="GET"){
 		}
 
 		// CBA
-		if ($current_session[0]->role === 'cba_assistant') {
+		if ($current_session[0]->role === 'cba_assistant' || $current_session[0]->role === 'admin') {
+			if(in_array($status, $status_filter)) {
+
+				if($status == 'draft') {
+					echo @json_encode($index->lists_all_drafts($current_session[0]->account_id,$page,$LIMIT,$status_code));
+				} else {
+					echo @json_encode($index->lists_by_status($page,$LIMIT,$status_code));	
+				}
+				
+			}
+
 			if(is_null($status_code)) {
 				echo @json_encode($index->lists_all_received($current_session[0]->account_id,$page,$LIMIT));
 			}
