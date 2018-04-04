@@ -50,10 +50,19 @@ $parts = $Part->lists_by_parent($data[0]->id, true);
 $partsSec = '';
 $letters = 'A';
 
+$funds_per_particulars = [];
+$funds_per_particulars['total_amount'] = [];
+
 for($x = 0; $x < count($parts); $x++ ) {
 	$partName = strtoupper($parts[$x]->name);
 	$req_details = ($Req->lists_by_parent($parts[$x]->id));
 
+	// add to list
+	$funds_per_particulars[$parts[$x]->name] = [];
+	$funds_per_particulars[$parts[$x]->name]['funds'] = [];
+	$funds_per_particulars[$parts[$x]->name]['requirements'] = [];
+	$funds_per_particulars[$parts[$x]->name]['amount'] = [];
+	
 
 	$partsSec.= "  		
 
@@ -64,17 +73,32 @@ for($x = 0; $x < count($parts); $x++ ) {
 	  		</p>";
 
 	  	// requirements
-	  	if ($req_details[0]) {
+	  	if (isset($req_details[0])) {
+
+	  		
+	  		$funds_per_particulars[$parts[$x]->name]['requirements'][] = $req_details;
 
 	  		$req_count = 0;
 
 	  		for ($z = 0; $z < count($req_details); $z++) {
+	  			// amount per Currency
+	  			if (! isset($funds_per_particulars[$parts[$x]->name]['amount'][$req_details[$z]->budget_currency])) $funds_per_particulars[$parts[$x]->name]['amount'][$req_details[$z]->budget_currency] = 0;
+	  			// funds
+	  			$funds_per_particulars[$parts[$x]->name]['funds'][] = $req_details[$z]->funds;
+	  			// total amount per particular
+	  			$funds_per_particulars[$parts[$x]->name]['amount'][$req_details[$z]->budget_currency] += $req_details[$z]->budget_amount;
+
+
+	  			// total amount 
+	  			if (!isset($funds_per_particulars['total_amount'][$req_details[$z]->budget_currency])) $funds_per_particulars['total_amount'][$req_details[$z]->budget_currency] = 0;
+	  			$funds_per_particulars['total_amount'][$req_details[$z]->budget_currency] += $req_details[$z]->budget_amount;
+
 
 	  			$req_count ++;
 
 	  			$partsSec.= " <div style='text-align:left;margin-left:25px;'>
 			  		<p>
-			  			<b>{$req_count}) {$req_details[0]->name}</b>
+			  			<b>{$req_count}) {$req_details[$z]->name}</b>
 			  		</p>";
 			  		if ($req_details[$z]->specs) {
 
@@ -110,13 +134,19 @@ $table= "
 		border:1px solid #ccc;	
 	}
 	.ledger-table th, .ledger-table td{
-		border:1px solid #ccc;
+		border:1px solid #ccc;	
 		padding:4px;
 		text-align:center;
+	}
+	.ledger-table tbody td {
+		height:50px;
 	}
 	.breaker {
 		text-align:left;
 		margin-left:25px;
+	}
+	.no-border{
+		border-bottom:1px solid #fff !important;
 	}
 </style>
 <br/>
@@ -133,18 +163,69 @@ $table= "
 			<th  width='110px;'>Estimated Cost</th>
 		</tr>
 	</thead>
-	<tbody>
-		<tr>
-			<td  style='height:300px;'>
+	<tbody>";
+
+	$class ='no-border';
+
+
+	for($x = 0; $x < count($parts); $x++ ) {
+		//$amount = number_format($funds_per_particulars[$parts[$x]->name]['amount'], 2, ',', ',');
+		$class = '';
+		// exclude last item
+		if($x+1 < count($parts)) {
+			$class = 'no-border';
+		}
+
+		$table .="<tr>
+				<td class='{$class}'>
+					{$parts[$x]->name}
+				</td>
+				<td class='{$class}'>
+					{$parts[$x]->deadline}
+				</td>
+				<td class='{$class}'>";
+				for($f = 0; $f < count($funds_per_particulars[$parts[$x]->name]['funds']); $f++ ) {
+				
+					$table .= "{$funds_per_particulars[$parts[$x]->name]['funds'][$f][0]->fund_type} - {$funds_per_particulars[$parts[$x]->name]['funds'][$f][0]->cost_center} - {$funds_per_particulars[$parts[$x]->name]['funds'][$f][0]->line_item}<br/>";
+				}
+
+		$table .="</td><td class='{$class}'>";
+
+				foreach ($funds_per_particulars[$parts[$x]->name]['amount'] as $key => $value) {
+					$amount = number_format($value, 2, ',', ',');
+					$table .="<p><b>{$key} {$amount}</b></p>";
+				}
+
+
+			$table .="</td></tr>";
+	}
+
+		if (count($parts) < 5) {
 			
-			</td>
-			<td></td>
-			<td></td>
-			<td></td>
-		</tr>
-		<tr>
+			for($ex = 0; $ex < (5 - count($parts)); $ex++) {
+				$class = 'no-border';
+
+				if ($ex+1 == (5 - count($parts))) {
+					$class = '';
+				}
+				$table .="<tr>
+					<td class='{$class}'></td><td class='{$class}'></td><td class='{$class}'></td><td class='{$class}'></td>";
+			}
+		}
+		// no data
+
+
+
+
+
+$table .="			<tr>
 			<td colspan='3'  style='height:50px;'></td>
-			<td><b>PHP</b></td>
+			<td>";
+				foreach ($funds_per_particulars['total_amount'] as $key => $value) {
+					$amount = number_format($value, 2, ',', ',');
+					$table .="<p><b>{$key} {$amount}</b></p>";	
+				}
+$table .="	</td>
 		</tr>
 	</tbody>
  <tbody>
@@ -245,7 +326,7 @@ $html = "<html>
   			<div style='float:left;width:150px;margin-left:440px;'>
   				CBA Control No.
   			</div>
-  			<div style='float:left;width:150px;border-bottom:1px solid #ccc;'>&nbsp;&nbsp;</div>
+  			<div style='float:left;width:150px;border-bottom:1px solid #ccc;text-align:center;'>&nbsp;&nbsp;<b>#{$data[0]->id}</b></div>
   			  		</section>
   	</article>
 

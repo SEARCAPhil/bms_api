@@ -115,6 +115,24 @@ if($method=="GET"){
 				echo @json_encode($index->lists_all_received($current_session[0]->account_id,$page,$LIMIT));
 			}
 		}
+
+
+		// CBA
+		if ($current_session[0]->role === 'gsu') {
+			if(in_array($status, $status_filter)) {
+
+				if($status == 'draft') {
+					echo @json_encode($index->lists_all_drafts($current_session[0]->account_id,$page,$LIMIT,$status_code));
+				} else {
+					echo @json_encode($index->lists_all_approved($page,$LIMIT));
+				}
+				
+			}
+
+			if(is_null($status_code)) {
+				echo @json_encode($index->lists_all_approved($page,$LIMIT));
+			}
+		}
 		
 		
 	}

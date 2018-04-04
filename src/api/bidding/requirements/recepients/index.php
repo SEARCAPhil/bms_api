@@ -78,6 +78,34 @@ if($method=="POST"){
 		}
 
 	}
+
+
+	
+	if($action == 'award') {
+		$remarks = isset($data->remarks)?$data->remarks:'';
+		$sup = isset($data->suppliers)?$data->suppliers:[];
+		$sup_ids = [];
+		$sup_sent = [];
+		foreach ($sup as $key => $value) {
+			if(!empty(trim($value))) {
+				array_push($sup_ids, (int) $key);
+			}
+		}
+
+		if (!empty($sup_ids)) {
+
+			if ($sup_ids[0]) {
+				// award($id,$supplier_id,$remarks)
+				$data = $req->award($id,$sup_ids[0],$remarks);
+				echo @json_encode($data);
+				exit;	
+			}
+			
+
+		}
+
+	}
+
 	
 	
 }

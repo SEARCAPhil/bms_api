@@ -83,6 +83,25 @@ class Index{
 		return $results;
 	}
 
+
+	public function lists_all_approved($page=0,$limit=20,$status=0){
+		$results=[];
+		$page=$page<2?0:$page-1;
+		//$SQL='SELECT bidding.*, profile.profile_name, profile.email, bidding_collaborators.*  FROM bidding LEFT JOIN profile on profile.id = bidding.created_by LEFT JOIN bidding_collaborators on bidding_collaborators.account_id = profile.account_id WHERE (bidding.status !=4 and bidding.status !=0) AND (profile.account_id = :account_id) OR (account.id =:account_id) ORDER BY bidding.name ASC LIMIT :offset,:lim';
+
+		$SQL='SELECT bidding.*, bidding_collaborators.account_id,profile.profile_name FROM bidding_collaborators LEFT JOIN bidding on bidding.id = bidding_collaborators.bidding_id LEFT JOIN profile on profile.id = bidding.created_by  WHERE bidding.status = 3 OR bidding.status = 5 ORDER BY bidding.name ASC LIMIT :offset,:lim';
+
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
+		$sth->bindParam(':offset',$page,\PDO::PARAM_INT);
+		$sth->execute();
+		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
+			$results[]=$row;
+		}
+
+		return $results;
+	}
+
 	public function lists_all_drafts($pid, $page=0,$limit=20,$status=0){
 		$results=[];
 		$page=$page<2?0:$page-1;

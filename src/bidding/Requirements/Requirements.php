@@ -21,11 +21,12 @@ class Requirements{
 
 	public function view($id){
 		$results=[];
-		$SQL='SELECT bidding_requirements.*, particulars.bidding_id FROM bidding_requirements LEFT JOIN particulars on particulars.id = bidding_requirements.particular_id WHERE bidding_requirements.id = :id and bidding_requirements.status != 1';
+		$SQL='SELECT bidding_requirements.*, particulars.bidding_id, bidding.status as bidding_status FROM bidding_requirements LEFT JOIN particulars on particulars.id = bidding_requirements.particular_id LEFT JOIN bidding on bidding.id = particulars.bidding_id WHERE bidding_requirements.id = :id and bidding_requirements.status != 1';
 		$SQL2='SELECT * FROM bidding_requirements_specs WHERE bidding_requirements_id = :id AND status != 1';
 		$SQL3='SELECT bidding_requirements_invitation.*, company.name, company.alias FROM bidding_requirements_invitation LEFT JOIN company on company.id = bidding_requirements_invitation.supplier_id WHERE bidding_requirements_invitation.bidding_requirements_id = :id and bidding_requirements_invitation.status = 0';
 
 		$SQL4 = 'SELECT bidding_requirements_funds.* FROM bidding_requirements_funds WHERE bidding_requirements_funds.bidding_requirements_id = :id AND bidding_requirements_funds.status !=1';
+		$SQL5 = 'SELECT bidding_requirements_awardees.* , company.name, company.alias FROM bidding_requirements_awardees LEFT JOIN company on company.id = bidding_requirements_awardees.company_id  WHERE bidding_requirements_awardees.bidding_requirements_id = :id AND bidding_requirements_awardees.status !=1';
 
 
 
@@ -33,6 +34,7 @@ class Requirements{
 		$sth2=$this->DB->prepare($SQL2);
 		$sth3=$this->DB->prepare($SQL3);
 		$sth4=$this->DB->prepare($SQL4);
+		$sth5=$this->DB->prepare($SQL5);
 
 		$sth->bindParam(':id', $id);
 		$sth->execute();
@@ -62,6 +64,15 @@ class Requirements{
 			$sth4->execute();
 			while($row4 =$sth4->fetch(\PDO::FETCH_OBJ)){
 				$row->funds[] = $row4; 
+			}
+
+
+			// recepients
+			$row->awardees = [];
+			$sth5->bindValue(':id',$row->id,\PDO::PARAM_INT);
+			$sth5->execute();
+			while($row5 =$sth5->fetch(\PDO::FETCH_OBJ)){
+				$row->awardees[] = $row5; 
 			}
 
 			// attachments
@@ -259,6 +270,22 @@ class Requirements{
 		$sth->bindParam(':bidding_requirements_id',$id);
 		$sth->bindParam(':supplier_id',$supplier_id);
 		$sth->bindParam(':account_id',$account_id);
+		$sth->execute();
+
+		return $this->DB->lastInsertId();
+
+	}
+
+
+	public function award($id,$supplier_id,$remarks){
+		//parameters
+		$results=[];
+		//query
+		$SQL='INSERT INTO bidding_requirements_awardees(bidding_requirements_id,company_id,remarks) values(:bidding_requirements_id,:company_id,:remarks)';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':bidding_requirements_id',$id);
+		$sth->bindParam(':company_id',$supplier_id);
+		$sth->bindParam(':remarks',$remarks,\PDO::PARAM_STR);
 		$sth->execute();
 
 		return $this->DB->lastInsertId();
