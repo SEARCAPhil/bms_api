@@ -15,6 +15,16 @@ $LIMIT=20;
 $status='all'; 
 $page=1;
 
+// DEFINE CURRENT Signatories
+const APPROVED_BY = 'GIL C. SAGUIGUIT, JR.';
+const RECOMMENDED_BY = 'ADORACION T. ROBLES';
+const CERTIFIED_BY = 'ADORACION T. ROBLES';
+const APPROVED_BY_POSITION = 'Director';
+const RECOMMENDED_BY_POSITION = 'Vice Chair, CBA';
+const CERTIFIED_BY_POSITION = 'Unit Head, Management Services and Executive Coordinator, OD';
+
+
+
 $clean_str=new CleanStr();
 $logs = new Logs($DB);
 $Ses = new Session($DB);
@@ -83,10 +93,10 @@ if($method=="GET"){
 
 
 		// For ADMIN
-		if ($current_session[0]->role === 'regular') {
+		if ($current_session[0]->role === 'standard') {
 			if(in_array($status, $status_filter)) {
 
-				if($status == 'draft') {
+				if($status == 'drafts') {
 					echo @json_encode($index->lists_all_drafts($current_session[0]->pid,$page,$LIMIT,$status_code));
 				} else {
 					echo @json_encode($index->lists_by_status($page,$LIMIT,$status_code));	
@@ -103,7 +113,7 @@ if($method=="GET"){
 		if ($current_session[0]->role === 'cba_assistant' || $current_session[0]->role === 'admin') {
 			if(in_array($status, $status_filter)) {
 
-				if($status == 'draft') {
+				if($status == 'drafts') {
 					echo @json_encode($index->lists_all_drafts($current_session[0]->account_id,$page,$LIMIT,$status_code));
 				} else {
 					echo @json_encode($index->lists_by_status($page,$LIMIT,$status_code));	
@@ -121,7 +131,7 @@ if($method=="GET"){
 		if ($current_session[0]->role === 'gsu') {
 			if(in_array($status, $status_filter)) {
 
-				if($status == 'draft') {
+				if($status == 'drafts') {
 					echo @json_encode($index->lists_all_drafts($current_session[0]->account_id,$page,$LIMIT,$status_code));
 				} else {
 					echo @json_encode($index->lists_all_approved($page,$LIMIT));
@@ -206,14 +216,18 @@ if($method=="POST"){
 
 	
 	//proceed to adding
-	$name = isset($data->name)?$clean_str->clean($data->name):'';
+	/*$name = isset($data->name)?$clean_str->clean($data->name):'';
 	$description = isset($data->desc)?$clean_str->clean($data->desc):'';
-	$deadline = isset($data->deadline)?$data->deadline:null;
+	$deadline = isset($data->deadline)?$data->deadline:null;*/
+
+	$name = '';
+	$description = '';
+	$deadline = '';
 	$excemption = isset($data->excemption)?$data->excemption:0;
 	
 	
 	//required
-	if(empty($name) || empty($description)) return 0;
+	//if(empty($name) || empty($description)) return 0;
 
 
 	//update
@@ -244,7 +258,13 @@ if($method=="POST"){
 				"description"=>$description,
 				"deadline"=>$deadline,
 				"excemption" => $excemption,
-				"created_by"=> $tok[0]->pid
+				"created_by"=> $tok[0]->pid,
+				"approved_by" => APPROVED_BY,
+				"recommended_by" => RECOMMENDED_BY, 
+				"certified_by" => CERTIFIED_BY,
+				"approved_by_position" => APPROVED_BY_POSITION,
+				"recommended_by_position" => RECOMMENDED_BY_POSITION,
+				"certified_by_position" => CERTIFIED_BY_POSITION
 			]);
 
 		}

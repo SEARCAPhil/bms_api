@@ -37,7 +37,7 @@ class Account{
 	}
 
 	public function login($username, $password){
-		$SQL = 'SELECT account.username,account.id as uid,account_profile.* FROM account LEFT JOIN account_profile on account_profile.uid = account.id WHERE username = :username and password = :password LIMIT 1';
+		$SQL = 'SELECT account.username,account.id as uid,profile.* FROM account LEFT JOIN profile on profile.account_id = account.id WHERE username = :username and password = :password LIMIT 1';
 		$sth = $this->DB->prepare($SQL);
 		$sth->bindParam(':username',$username,\PDO::PARAM_STR);
 		$sth->bindParam(':password',$password,\PDO::PARAM_STR);

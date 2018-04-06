@@ -106,6 +106,12 @@ if($method=="POST"){
 
 	}
 
+
+	if($action == 'remove_awardee') {
+		echo $req->remove_awardee($id);
+		exit;
+	}
+
 	
 	
 }

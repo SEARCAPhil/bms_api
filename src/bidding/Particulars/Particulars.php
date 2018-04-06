@@ -18,12 +18,15 @@ class Particulars{
 
 
 	public function view($id){
+		
 		$results=[];
 		$SQL='SELECT * FROM particulars WHERE id = :id and status != 1';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id',$id,\PDO::PARAM_INT);
 		$sth->execute();
+
 		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
+
 			$results[]=$row;
 		}
 

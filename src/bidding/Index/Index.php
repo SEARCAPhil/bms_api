@@ -13,6 +13,7 @@ use Bidding\Particulars;
 use Bidding\Attachments;
 
 
+
 class Index{
 
 	public function __construct(\PDO $DB_CONNECTION){
@@ -33,13 +34,19 @@ class Index{
 		$excemption = (int) isset($params["excemption"])?$params["excemption"]:0;
 
 		//query
-		$SQL='INSERT INTO bidding(name,description,deadline,created_by,excemption) values(:name,:description,:deadline,:created_by,:excemption)';
+		$SQL='INSERT INTO bidding(name,description,deadline,created_by,excemption,approved_by,recommended_by,certified_by,approved_by_position,recommended_by_position,certified_by_position) values(:name,:description,:deadline,:created_by,:excemption,:approved_by,:recommended_by,:certified_by,:approved_by_position,:recommended_by_position,:certified_by_position)';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':name',$name);
 		$sth->bindParam(':description',$description);
 		$sth->bindParam(':deadline',$deadline);
 		$sth->bindParam(':created_by',$created_by);
 		$sth->bindParam(':excemption',$excemption);
+		$sth->bindValue(':approved_by',@$params["approved_by"]);
+		$sth->bindValue('recommended_by',@$params["recommended_by"]);
+		$sth->bindValue(':certified_by',@$params["certified_by"]);
+		$sth->bindValue(':approved_by_position',@$params["approved_by_position"]);
+		$sth->bindValue(':recommended_by_position',@$params["recommended_by_position"]);
+		$sth->bindValue(':certified_by_position',@$params["certified_by_position"]);
 		$sth->execute();
 
 		return $this->DB->lastInsertId();
@@ -170,7 +177,6 @@ class Index{
 			$row->collaborators = $this->get_collaborators($row->id);
 
 			$row->attachments = $att->get_attachments($row->id);
-
 
 
 			$results[]=$row;

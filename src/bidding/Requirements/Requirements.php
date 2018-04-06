@@ -92,6 +92,7 @@ class Requirements{
 		$SQL3='SELECT * FROM bidding_requirements_specs WHERE bidding_requirements_id = :id';
 		$SQL4='SELECT bidding_requirements_invitation.*, company.name, company.alias FROM bidding_requirements_invitation LEFT JOIN company on company.id = bidding_requirements_invitation.supplier_id WHERE bidding_requirements_invitation.bidding_requirements_id = :id and bidding_requirements_invitation.status = 0';
 
+
 		$sth=$this->DB->prepare($SQL);
 		$sth2=$this->DB->prepare($SQL2);
 		$sth3=$this->DB->prepare($SQL3);
@@ -125,7 +126,25 @@ class Requirements{
 				$row->recepients[] = $row4; 
 			}
 
+			$row->awardees = $this->get_awardees($row->id);
 			$row->attachments = $this->Att->get_attachments($row->id);
+			
+			$results[]=$row;
+		}
+
+		return $results;
+	}
+
+	public function get_awardees($id) {
+		$results=[];
+
+		$SQL='SELECT * FROM bidding_requirements_awardees WHERE bidding_requirements_id = :id and status !=1';
+		
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':id',$id,\PDO::PARAM_INT);
+		$sth->execute();
+		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
+
 			
 			$results[]=$row;
 		}
@@ -292,11 +311,40 @@ class Requirements{
 
 	}
 
+	public function set_deadline($id, $deadline = '0000-00-00'){
+		//parameters
+		$results=[];
+		//query
+		$SQL='UPDATE bidding_requirements set deadline = :deadline where id = :id';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':id',$id);
+		$sth->bindParam(':deadline',$deadline);
+		$sth->execute();
+
+		return $sth->rowCount();
+
+	}
+
 	public function set_recepient_status($id, $status){
 		//parameters
 		$results=[];
 		//query
 		$SQL='UPDATE bidding_requirements_invitation set status=:status where id = :id';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':id',$id);
+		$sth->bindParam(':status',$status);
+		$sth->execute();
+
+		return $sth->rowCount();
+
+	}
+
+	// awardee
+	public function set_awardee_status($id, $status){
+		//parameters
+		$results=[];
+		//query
+		$SQL='UPDATE bidding_requirements_awardees set status=:status where id = :id';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id',$id);
 		$sth->bindParam(':status',$status);
@@ -339,6 +387,10 @@ class Requirements{
 		$sth->execute();
 
 		return $sth->rowCount();
+	}
+
+	public function remove_awardee($id){
+		return self::set_awardee_status($id,1);
 	}
 
 	public function remove($id){
