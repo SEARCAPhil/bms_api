@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 06, 2018 at 01:23 PM
+-- Generation Time: Apr 07, 2018 at 11:08 AM
 -- Server version: 10.1.31-MariaDB
 -- PHP Version: 7.2.3
 
@@ -223,9 +223,15 @@ CREATE TABLE `bidding_requirements_proposals` (
   `id` int(11) NOT NULL,
   `bidding_requirements_id` int(11) NOT NULL,
   `account_id` int(11) NOT NULL,
+  `currency` varchar(255) NOT NULL DEFAULT 'PHP',
+  `amount` double NOT NULL DEFAULT '0',
+  `discount` double NOT NULL DEFAULT '0',
   `remarks` text NOT NULL,
+  `bidders_remarks` text NOT NULL,
   `status` int(11) NOT NULL,
-  `date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+  `date_created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_modified` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_submitted` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -693,7 +699,7 @@ ALTER TABLE `account_role`
 -- AUTO_INCREMENT for table `account_session`
 --
 ALTER TABLE `account_session`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=100;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=105;
 
 --
 -- AUTO_INCREMENT for table `bidding`
@@ -729,7 +735,7 @@ ALTER TABLE `bidding_requirements_attachments`
 -- AUTO_INCREMENT for table `bidding_requirements_awardees`
 --
 ALTER TABLE `bidding_requirements_awardees`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `bidding_requirements_funds`
@@ -753,7 +759,7 @@ ALTER TABLE `bidding_requirements_proposals`
 -- AUTO_INCREMENT for table `bidding_requirements_proposals_specs`
 --
 ALTER TABLE `bidding_requirements_proposals_specs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `bidding_requirements_specs`

@@ -13,11 +13,30 @@ class Proposals{
 	}
 
 
-	public function lists_all_received($req_id,$page=0,$limit=20){
+	public function lists_all($req_id,$page=0,$limit=20){
 		$results=[];
 		$page=$page<2?0:$page-1;
 
-		$SQL='SELECT bidding_requirements_proposals.*, bidding_requirements.name, quantity, unit, username, company_id FROM  bidding_requirements_proposals LEFT JOIN bidding_requirements on bidding_requirements.id = bidding_requirements_proposals.bidding_requirements_id LEFT JOIN account on account.id = bidding_requirements_proposals.account_id WHERE bidding_requirements_proposals.bidding_requirements_id = :id LIMIT :offset,:lim';
+		$SQL='SELECT bidding_requirements_proposals.*, bidding_requirements.name, quantity, unit, username, company_id FROM  bidding_requirements_proposals LEFT JOIN bidding_requirements on bidding_requirements.id = bidding_requirements_proposals.bidding_requirements_id LEFT JOIN account on account.id = bidding_requirements_proposals.account_id WHERE bidding_requirements_proposals.bidding_requirements_id = :id AND bidding_requirements_proposals.status !=4 LIMIT :offset,:lim';
+
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindValue(':id',$req_id,\PDO::PARAM_INT);
+		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
+		$sth->bindParam(':offset',$page,\PDO::PARAM_INT);
+		$sth->execute();
+		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
+			$results[]=$row;
+		}
+
+		return $results;
+	}
+
+
+	public function lists_all_received($req_id,$page=0,$limit=100){
+		$results=[];
+		$page=$page<2?0:$page-1;
+
+		$SQL='SELECT bidding_requirements_proposals.*, bidding_requirements.name, quantity, unit, username, company_id FROM  bidding_requirements_proposals LEFT JOIN bidding_requirements on bidding_requirements.id = bidding_requirements_proposals.bidding_requirements_id LEFT JOIN account on account.id = bidding_requirements_proposals.account_id WHERE bidding_requirements_proposals.bidding_requirements_id = :id AND bidding_requirements_proposals.status !=4 AND bidding_requirements_proposals.status !=0  LIMIT :offset,:lim';
 
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindValue(':id',$req_id,\PDO::PARAM_INT);
@@ -82,7 +101,7 @@ class Proposals{
 	}
 
 	public function set_status($id,$status){
-		$SQL='UPDATE bidding set status=:status where id=:id';
+		$SQL='UPDATE bidding_requirements_proposals set status=:status where id=:id';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id',$id);
 		$sth->bindParam(':status',$status);
@@ -90,6 +109,26 @@ class Proposals{
 
 		return $sth->rowCount();
 	}
+
+
+	public function remove($id){
+		return (int) self::set_status($id, 4);
+	}
+
+	public function send($id){
+		return (int) self::set_status($id, 1);
+	}
+
+	public function request_for_changes($id,$reason){
+		$SQL='UPDATE bidding_requirements_proposals set status=2, bidders_remarks =:reason where id=:id';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':id',$id);
+		$sth->bindParam(':reason',$reason,\PDO::PARAM_STR);
+		$sth->execute();
+
+		return $sth->rowCount();
+	}
+
 
 }
 

@@ -89,7 +89,7 @@ if($method=="GET"){
 			if(in_array($status, $status_filter)) {
 
 				if($status == 'closed') {
-					echo @json_encode($Prop->lists_all_received($id,$page,$LIMIT,$status_code));
+					echo @json_encode($Prop->lists_all($id,$page,$LIMIT,$status_code));
 				} else {
 					echo @json_encode($Prop->lists_by_status($page,$LIMIT,$status_code));	
 				}
@@ -97,8 +97,14 @@ if($method=="GET"){
 			}
 
 			if(is_null($status_code)) { 
-				echo json_encode($Prop->lists_all_received($id,$page,$LIMIT));
+				echo json_encode($Prop->lists_all($id,$page,$LIMIT));
 			}
+		}
+
+
+		if ($current_session[0]->role === 'cba_assistant') {
+			// all received
+			echo @json_encode($Prop->lists_all_received($id,$page,$LIMIT,$status_code));	
 		}
 
 		
@@ -117,11 +123,11 @@ if($method=="GET"){
 
 		#
 		
-		if (is_null($current_session[0]->role)) {
+		//if (is_null($current_session[0]->role)) {
 			
 			echo json_encode($Prop->view($id));
 			
-		}
+		//}
 
 		
 		
@@ -129,6 +135,52 @@ if($method=="GET"){
 	}
 	
 }
+
+if($method=="POST"){
+	/**
+	 * POST product
+	 */  
+	$Prop=new Proposals($DB);
+	
+	$input=file_get_contents("php://input");
+
+
+	$data=(@json_decode($input));
+
+	$action=isset($data->action)?$clean_str->clean($data->action):'';
+	$token = isset($data->token)?trim($data->token):'';
+
+	if(empty($token)) exit;
+
+	// remove
+	if ($action == 'remove') {
+		$id = (int) isset($data->id) ? $clean_str->clean($data->id) : '';
+
+		echo @$Prop->remove($id);
+		exit;
+	}
+
+	// send
+	if ($action == 'send') {
+		$id = (int) isset($data->id) ? $clean_str->clean($data->id) : '';
+
+		echo @$Prop->send($id);
+		exit;
+	}
+
+
+	// send
+	if ($action == 'change') {
+		$id = (int) isset($data->id) ? $clean_str->clean($data->id) : '';
+		$reason = (int) isset($data->reason) ? $clean_str->clean($data->reason) : '';
+
+		if (empty($reason)) exit;
+
+		echo @$Prop->request_for_changes($id,$reason);
+		exit;
+	}
+}
+
 
 
 
