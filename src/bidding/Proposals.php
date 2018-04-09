@@ -12,6 +12,24 @@ class Proposals{
 		$this->DB=$DB_CONNECTION;
 	}
 
+	public function create($id, $account_id, $amount, $discount = 0, $remarks =''){
+		//parameters
+		$results=[];
+		//query
+		$SQL='INSERT INTO bidding_requirements_proposals(bidding_requirements_id, account_id, amount, discount, remarks) values(:bidding_requirements_id, :account_id, :amount, :discount, :remarks)';
+
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':bidding_requirements_id',$id);
+		$sth->bindParam(':account_id',$account_id);
+		$sth->bindParam(':amount',$amount);
+		$sth->bindParam(':discount',$discount);
+		$sth->bindParam(':remarks',$remarks);
+
+		$sth->execute();
+
+		return $this->DB->lastInsertId();
+
+	}
 
 	public function lists_all($req_id,$page=0,$limit=20){
 		$results=[];
@@ -36,7 +54,7 @@ class Proposals{
 		$results=[];
 		$page=$page<2?0:$page-1;
 
-		$SQL='SELECT bidding_requirements_proposals.*, bidding_requirements.name, quantity, unit, username, company_id FROM  bidding_requirements_proposals LEFT JOIN bidding_requirements on bidding_requirements.id = bidding_requirements_proposals.bidding_requirements_id LEFT JOIN account on account.id = bidding_requirements_proposals.account_id WHERE bidding_requirements_proposals.bidding_requirements_id = :id AND bidding_requirements_proposals.status !=4 AND bidding_requirements_proposals.status !=0  LIMIT :offset,:lim';
+		$SQL='SELECT bidding_requirements_proposals.*, bidding_requirements.name, quantity, unit, username, company_id FROM  bidding_requirements_proposals LEFT JOIN bidding_requirements on bidding_requirements.id = bidding_requirements_proposals.bidding_requirements_id LEFT JOIN account on account.id = bidding_requirements_proposals.account_id WHERE bidding_requirements_proposals.bidding_requirements_id = :id AND bidding_requirements_proposals.status !=4 AND bidding_requirements_proposals.status !=0 ORDER BY bidding_requirements_proposals.date_created DESC LIMIT :offset,:lim';
 
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindValue(':id',$req_id,\PDO::PARAM_INT);
@@ -98,6 +116,23 @@ class Proposals{
 		}
 
 		return $results;
+	}
+
+	public function add_specs($id, $name, $value, $parent_id = 0){
+		//parameters
+		$results=[];
+		
+		//query
+		$SQL='INSERT INTO bidding_requirements_proposals_specs(bidding_requirements_proposals_id,name,value,bidding_requirements_specs_id) values(:bidding_requirements_proposals_id,:name,:value,:bidding_requirements_specs_id)';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':bidding_requirements_proposals_id',$id);
+		$sth->bindParam(':name',$name);
+		$sth->bindParam(':value',$value);
+		$sth->bindParam(':bidding_requirements_specs_id',$parent_id);
+		$sth->execute();
+
+		return $this->DB->lastInsertId();
+
 	}
 
 	public function set_status($id,$status){

@@ -3,10 +3,12 @@ header('Access-Control-Allow-Origin: *');
 require_once('../../../bidding/Proposals.php');
 require_once('../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../config/database/connections.php');
+require_once('../../../bidding/Requirements/Requirements.php');
 require_once('../../../suppliers/Logs/Logs.php');
 require_once('../../../Auth/Session.php');
 
 use Bidding\Proposals as Proposals;
+use Bidding\Requirements as Requirements;
 use Suppliers\Logs as Logs;
 use Helpers\CleanStr as CleanStr;
 use Auth\Session as Session;
@@ -15,9 +17,10 @@ $LIMIT=20;
 $status='all'; 
 $page=1;
 
-$clean_str=new CleanStr();
+$clean_str = new CleanStr();
 $logs = new Logs($DB);
 $Ses = new Session($DB);
+$Req = new Requirements($DB);
 
 $result = [];
 /**
@@ -34,7 +37,7 @@ if($method=="GET"){
 		$page=(int) htmlentities(htmlspecialchars($_GET['page']));
 	}
 
-		#serve with page request
+	#serve with page request
 	if(!isset($_GET['token'])){
 		exit;
 	}
@@ -47,6 +50,8 @@ if($method=="GET"){
 
 
 	if(!@$current_session[0]->token) exit;
+
+
 
 
 	/**
@@ -152,6 +157,16 @@ if($method=="POST"){
 
 	if(empty($token)) exit;
 
+	// get privilege
+	// this is IMPORTANT for checking privilege
+
+	$current_session = $Ses->get($token);
+
+
+	if(!@$current_session[0]->token) exit;
+
+	
+
 	// remove
 	if ($action == 'remove') {
 		$id = (int) isset($data->id) ? $clean_str->clean($data->id) : '';
@@ -179,6 +194,65 @@ if($method=="POST"){
 		echo @$Prop->request_for_changes($id,$reason);
 		exit;
 	}
+
+	// create
+	if ($action == 'create') {
+		$id = (int) isset($data->id) ? $clean_str->clean($data->id) : '';
+		$amount =  isset($data->amount) ? $clean_str->clean($data->amount) : 0;
+		$discount = isset($data->amount) ? $clean_str->clean($data->amount) : 0;
+		$remarks = isset($data->remarks) ? $clean_str->clean($data->remarks) : 0;
+		$original = isset($data->original) ? $data->original : [];
+		$others = isset($data->others) ? $data->others : [];
+
+		if ($amount) {
+
+			$original_requirements = $Req->view($id,1);
+			$original_specs = [];
+
+			if (@$original_requirements[0]->specs) {
+				
+				for($x = 0; $x < count($original_requirements[0]->specs); $x++) {
+					for($y = 0; $y < count($original); $y++) {
+						// change orig values that match on user POST data
+						if($original[$y]->id == $original_requirements[0]->specs[$x]->id) {
+							// change value
+							$original_requirements[0]->specs[$x]->value = $original[$y]->value;
+						}
+					}
+
+					// push to specs
+					$original_specs[] = $original_requirements[0]->specs[$x];
+					
+				}
+			}
+
+
+
+
+			$lastId = $Prop->create($id, $current_session[0]->account_id, $amount, $discount, $remarks);	
+
+			// proceed to adding specs
+			if ($lastId) {
+				for ($i=0; $i < count($original_specs) ; $i++) { 
+					if(!empty($original_specs[$i]->name) && !empty($original_specs[$i]->value)) {
+						$Prop->add_specs($lastId,$original_specs[$i]->name,$original_specs[$i]->value,$original_specs[$i]->id);	
+					}
+				}
+
+				for ($o=0; $o < count($others) ; $o++) { 
+					if (!empty($others[$o]->name) && !empty($others[$o]->value)) {
+						$Prop->add_specs($lastId,$others[$o]->name,$others[$o]->value);	
+					}
+				}
+			}
+
+			echo $lastId;
+		}
+
+		
+		exit;
+	}
+
 }
 
 
