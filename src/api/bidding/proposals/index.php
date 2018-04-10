@@ -107,7 +107,7 @@ if($method=="GET"){
 		}
 
 
-		if ($current_session[0]->role === 'cba_assistant') {
+		if ($current_session[0]->role === 'cba_assistant' || $current_session[0]->role === 'gsu') {
 			// all received
 			echo @json_encode($Prop->lists_all_received($id,$page,$LIMIT,$status_code));	
 		}
@@ -195,11 +195,31 @@ if($method=="POST"){
 		exit;
 	}
 
+
+		// send
+	if ($action == 'award') {
+		$id = (int) isset($data->id) ? $clean_str->clean($data->id) : '';
+		$remarks = (int) isset($data->remarks) ? $clean_str->clean($data->remarks) : '';
+		$original_proposal = $Prop->view($id);
+
+		if (@$original_proposal[0]->company_id) {
+			$lastId = $Req->award($original_proposal[0]->bidding_requirements_id,$original_proposal[0]->company_id,$remarks);
+
+			if ($lastId) {
+				echo @$Prop->award($id);
+			}
+		}
+		
+		
+		exit;
+	}
+
+
 	// create
 	if ($action == 'create') {
 		$id = (int) isset($data->id) ? $clean_str->clean($data->id) : '';
 		$amount =  isset($data->amount) ? $clean_str->clean($data->amount) : 0;
-		$discount = isset($data->amount) ? $clean_str->clean($data->amount) : 0;
+		$discount = isset($data->discount) ? $clean_str->clean($data->discount) : 0;
 		$remarks = isset($data->remarks) ? $clean_str->clean($data->remarks) : 0;
 		$original = isset($data->original) ? $data->original : [];
 		$others = isset($data->others) ? $data->others : [];
@@ -247,6 +267,70 @@ if($method=="POST"){
 			}
 
 			echo $lastId;
+		}
+
+		
+		exit;
+	}
+
+
+
+
+	// create
+	if ($action == 'update') {
+		$id = (int) isset($data->id) ? $clean_str->clean($data->id) : '';
+		$amount =  isset($data->amount) ? $clean_str->clean($data->amount) : 0;
+		$discount = isset($data->discount) ? $clean_str->clean($data->discount) : 0;
+		$remarks = isset($data->remarks) ? $clean_str->clean($data->remarks) : 0;
+		$original = isset($data->original) ? $data->original : [];
+		$others = isset($data->others) ? $data->others : [];
+		$otherSpecsToBeRemoved = isset($data->otherSpecsToBeRemoved) ? $data->otherSpecsToBeRemoved : [];
+		$specs_update = 0;
+
+		if ($amount) {
+
+			$lastId = $Prop->update($id, $amount, $discount, $remarks);	
+
+
+			//echo $lastId;
+
+			for($x = 0; $x < count($original); $x++) {
+				
+				$spId = $Prop->update_specs_value($original[$x]->id,$original[$x]->value);	
+				if ($spId) {
+					$specs_update +=$spId;
+				}	
+			}
+
+			for ($o=0; $o < count($others) ; $o++) { 
+
+				if (!empty($others[$o]->name) && !empty($others[$o]->value)) {
+
+					if ($others[$o]->id) {
+						$spId = $Prop->update_specs($others[$o]->id,$others[$o]->name,$others[$o]->value);	
+							
+					} else {
+						$spId = $Prop->add_specs($id,$others[$o]->name,$others[$o]->value);	
+					}
+					
+					$specs_update +=$spId;
+					
+				}
+			}
+
+
+			for ($p=0; $p < count($otherSpecsToBeRemoved) ; $p++) { 
+
+				if ($otherSpecsToBeRemoved[$p]->id) {
+					$spId = $Prop->remove_specs($otherSpecsToBeRemoved[$p]->id);	
+					
+					$specs_update +=$spId;	
+				}
+			}
+
+			echo $lastId || $specs_update;
+
+
 		}
 
 		
