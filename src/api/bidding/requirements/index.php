@@ -6,12 +6,14 @@ require_once('../../../bidding/Requirements/Requirements.php');
 require_once('../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../config/database/connections.php');
 require_once('../../../suppliers/Logs/Logs.php');
+require_once('../../../Auth/Session.php');
 
 use Bidding\Index as Index;
 use Bidding\Particulars as Particulars;
 use Bidding\Requirements as Requirements;
 use Suppliers\Logs as Logs;
 use Helpers\CleanStr as CleanStr;
+use Auth\Session as Session;
 
 $LIMIT=20;
 $status='all'; 
@@ -21,6 +23,7 @@ $clean_str=new CleanStr();
 $logs = new Logs($DB);
 $part = new Particulars($DB);
 $req= new Requirements($DB);
+$Ses = new Session($DB);
 
 /**
  * GET suppliers list
@@ -279,8 +282,43 @@ if($method=="POST"){
 
 if($method=="GET" && isset($_GET['id'])){
 	$id=(int) htmlentities(htmlspecialchars($_GET['id']));
+	$res = [];
 
-	$res = $req->view($id);
+	#serve with page request
+	if(!isset($_GET['token'])){
+		exit;
+	}
+
+	// get privilege
+	// this is IMPORTANT for checking privilege
+	$token=htmlentities(htmlspecialchars($_GET['token']));
+
+	$current_session = $Ses->get($token);
+
+
+	if(!$current_session[0]->role) {
+		$res = $req->view($id);
+		$viewable = false;
+
+		if (!$res[0]->recepients) exit;
+		// match recepients
+		foreach ($res[0]->recepients as $key => $value) {
+			if ($value->supplier_id == $current_session[0]->company_id) {
+				$viewable = true;
+			}
+		}
+		// if one of the recepients
+		if ($viewable) {
+			$res = $req->view($id);	
+		}
+		
+	} else {
+		$res = $req->view($id);
+	}
+
+
+
+	
 
 	echo @json_encode($res);
 }

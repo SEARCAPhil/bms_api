@@ -94,15 +94,17 @@ if($method=="GET"){
 			if(in_array($status, $status_filter)) {
 
 				if($status == 'closed') {
-					echo @json_encode($Prop->lists_all($id,$page,$LIMIT,$status_code));
+					// echo @json_encode($Prop->lists_all($id,$page,$LIMIT,$status_code));
 				} else {
-					echo @json_encode($Prop->lists_by_status($page,$LIMIT,$status_code));	
+					//echo @json_encode($Prop->lists_by_status($page,$LIMIT,$status_code));	
 				}
 				
 			}
 
 			if(is_null($status_code)) { 
-				echo json_encode($Prop->lists_all($id,$page,$LIMIT));
+				//var_dump($current_session[0]->company_id);
+				// echo json_encode($Prop->lists_all($id,$page,$LIMIT));
+				echo json_encode($Prop->lists_all_created($current_session[0]->company_id,$id,$page,$LIMIT));
 			}
 		}
 

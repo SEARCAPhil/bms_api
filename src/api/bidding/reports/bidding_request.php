@@ -129,6 +129,7 @@ $table= "
 		border-collapse:collapse;
 		font-size:14px;
 		margin-left:20px;
+		width:90%;
 	}
 	.ledger-table td{
 		border:1px solid #ccc;	
@@ -296,7 +297,7 @@ $table .="	</td>
 $html = "<html>
 <head>
   <style>
-    @page { margin: 35px 25px; }
+    @page { margin: 35px 25px;}
     header { position: fixed; top: -60px; left: 0px; right: 0px; height: 50px; text-align:center; }
     header p {
     	font-size:15px;
@@ -305,7 +306,7 @@ $html = "<html>
     /*p { page-break-after: always; }
     p:last-child { page-break-after: never; }*/
     main.page{
-
+    	margin-top:10px;
     	width:100%;
     	height:90%;
     }
@@ -323,24 +324,43 @@ $html = "<html>
   <main class='page'>
   	<article>
   		<section style='width:100%;height:20px;'>
-  			<div style='float:left;width:150px;margin-left:440px;'>
+  			<div style='float:left;width:120px;margin-left:440px;'>
   				CBA Control No.
   			</div>
   			<div style='float:left;width:150px;border-bottom:1px solid #ccc;text-align:center;'>&nbsp;&nbsp;<b>#{$data[0]->id}</b></div>
   			  		</section>
   	</article>
 
-  	<article class='text-center'>
-  	  	<p>SOUTHEAST ASIAN REGIONAL CENTER FOR GRADUATE STUDY 
-		  	<br/>AND RESEARCH IN AGRICULTURE
-		  	<br/>College, Laguna, 4031, Philippines
-		  	<br/>
-	  	</p><br/>
-	  	<h3>BIDDING REQUEST</h3>
+  		<article class='text-center'>
+	  	  	<p>SOUTHEAST ASIAN REGIONAL CENTER FOR GRADUATE STUDY 
+			  	<br/>AND RESEARCH IN AGRICULTURE
+			  	<br/>College, Laguna, 4031, Philippines
+			  	<br/>
+		  	</p><br/>
+		  	<h3>BIDDING REQUEST</h3><br/>
 
-	  </article>
+		 </article>
 
-	  <article class='text-center'  style='float:left;text-align:center;width:100%;'>
+	 
+
+	  	<div style='float:left;margin-left:27px;text-align:left;width:72%;'>
+	  		The Chairman <br/>
+	  		SEARA Committee on BIDS and Awards <br/>
+	  		College, Laguna
+
+	  	</div>
+
+	  	<div style='float:left;text-align:left;width:20%;'>
+	  		<div style='float:left;text-align:center;width:100%;'>
+				<div style='text-align:center;'>
+					<div style='height:2px;'><p>{$date}</p></div>
+					<div style='height:2px;border-bottom:1px solid #ccc;'>Date</div>
+				</div>
+			</div>
+
+	  	</div>
+
+	  	 <article class='text-center'  style='float:left;text-align:center;width:100%;'>
 		<div style='float:left;text-align:center;width:100%;'>
 
 			<div style='margin-left:80%;text-align:center;'>
@@ -354,12 +374,6 @@ $html = "<html>
 		 </p>
 	</article>
 
-	  	<p style='float:left;margin-left:27px;text-align:left;'>
-	  		The Chairman <br/>
-	  		SEARA Committee on BIDS and Awards <br/>
-	  		College, Laguna
-
-	  	</p>
 	  	<br/>
 	  	{$table}
 
@@ -368,7 +382,7 @@ $html = "<html>
 
     <main class='page'>
 
-  		<center style='padding-top:35px;'>
+  		<center style='padding-top:0px;'>
   			<b><br/>
   				{$bidding_name} <br/>
   				STANDARD MINIMUM SPECIFICATIONS

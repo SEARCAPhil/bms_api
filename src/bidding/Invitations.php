@@ -25,7 +25,7 @@ class Invitations{
 		$results=[];
 		$page=$page<2?0:$page-1;
 
-		$SQL='SELECT bidding_requirements_invitation.*, bidding_requirements.name, quantity, unit, deadline FROM  bidding_requirements_invitation LEFT JOIN bidding_requirements on bidding_requirements.id = bidding_requirements_invitation.bidding_requirements_id  WHERE supplier_id =:id and bidding_requirements.status!=1 AND bidding_requirements_invitation.status !=1 LIMIT :offset,:lim';
+		$SQL='SELECT bidding_requirements_invitation.*, bidding_requirements.name, quantity, unit, deadline FROM  bidding_requirements_invitation LEFT JOIN bidding_requirements on bidding_requirements.id = bidding_requirements_invitation.bidding_requirements_id  WHERE supplier_id =:id and bidding_requirements.status!=1 AND bidding_requirements_invitation.status !=1 ORDER BY bidding_requirements_invitation.id DESC  LIMIT :offset,:lim';
 
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindValue(':id',$supplier_id,\PDO::PARAM_INT);

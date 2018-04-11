@@ -73,8 +73,12 @@ for($a = 0; $a < count($props_ids); $a++) {
 	 		if (!isset($conso_orig_specs[$value->bidding_requirements_specs_id])) {
 	 			$conso_orig_specs[$value->bidding_requirements_specs_id] = [];
 	 		}
+
+	 		if (!isset($conso_orig_specs[$value->bidding_requirements_specs_id][$det[0]->company_name])) {
+	 			$conso_orig_specs[$value->bidding_requirements_specs_id][$det[0]->company_name] = [];
+	 		}
 	 		// add to store
-	 		$conso_orig_specs[$value->bidding_requirements_specs_id][] = $value;	
+	 		$conso_orig_specs[$value->bidding_requirements_specs_id][$det[0]->company_name][] = $value;	
 	 	}
 
 
@@ -84,9 +88,12 @@ for($a = 0; $a < count($props_ids); $a++) {
 	 		if (!isset($conso_other_specs[$value->name])) {
 	 			$conso_other_specs[$value->name] = [];
 	 		}
+	 		if (!isset($conso_other_specs[$value->name][$det[0]->company_name])) {
+	 			$conso_other_specs[$value->name][$det[0]->company_name] = [];
+	 		}
 
 	 		// add to store
-	 		$conso_other_specs[$value->name][] = $value;		
+	 		$conso_other_specs[$value->name][$det[0]->company_name][] = $value;		
 	 	}
 
 	}	
@@ -168,12 +175,22 @@ for ($x = 0; $x < count($details[0]->specs); $x++) {
 
 	$remaining = (5 - count($conso_orig_specs[$details[0]->specs[$x]->id]));
 
-	foreach ($conso_orig_specs[$details[0]->specs[$x]->id] as $key => $value) {
-		// mark specs with different value
-		$color = ($value->value != $details[0]->specs[$x]->value) ? 'red' : '';
-			$specs_td.="<td style='color:{$color};'> {$value->value} </td>";
-		 
+	foreach ($conso_suppliers as $key => $value) {
+		if ($conso_orig_specs[$details[0]->specs[$x]->id][$value]) {
+
+			foreach ($conso_orig_specs[$details[0]->specs[$x]->id][$value] as $key2 => $value2) {
+				
+				// mark specs with different value
+				$color = ($value2->value != $details[0]->specs[$x]->value) ? 'red' : '';
+					$specs_td.="<td style='color:{$color};'> {$value2->value} </td>";
+				 
+			}
+
+		} else {
+			$specs_td.="<td> </td>";
+		}
 	}
+
 
 	if ($remaining > 0) {
 		for($b = 0; $b < $remaining; $b++) {
@@ -193,11 +210,39 @@ foreach ($conso_other_specs as $key => $value) {
 	$other_specs.="<tr>
 		<td style='text-align:left;'>{$key_name}</td><td></td>";
 
-		foreach ($value as $key2 => $value2) {
-			$other_specs.="<td>$value2->value</td>";
+		$remaining = 5;
+
+		foreach ($conso_suppliers as $key2 => $value2) {
+			if (isset($conso_other_specs[$key][$value2])) {
+				$other_specs.="<td>{$conso_other_specs[$key][$value2][0]->value}</td>";
+			} else {
+				$other_specs.="<td> </td>";
+			}
+			$remaining --;
+			/*if ($conso_other_specs[$details[0]->specs[$x]->id][$value]) {
+
+				foreach ($conso_orig_specs[$details[0]->specs[$x]->id][$value] as $key2 => $value2) {
+					
+					// mark specs with different value
+					$color = ($value2->value != $details[0]->specs[$x]->value) ? 'red' : '';
+						$specs_td.="<td style='color:{$color};'> {$value2->value} </td>";
+					 
+				}
+
+			} else {
+				$specs_td.="<td> </td>";
+			}*/
+
 		}
 
-		$remaining = (5 - count($value));
+		/*foreach ($value as $key2 => $value2) {
+			$other_specs.="<td>$value2->value</td>";
+		}*/
+
+
+
+
+	
 
 		if ($remaining > 0) {
 			for($b = 0; $b < $remaining; $b++) {
