@@ -104,14 +104,21 @@ if($method=="GET"){
 			if(is_null($status_code)) { 
 				//var_dump($current_session[0]->company_id);
 				// echo json_encode($Prop->lists_all($id,$page,$LIMIT));
-				echo json_encode($Prop->lists_all_created($current_session[0]->company_id,$id,$page,$LIMIT));
+				echo json_encode($Prop->lists_all_created($current_session[0]->company_id,$id,$page,200));
 			}
 		}
 
 
-		if ($current_session[0]->role === 'cba_assistant' || $current_session[0]->role === 'gsu') {
+		if ($current_session[0]->role === 'cba_assistant') {
 			// all received
-			echo @json_encode($Prop->lists_all_received($id,$page,$LIMIT,$status_code));	
+			echo @json_encode($Prop->lists_all_received($id,$page,200,$status_code));	
+		}
+
+
+
+		if ($current_session[0]->role === 'gsu') {
+			// all received
+			echo @json_encode($Prop->lists_all_by_status($id,$page,200,3));	
 		}
 
 		
@@ -205,7 +212,7 @@ if($method=="POST"){
 		$original_proposal = $Prop->view($id);
 
 		if (@$original_proposal[0]->company_id) {
-			$lastId = $Req->award($original_proposal[0]->bidding_requirements_id,$original_proposal[0]->company_id,$remarks);
+			$lastId = $Req->award($original_proposal[0]->bidding_requirements_id,$original_proposal[0]->company_id,$remarks,$id);
 
 			if ($lastId) {
 				echo @$Prop->award($id);

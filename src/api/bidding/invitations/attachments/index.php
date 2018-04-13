@@ -1,12 +1,15 @@
 <?php 
 header('Access-Control-Allow-Origin: *');
 require_once('../../../../bidding/Invitations.php');
+require_once('../../../../bidding/Proposals.php');
+require_once('../../../../bidding/Proposals/Attachments.php');
 require_once('../../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../../config/database/connections.php');
 require_once('../../../../suppliers/Logs/Logs.php');
 require_once('../../../../Auth/Session.php');
 
-use Bidding\Attachments as Attachments;
+use Bidding\Proposals\Attachments as Attachments;
+use Bidding\Proposals as Proposals;
 use Suppliers\Logs as Logs;
 use Helpers\CleanStr as CleanStr;
 use Auth\Session as Session;
@@ -17,10 +20,11 @@ $page=1;
 
 $clean_str=new CleanStr();
 $logs = new Logs($DB);
-$att = new Attachments($DB);
+$Att = new Attachments($DB);
 $Ses = new Session($DB);
+$Prop= new Proposals($DB);
 
-$dir = './../../../../public/uploads/';
+$dir = './../../../../../public/uploads/proposals/';
 
 
 /**
@@ -47,6 +51,10 @@ if($method=="POST" && isset($_FILES['files'])){
 
 	// get requirements info
 
+	$res = $Prop->view($bidding_id);
+
+	if(!isset($res[0]->id)) exit;
+
 
 
 	$file = ($_FILES['files']);
@@ -68,15 +76,42 @@ if($method=="POST" && isset($_FILES['files'])){
 	if(in_array($ext, $allowed_format) && $size<$allowed_size){
 
 		// create directory if not exist
-		/*if(!is_dir($dir)) mkdir($dir,0777, true);
+		if(!is_dir($dir)) mkdir($dir,0777, true);
 
 		// upload
 		if(move_uploaded_file($tmp_name, $dir.''.$new_file_name)){
 
-			$last_id = $att->create($id, $bidding_id, $new_file_name, $name, $size, $ext, 'original');
+
+			$last_id = $Att->create($current_session[0]->account_id, $bidding_id, $new_file_name, $name, $size, $ext);
 
 			echo $last_id;
-		}*/
+		}
+		
+	}
+}
+
+
+
+
+// remove or update attachments
+if($method=="POST" && !isset($_FILES['files'])){
+	$input=file_get_contents("php://input");
+
+	$data=(@json_decode($input));
+
+	$action=isset($data->action)?$clean_str->clean($data->action):'';
+
+	$id=(int) isset($data->id)?$data->id:null;
+
+	if (empty($id) || empty($action)) return 0;
+
+	//remove
+	if($action == 'remove'){
+
+		$res = $Att->remove($id);
+		$data = ["data"=>$res];
+		echo @json_encode($data);
+		exit;
 	}
 }
 

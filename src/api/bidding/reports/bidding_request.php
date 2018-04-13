@@ -255,7 +255,7 @@ $table .="	</td>
 	 </div>
 
  	<div style='float:left;text-align:center; height:40px;width:300px;margin-left:100px;'>
-	 	<u><b>{$data[0]->certified_by}</b></u><br/>
+	 	<u><b style='text-transform:uppercase;'>{$data[0]->certified_by}</b></u><br/>
 	 	{$data[0]->certified_by_position}
 	</div>
 
@@ -277,12 +277,12 @@ $table .="	</td>
 
 	
 	<div style='float:left;text-align:center; height:100px;width:300px;'>
-	 	<u> <b>{$data[0]->recommended_by}</b></u><br/>
+	 	<u> <b style='text-transform:uppercase;'>{$data[0]->recommended_by}</b></u><br/>
 	 	{$data[0]->recommended_by_position}
 	 </div>
 
  	<div style='float:left;text-align:center; height:100px;width:300px;margin-left:100px;'>
-	 	<u><b>{$data[0]->approved_by}</b></u><br/>
+	 	<u><b style='text-transform:uppercase;'>{$data[0]->approved_by}</b></u><br/>
 	 {$data[0]->approved_by_position}
 	</div>
 

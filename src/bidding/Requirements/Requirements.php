@@ -206,6 +206,7 @@ class Requirements{
 
 	}
 
+
 	public function funds($params=[]){
 		//parameters
 		$results=[];
@@ -296,14 +297,15 @@ class Requirements{
 	}
 
 
-	public function award($id,$supplier_id,$remarks){
+	public function award($id,$supplier_id,$remarks,$proposal_id = 0){
 		//parameters
 		$results=[];
 		//query
-		$SQL='INSERT INTO bidding_requirements_awardees(bidding_requirements_id,company_id,remarks) values(:bidding_requirements_id,:company_id,:remarks)';
+		$SQL='INSERT INTO bidding_requirements_awardees(bidding_requirements_id,company_id,remarks,proposal_id) values(:bidding_requirements_id,:company_id,:remarks,:proposal_id)';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':bidding_requirements_id',$id);
 		$sth->bindParam(':company_id',$supplier_id);
+		$sth->bindParam(':proposal_id',$proposal_id);
 		$sth->bindParam(':remarks',$remarks,\PDO::PARAM_STR);
 		$sth->execute();
 

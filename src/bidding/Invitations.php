@@ -57,6 +57,29 @@ class Invitations{
 		return $results;
 	}
 
+
+	public function search_all_received($supplier_id,$param,$page=0,$limit=50){
+
+		$results=[];
+		$page=$page<2?0:$page-1;
+		$params = '%'.$param.'%';
+
+		$SQL='SELECT bidding_requirements_invitation.*, bidding_requirements.name, quantity, unit, deadline FROM  bidding_requirements_invitation LEFT JOIN bidding_requirements on bidding_requirements.id = bidding_requirements_invitation.bidding_requirements_id  WHERE (supplier_id =:id and bidding_requirements.status!=1 AND bidding_requirements_invitation.status !=1) AND (bidding_requirements_invitation.id LIKE :param OR bidding_requirements_invitation.bidding_requirements_id LIKE :param OR bidding_requirements.name LIKE :param) ORDER BY bidding_requirements_invitation.id DESC  LIMIT :offset,:lim';
+
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':param',$params);
+		$sth->bindParam(':id',$supplier_id,\PDO::PARAM_INT);
+		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
+		$sth->bindParam(':offset',$page,\PDO::PARAM_INT);
+		$sth->execute();
+		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
+			$results[]=$row;
+		}
+
+		return $results;
+	}
+
+
 	public function view($id,$particulars=0){
 		$results=[];	
 		$SQL='SELECT bidding.*, profile.profile_name , profile.position FROM bidding LEFT JOIN profile on profile.id = bidding.created_by WHERE bidding.id=:id AND bidding.status != 4';

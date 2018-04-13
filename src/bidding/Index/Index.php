@@ -185,6 +185,70 @@ class Index{
 		return $results;
 	}
 
+
+	public function search_all_received($account_id,$param,$page=0,$limit=20,$status=0){
+		$results=[];
+		$page=$page<2?0:$page-1;
+		//$SQL='SELECT bidding.*, profile.profile_name, profile.email, bidding_collaborators.*  FROM bidding LEFT JOIN profile on profile.id = bidding.created_by LEFT JOIN bidding_collaborators on bidding_collaborators.account_id = profile.account_id WHERE (bidding.status !=4 and bidding.status !=0) AND (profile.account_id = :account_id) OR (account.id =:account_id) ORDER BY bidding.name ASC LIMIT :offset,:lim';
+
+		$SQL='SELECT bidding.*, bidding_collaborators.account_id,profile.profile_name FROM bidding_collaborators LEFT JOIN bidding on bidding.id = bidding_collaborators.bidding_id LEFT JOIN profile on profile.id = bidding.created_by  WHERE bidding.id LIKE :param AND ((bidding.status !=4 and bidding.status != 0) AND (bidding.created_by = :account_id OR bidding_collaborators.account_id = :account_id))  ORDER BY bidding.id DESC LIMIT :offset,:lim';
+
+		$params = '%'.$param.'%';
+		$sth = $this->DB->prepare($SQL);
+
+		$sth->bindParam(':param',$params);
+		$sth->bindParam(':account_id',$account_id);
+		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
+		$sth->bindParam(':offset',$page,\PDO::PARAM_INT);
+		$sth->execute();
+		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
+			$results[]=$row;
+		}
+
+		return $results;
+	}
+
+
+	public function search_all_approved($page=0,$param,$limit=20,$status=0){
+		$results=[];
+		$page=$page<2?0:$page-1;
+		$params = '%'.$param.'%';
+		//$SQL='SELECT bidding.*, profile.profile_name, profile.email, bidding_collaborators.*  FROM bidding LEFT JOIN profile on profile.id = bidding.created_by LEFT JOIN bidding_collaborators on bidding_collaborators.account_id = profile.account_id WHERE (bidding.status !=4 and bidding.status !=0) AND (profile.account_id = :account_id) OR (account.id =:account_id) ORDER BY bidding.name ASC LIMIT :offset,:lim';
+
+		$SQL='SELECT bidding.*, bidding_collaborators.account_id,profile.profile_name FROM bidding_collaborators LEFT JOIN bidding on bidding.id = bidding_collaborators.bidding_id LEFT JOIN profile on profile.id = bidding.created_by  WHERE (bidding.status = 3 OR bidding.status = 5) AND bidding.id LIKE :param ORDER BY bidding.id DESC LIMIT :offset,:lim';
+
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':param',$params);
+		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
+		$sth->bindParam(':offset',$page,\PDO::PARAM_INT);
+		$sth->execute();
+		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
+			$results[]=$row;
+		}
+
+		return $results;
+	}
+
+
+
+	public function change_signatories($id,$recommended_by, $recommended_by_position, $certified_by, $certified_by_position, $approved_by, $approved_by_position) {
+
+		$SQL='UPDATE bidding set recommended_by =:recommended_by, recommended_by_position=:recommended_by_position, certified_by =:certified_by, certified_by_position=:certified_by_position, approved_by=:approved_by, approved_by_position =:approved_by_position where id=:id';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindValue(':id',$id,\PDO::PARAM_INT);
+		$sth->bindValue(':recommended_by',$recommended_by);
+		$sth->bindValue(':recommended_by_position',$recommended_by_position);
+		$sth->bindValue(':certified_by',$certified_by);
+		$sth->bindValue(':certified_by_position',$certified_by_position);
+		$sth->bindValue(':approved_by',$approved_by);
+		$sth->bindValue(':approved_by_position',$approved_by_position);
+		$sth->execute();
+
+		return $sth->rowCount();
+
+
+	}
+
 	public function set_status($id,$status){
 		$SQL='UPDATE bidding set status=:status where id=:id';
 		$sth=$this->DB->prepare($SQL);

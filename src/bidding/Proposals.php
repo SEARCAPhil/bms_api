@@ -109,12 +109,14 @@ class Proposals{
 	}
 
 
-
-	public function lists_by_status($page=0,$limit=20,$status=0){
+	public function lists_all_by_status($req_id,$page=0,$limit=200,$status = 1){
 		$results=[];
 		$page=$page<2?0:$page-1;
-		$SQL='SELECT bidding.*, profile.profile_name FROM bidding LEFT JOIN profile on profile.id = bidding.created_by WHERE bidding.status =:status ORDER BY bidding.name ASC LIMIT :offset,:lim';
+
+		$SQL='SELECT bidding_requirements_proposals.*, bidding_requirements.name, quantity, unit, username, company_id FROM  bidding_requirements_proposals LEFT JOIN bidding_requirements on bidding_requirements.id = bidding_requirements_proposals.bidding_requirements_id LEFT JOIN account on account.id = bidding_requirements_proposals.account_id WHERE (bidding_requirements_proposals.bidding_requirements_id = :id AND bidding_requirements_proposals.status =:status) ORDER BY bidding_requirements_proposals.date_created DESC LIMIT :offset,:lim';
+
 		$sth=$this->DB->prepare($SQL);
+		$sth->bindValue(':id',$req_id,\PDO::PARAM_INT);
 		$sth->bindParam(':status',$status,\PDO::PARAM_INT);
 		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
 		$sth->bindParam(':offset',$page,\PDO::PARAM_INT);
@@ -126,6 +128,7 @@ class Proposals{
 		return $results;
 	}
 
+
 	public function view($id){
 		$results=[];	
 
@@ -133,8 +136,12 @@ class Proposals{
 
 		$SQL2 = 'SELECT bidding_requirements_proposals_specs.*, bidding_requirements_specs.name as orig_name, bidding_requirements_specs.value as orig_value FROM bidding_requirements_proposals_specs LEFT JOIN bidding_requirements_specs on bidding_requirements_specs.id = bidding_requirements_proposals_specs.bidding_requirements_specs_id  WHERE bidding_requirements_proposals_id = :id and bidding_requirements_proposals_specs.status = 0 ';
 
+		$SQL3 = 'SELECT * FROM bidding_requirements_proposals_attachments WHERE bidding_requirements_proposals_id=:id AND status !=1 ';
+
+
 		$sth=$this->DB->prepare($SQL);
 		$sth2=$this->DB->prepare($SQL2);
+		$sth3=$this->DB->prepare($SQL3);
 
 		$sth->bindParam(':id',$id,\PDO::PARAM_INT);
 		$sth->execute();
@@ -144,9 +151,13 @@ class Proposals{
 			$row->specs = [];
 			$row->orig_specs = [];
 			$row->other_specs = [];
+			$row->attachments = [];
 
 			$sth2->bindParam(':id',$row->id,\PDO::PARAM_INT);
 			$sth2->execute();
+
+			$sth3->bindParam(':id',$row->id,\PDO::PARAM_INT);
+			$sth3->execute();
 
 			// specs
 			while ($row2 = $sth2->fetch(\PDO::FETCH_OBJ)) {
@@ -161,11 +172,41 @@ class Proposals{
 			}
 
 
+			// attachments
+			while ($row3 = $sth3->fetch(\PDO::FETCH_OBJ)) {
+
+
+				$row->attachments[] = $row3;
+			}
+
+
 			$results[]=$row;
 		}
 
 		return $results;
 	}
+
+
+
+
+
+	public function set_reference_no($id,$ref){
+		//parameters
+		$results=[];
+		//query
+		$SQL='UPDATE bidding_requirements_proposals set reference_no =:no WHERE id = :id';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':no',$ref);
+		$sth->bindParam(':id',$id);
+
+		$sth->execute();
+
+		return $sth->rowCount();
+
+	}
+
+
+
 
 	public function add_specs($id, $name, $value, $parent_id = 0){
 		//parameters
