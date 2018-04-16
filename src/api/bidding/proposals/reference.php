@@ -5,7 +5,7 @@ require_once('../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../config/database/connections.php');
 require_once('../../../bidding/Requirements/Requirements.php');
 require_once('../../../suppliers/Logs/Logs.php');
-require_once('../../../Auth/Session.php');
+require_once('../../../auth/Session.php');
 
 use Bidding\Proposals as Proposals;
 use Bidding\Requirements as Requirements;

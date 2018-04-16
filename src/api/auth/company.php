@@ -1,7 +1,7 @@
 <?php 
 header('Access-Control-Allow-Origin: *');
-require_once('../../Auth/Account.php');
-require_once('../../Auth/Session.php');
+require_once('../../auth/Account.php');
+require_once('../../auth/Session.php');
 require_once('../../config/database/connections.php');
 
 use Auth\Account as Account;
