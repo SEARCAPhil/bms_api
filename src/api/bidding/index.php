@@ -114,7 +114,7 @@ if($method=="GET"){
 			if(in_array($status, $status_filter)) {
 
 				if($status == 'drafts') {
-					echo @json_encode($index->lists_all_drafts($current_session[0]->account_id,$page,$LIMIT,$status_code));
+					echo @json_encode($index->lists_all_drafts($current_session[0]->pid,$page,$LIMIT,$status_code));
 				} else {
 					echo @json_encode($index->lists_by_status($page,$LIMIT,$status_code));	
 				}
@@ -132,7 +132,7 @@ if($method=="GET"){
 			if(in_array($status, $status_filter)) {
 
 				if($status == 'drafts') {
-					echo @json_encode($index->lists_all_drafts($current_session[0]->account_id,$page,$LIMIT,$status_code));
+					echo @json_encode($index->lists_all_drafts($current_session[0]->pid,$page,$LIMIT,$status_code));
 				} else {
 					echo @json_encode($index->lists_all_approved($page,$LIMIT));
 				}

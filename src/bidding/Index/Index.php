@@ -112,8 +112,9 @@ class Index{
 	public function lists_all_drafts($pid, $page=0,$limit=20,$status=0){
 		$results=[];
 		$page=$page<2?0:$page-1;
-		$SQL='SELECT bidding.*, profile.profile_name FROM bidding LEFT JOIN profile on profile.id = bidding.created_by WHERE (bidding.status !=4 and bidding.status = 0) AND bidding.created_by = profile.id ORDER BY bidding.name ASC LIMIT :offset,:lim';
+		$SQL='SELECT bidding.*, profile.profile_name FROM bidding LEFT JOIN profile on profile.id = bidding.created_by WHERE (bidding.status !=4 and bidding.status = 0) AND bidding.created_by = :pid ORDER BY bidding.name ASC LIMIT :offset,:lim';
 		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':pid',$pid,\PDO::PARAM_INT);
 		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
 		$sth->bindParam(':offset',$page,\PDO::PARAM_INT);
 		$sth->execute();
