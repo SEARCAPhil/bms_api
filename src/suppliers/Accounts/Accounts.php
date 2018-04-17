@@ -44,7 +44,7 @@ class Accounts{
 
 	public function view($id){
 		$results=[];	
-		$SQL='SELECT account.username,profile.*,company.name as company FROM account LEFT JOIN profile on profile.uid=account.id LEFT JOIN company on company.id=account.company_id WHERE account.id=:id';
+		$SQL='SELECT account.username,profile.*,company.name as company FROM account LEFT JOIN profile on profile.account_id=account.id LEFT JOIN company on company.id=account.company_id WHERE account.id=:id';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id',$id,\PDO::PARAM_INT);
 		$sth->execute();

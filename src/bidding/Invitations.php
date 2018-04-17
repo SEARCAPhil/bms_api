@@ -40,6 +40,27 @@ class Invitations{
 	}
 
 
+	public function lists_all_received_per_bidding($supplier_id,$bidding_id,$page=0,$limit=20){
+		$results=[];
+		$page=$page<2?0:$page-1;
+
+		$SQL='SELECT bidding_requirements_invitation.*, bidding_requirements.name, particulars.bidding_id, quantity, unit, bidding_requirements.deadline FROM  bidding_requirements_invitation LEFT JOIN bidding_requirements on bidding_requirements.id = bidding_requirements_invitation.bidding_requirements_id LEFT JOIN particulars on particulars.id = bidding_requirements.particular_id  WHERE supplier_id =:id AND  particulars.bidding_id = :bidding_id  AND (bidding_requirements.status!=1 AND bidding_requirements_invitation.status !=1) ORDER BY bidding_requirements_invitation.id DESC  LIMIT :offset,:lim';
+
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindValue(':bidding_id',$bidding_id,\PDO::PARAM_INT);
+		$sth->bindValue(':id',$supplier_id,\PDO::PARAM_INT);
+		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
+		$sth->bindParam(':offset',$page,\PDO::PARAM_INT);
+		$sth->execute();
+		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
+			$results[]=$row;
+		}
+
+		return $results;
+	}
+
+
+
 
 	public function lists_by_status($page=0,$limit=20,$status=0){
 		$results=[];
@@ -80,7 +101,7 @@ class Invitations{
 	}
 
 
-	public function view($id,$particulars=0){
+	/*public function view($id,$particulars=0){
 		$results=[];	
 		$SQL='SELECT bidding.*, profile.profile_name , profile.position FROM bidding LEFT JOIN profile on profile.id = bidding.created_by WHERE bidding.id=:id AND bidding.status != 4';
 		$sth=$this->DB->prepare($SQL);
@@ -105,7 +126,23 @@ class Invitations{
 		}
 
 		return $results;
+	}*/
+
+	public function view($id){
+		$results=[];	
+
+		$SQL='SELECT * from bidding_requirements_invitation where id =:id';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':id',$id,\PDO::PARAM_INT);
+		$sth->execute();
+
+		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
+			$results[]=$row;
+		}
+
+		return $results;
 	}
+
 
 	public function set_status($id,$status){
 		$SQL='UPDATE bidding set status=:status where id=:id';

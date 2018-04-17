@@ -80,6 +80,51 @@ if($method=="POST"){
 	}
 
 
+	// general sending
+	if($action == 'send_items') {
+		$items = isset($data->items)?$data->items:[];
+		// specs
+		$specs = isset($data->suppliers)?$data->suppliers:[];
+		$specs_ids = [];
+		$specs_sent = [];
+		foreach ($specs as $key => $value) {
+			if(!empty(trim($value))) {
+				array_push($specs_ids, (int) $key);
+			}
+		}
+
+		$item_ids = [];
+		foreach ($items as $key => $value) {
+			if(!empty(trim($value))) {
+				array_push($item_ids, (int) $key);
+			}
+		}
+
+
+
+
+
+		if (!empty($specs_ids)) {
+
+			for ($a=0; $a < count($item_ids); $a++) {
+				for ($x=0; $x < count($specs_ids); $x++) {
+					$result = $req->send($item_ids[$a],$specs_ids[$x],0);
+					// add to sent items
+					if ($result) {
+						$specs_sent[$specs_ids[$x]] = $result;
+					}
+				}
+			}
+			
+
+			$data=["data"=> $specs_sent];
+			echo @json_encode($data);
+			exit;	
+		}
+
+	}
+
+
 	
 	if($action == 'award') {
 		$remarks = isset($data->remarks)?$data->remarks:'';

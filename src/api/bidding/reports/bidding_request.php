@@ -5,7 +5,7 @@ require_once('../../../bidding/Particulars/Particulars.php');
 require_once('../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../config/database/connections.php');
 require_once('../../../suppliers/Logs/Logs.php');
-require_once('../../../Auth/Session.php');
+require_once('../../../auth/Session.php');
 require_once('../../../bidding/Requirements/Requirements.php');
 
 
@@ -67,7 +67,7 @@ for($x = 0; $x < count($parts); $x++ ) {
 	$partsSec.= "  		
 
   		<section style='text-align:left;margin-left:30px;'>
-  			<br/><br/><br/><br/>
+  			<br/>
   			<p>
 	  			<b>{$letters}. {$partName}</b>
 	  		</p>";
@@ -185,9 +185,19 @@ $table= "
 					{$parts[$x]->deadline}
 				</td>
 				<td class='{$class}'>";
+				// used funds
+				// this will prevent displaying of same fund
+				$used_funds = [];
+
 				for($f = 0; $f < count($funds_per_particulars[$parts[$x]->name]['funds']); $f++ ) {
-				
-					$table .= "{$funds_per_particulars[$parts[$x]->name]['funds'][$f][0]->fund_type} - {$funds_per_particulars[$parts[$x]->name]['funds'][$f][0]->cost_center} - {$funds_per_particulars[$parts[$x]->name]['funds'][$f][0]->line_item}<br/>";
+					
+					$funds = "{$funds_per_particulars[$parts[$x]->name]['funds'][$f][0]->fund_type} - {$funds_per_particulars[$parts[$x]->name]['funds'][$f][0]->cost_center} - {$funds_per_particulars[$parts[$x]->name]['funds'][$f][0]->line_item}";
+
+					// show in PDF and save to recetly used funding
+					if (!in_array($funds, $used_funds)) {
+						$table .= "{$funds}<br/>";	
+						array_push($used_funds, $funds);
+					}
 				}
 
 		$table .="</td><td class='{$class}'>";
@@ -234,9 +244,6 @@ $table .="	</td>
  </tbody>
  </table>
  <div style='text-align:left;margin-left:25px;'>
-	 <p style='text-align:left;'>
-	 	* Funds to be transferred to concerned Office/Department/Unit upon procurement of items
-	 </p>
 
 	<br/>
 	 <span width='400px' style='float:left;'>
@@ -244,7 +251,7 @@ $table .="	</td>
 	 </span>
 
 	 <span width='400px' style='float:left;margin-left:350px;'>
-	 	Certified Funds Available
+	 	
 	 </span>
 
 
@@ -254,10 +261,7 @@ $table .="	</td>
 	 	{$data[0]->position}
 	 </div>
 
- 	<div style='float:left;text-align:center; height:40px;width:300px;margin-left:100px;'>
-	 	<u><b style='text-transform:uppercase;'>{$data[0]->certified_by}</b></u><br/>
-	 	{$data[0]->certified_by_position}
-	</div>
+ 	<div style='float:left;text-align:center; height:40px;width:300px;margin-left:100px;'> </div>
 
 	 <p class='breaker'>
 	 	&nbsp;&nbsp;&nbsp;
@@ -304,24 +308,32 @@ $html = "<html>
     }
     footer { position: fixed; bottom: -75px; left: 0px; right: 0px; height: 30px; text-align:center; font-size:12px; }
     /*p { page-break-after: always; }
-    p:last-child { page-break-after: never; }*/
+    p:last-child { page-break-after: never; }*/\
+    .first-page {
+        margin: 0in;
+        color: green;
+        height: 100%;
+        width: 100%;
+        position:absolute;
+        page-break-after: always;
+    }
     main.page{
     	margin-top:10px;
     	width:100%;
     	height:90%;
+    	page-break-before: always;
     }
+
+
+
     .text-center{
     	text-align:center;
     }
   </style>
 </head>
 <body>
-  <!--<header>
 
-
-  </header>-->
-  <!--<footer>Page /</footer>-->
-  <main class='page'>
+  <main class='first-page'>
   	<article>
   		<section style='width:100%;height:20px;'>
   			<div style='float:left;width:120px;margin-left:440px;'>
@@ -379,12 +391,11 @@ $html = "<html>
 
 
   </main>
+<main class='page'>
 
-    <main class='page'>
-
-  		<center style='padding-top:0px;'>
-  			<b><br/>
-  				{$bidding_name} <br/>
+  		<center>
+  			<b>
+  				{$bidding_name} 
   				STANDARD MINIMUM SPECIFICATIONS
   			</b>
   		</center>

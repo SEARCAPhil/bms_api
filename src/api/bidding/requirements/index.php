@@ -76,6 +76,8 @@ if($method=="POST"){
 	}
 
 	if($action == 'send') {
+		$items = isset($data->items)?$data->items:[];
+		// specs
 		$specs = isset($data->suppliers)?$data->suppliers:[];
 		$specs_ids = [];
 		$specs_sent = [];

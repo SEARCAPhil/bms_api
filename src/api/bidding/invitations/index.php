@@ -1,12 +1,14 @@
 <?php 
 header('Access-Control-Allow-Origin: *');
 require_once('../../../bidding/Invitations.php');
+require_once('../../../bidding/Requirements/Requirements.php');
 require_once('../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../config/database/connections.php');
 require_once('../../../suppliers/Logs/Logs.php');
-require_once('../../../Auth/Session.php');
+require_once('../../../auth/Session.php');
 
 use Bidding\Invitations as Invitations;
+use Bidding\Requirements as Requirements;
 use Suppliers\Logs as Logs;
 use Helpers\CleanStr as CleanStr;
 use Auth\Session as Session;
@@ -18,6 +20,11 @@ $page=1;
 $clean_str=new CleanStr();
 $logs = new Logs($DB);
 $Ses = new Session($DB);
+$Req = new Requirements($DB);
+
+#instance
+$Inv = new Invitations($DB);
+
 
 $result = [];
 /**
@@ -57,8 +64,7 @@ if($method=="GET"){
 	 * @return json
 	 */
 	if(!isset($_GET['id'])){
-		#instance
-		$Inv=new Invitations($DB);
+
 		$status_filter = ['drafts','closed'];
 
 		#filter blocked or active companies
@@ -98,11 +104,19 @@ if($method=="GET"){
 			if(is_null($status_code)) { 
 				echo json_encode($Inv->lists_all_received($current_session[0]->company_id,$page,$LIMIT));
 			}
-		}
+		}	
+		
+	}
 
-		
-		
-		
+
+	if(isset($_GET['id'])){
+		$id = (int) htmlentities(htmlspecialchars($_GET['id']));
+
+		$details = $Inv->view($id);
+
+		if ($details[0]) {
+			echo json_encode($Req->view($details[0]->bidding_requirements_id));
+		}
 	}
 	
 }
