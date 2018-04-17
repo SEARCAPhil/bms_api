@@ -4,7 +4,7 @@ require_once('../../../../bidding/Attachments.php');
 require_once('../../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../../config/database/connections.php');
 require_once('../../../../suppliers/Logs/Logs.php');
-require_once('../../../../Auth/Session.php');
+require_once('../../../../auth/Session.php');
 
 use Bidding\Attachments as Attachments;
 use Suppliers\Logs as Logs;
