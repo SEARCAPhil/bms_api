@@ -37,11 +37,13 @@ $id = (int) htmlentities(htmlspecialchars($_GET['id']));
 // token 
 if(!isset($_GET['token']))  exit;
 
+
 // get privilege
 // this is IMPORTANT for checking privilege
 $token=htmlentities(htmlspecialchars($_GET['token']));
 $current_session = $Ses->get($token);
 if(!@$current_session[0]->token) exit;
+
 
 // suppliers information
 $suppliers_info = $Supp->view($current_session[0]->account_id);
@@ -49,11 +51,8 @@ if (!isset($suppliers_info[0])) exit;
 $company_name = strtoupper($suppliers_info[0]->company);
 
 
-
-
-$inv_details = $Inv->view($id);
-
 // non emty invitation
+$inv_details = $Inv->view($id);
 if (!isset($inv_details[0])) exit;
 
 // get all requirements details
@@ -79,6 +78,18 @@ if($details[0]->specs) {
 		";
 	}
 }
+
+
+// signatories
+$created_by = '&nbsp;';
+$approved_by = '&nbsp;';
+if($inv_details[0]) {
+	$created_by = $inv_details[0]->profile_name;
+	$approved_by = $inv_details[0]->approved_by;
+
+}
+
+
 
 
 
@@ -150,26 +161,25 @@ $html = "<html>
 		 </article>
 
 
-		   	<article>
-		  		<section style='width:100%;height:20px;'>
-		  			<div style='float:left;width:50px;margin-left:440px;'>
-		  				Date :
-		  			</div>
-		  			
-		  			<div style='float:left;width:150px;border-bottom:1px solid #ccc;text-align:center;'>{$date}</div>
-		  		</section>
-		  	</article>
-
 		  	<article>
-	  	  		<div style='float:left;width:290px;'> </div>
+	  	  		<div style='float:left;width:460px;'> </div>
+		  		<div style='float:left;'>
+		  				Date :
+		  		</div>
+
+		  		<div style='float:left;width:200px;border-bottom:1px solid #ccc;text-align:center;'> <b>{$date}</b></div>
+		  		<br/><br/>
+			 </article>
+
+			 <article>
+	  	  		<div style='float:left;width:460px;'> </div>
 		  		<div style='float:left;'>
 		  				Reference :
 		  		</div>
 
-		  		<div style='float:left;width:155px;border-bottom:1px solid #ccc;text-align:center;'> &nbsp;</div>
+		  		<div style='float:left;width:165px;border-bottom:1px solid #ccc;text-align:center;'> <b>{$id}</b></div>
 		  		<br/><br/>
 			 </article>
-
 
 
 		  	<article class='text-center'>
@@ -214,16 +224,7 @@ $html = "<html>
 	  	</div>
 	  	
 
-	  	 <article>
-
-			 <p class='breaker'>
-			 	&nbsp;&nbsp;&nbsp;
-			 </p>
-		</article>
-
-	  	<br/>
-
-	  	 <article class='text-center'  style='float:left;text-align:center;width:100%;'>
+	  	 <article class='text-center'  style='text-align:center;width:100%;'>
 	  	 	<table class='ledger-table'>
 	  	 		<tr>
 	  	 			<td style='width:200px;'>Product / Service Name: </td>
@@ -236,7 +237,39 @@ $html = "<html>
 	  	 		{$tr_specs}
 	  	 	</table>
 	  	 </article>
+	  	 <br/>
 
+	  	 	<article>
+		  		<section style='width:100%;height:30px;font-size:13px;'>
+		  			<div style='float:left;width:100px;'>
+		  				Prepared by:
+		  				
+		  			</div>
+		  			<div style='float:left;width:230px;border-bottom:1px solid #ccc;text-align:center;'><b>{$created_by}</b></div>
+
+		  			<div style='float:left;width:100px;margin-left:70px;'>
+		  				Approved by:
+		  			</div>
+		  			<div style='float:left;width:230px;border-bottom:1px solid #ccc;text-align:center;'><b>{$approved_by}</b></div>
+		  		
+		  		</section>
+		  	</article>
+
+
+		  	<article>
+		  		<section style='width:100%;height:20px;font-size:13px;'>
+		  			<div style='float:left;width:100px;'>
+		  				Emailed: 	
+		  			</div>
+		  			<div style='float:left;width:230px;border-bottom:1px solid #ccc;text-align:center;'><b>{$date}</b></div>  		
+		  		</section>
+		  	</article>
+
+
+	  	  <p style='width:100%;font-size:13px;border-top:2px dashed #ccc;padding-top:10px;'>
+	  	 	Note : Charges of PACKING  and similar services will not be allowed unless stated in bidder's quotation and authorized in order as place by us.
+	  	 	<br/>
+	  	 </p>
 	  
 
 

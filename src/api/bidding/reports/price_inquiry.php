@@ -1,5 +1,6 @@
 <?php
 header('Access-Control-Allow-Origin: *');
+require_once('../../../bidding/Index/Index.php');
 require_once('../../../bidding/Particulars/Particulars.php');
 require_once('../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../config/database/connections.php');
@@ -32,6 +33,7 @@ $Part = new Particulars($DB);
 $Req = new Requirements($DB);
 $Inv = new Invitations($DB);
 $Supp = new Suppliers($DB);
+$Index = new Bid($DB);
 
 // ID
 if (!isset($_GET['id'])) exit;
@@ -69,9 +71,8 @@ if (!$details[0]) exit;
 
 // items
 $items = ($Inv->lists_all_received_per_bidding($current_session[0]->company_id,$details[0]->bidding_id));
+
 if (!isset($items[0])) exit;
-
-
 $tr_specs = '';
 foreach ($items as $key => $value) {
 	$tr_specs.="
@@ -80,6 +81,14 @@ foreach ($items as $key => $value) {
 				<td>{$value->quantity} {$value->unit}</td>
 			</tr>
 		";
+}
+
+// signatories
+$created_by = '';
+if($items[0]) {
+	$created_by = $items[0]->profile_name;
+	$approved_by = $items[0]->approved_by;
+
 }
 
 
@@ -101,6 +110,7 @@ $html = "<html>
     	margin-top:10px;
     	width:100%;
     	height:90%;
+    	padding:10px;
     }
     .text-center{
     	text-align:center;
@@ -111,18 +121,19 @@ $html = "<html>
 		cellspacing:0px;
 		cellpadding:0px;
 		border-collapse:collapse;
-		font-size:13px;
+		font-size:12px;
 		margin-left:20px;
 		width:90%;
 	}
 	.ledger-table td{
 		border:1px solid #ccc;	
+
 	}
-	.ledger-table th, .ledger-table td{
+	.ledger-table th, .ledger-table tr td{
 		border:1px solid #ccc;	
 		padding-left:15px;
 	}
-	.ledger-table tbody td {
+	.ledger-table tr td {
 		height:50px;
 	}
 	.breaker {
@@ -153,23 +164,24 @@ $html = "<html>
 		 </article>
 
 
-		   	<article>
-		  		<section style='width:100%;height:20px;'>
-		  			<div style='float:left;width:50px;margin-left:440px;'>
-		  				Date :
-		  			</div>
-		  			
-		  			<div style='float:left;width:150px;border-bottom:1px solid #ccc;text-align:center;'>{$date}</div>
-		  		</section>
-		  	</article>
 
 		  	<article>
-	  	  		<div style='float:left;width:290px;'> </div>
+	  	  		<div style='float:left;width:460px;'> </div>
+		  		<div style='float:left;'>
+		  				Date :
+		  		</div>
+
+		  		<div style='float:left;width:200px;border-bottom:1px solid #ccc;text-align:center;'> <b>{$date}</b></div>
+		  		<br/><br/>
+			 </article>
+
+			 <article>
+	  	  		<div style='float:left;width:460px;'> </div>
 		  		<div style='float:left;'>
 		  				Reference :
 		  		</div>
 
-		  		<div style='float:left;width:155px;border-bottom:1px solid #ccc;text-align:center;'> <b>{$id}</b></div>
+		  		<div style='float:left;width:165px;border-bottom:1px solid #ccc;text-align:center;'> <b>{$id}</b></div>
 		  		<br/><br/>
 			 </article>
 
@@ -209,22 +221,13 @@ $html = "<html>
 
 
 
-		<div>
-			<p style='font-size:13px;'>Quotation must be received on or before________________. Please submit your quotation on this form and furnish complete information as called for below.
+		<div style='width:95%;'>
+			<p style='font-size:13px;text-align:justify;'>Quotation must be received on or before________________. Please submit your quotation on this form and furnish complete information as called for below.
 				If you should have any further question regarding this inquiry, please communicate with __________________________.
 			</p>
 
 	  	</div>
 	  	
-
-	  	 <article>
-
-			 <p class='breaker'>
-			 	&nbsp;&nbsp;&nbsp;
-			 </p>
-		</article>
-
-	  	<br/>
 
 	  	 <article class='text-center'  style='float:left;text-align:center;width:100%;'>
 	  	 	<table class='ledger-table'>
@@ -236,7 +239,44 @@ $html = "<html>
 	  	 	</table>
 	  	 </article>
 
-	  
+
+	  	 <p style='font-size:13px;'>&nbsp;</p>
+	  	
+
+
+
+		   	<article>
+		  		<section style='width:100%;height:30px;font-size:13px;'>
+		  			<div style='float:left;width:100px;'>
+		  				Prepared by:
+		  				
+		  			</div>
+		  			<div style='float:left;width:230px;border-bottom:1px solid #ccc;text-align:center;'><b>{$created_by}</b></div>
+
+		  			<div style='float:left;width:100px;margin-left:70px;'>
+		  				Approved by:
+		  			</div>
+		  			<div style='float:left;width:230px;border-bottom:1px solid #ccc;text-align:center;'><b>{$approved_by}</b></div>
+		  		
+		  		</section>
+		  	</article>
+
+
+		  	<article>
+		  		<section style='width:100%;height:20px;font-size:13px;'>
+		  			<div style='float:left;width:100px;'>
+		  				Emailed: 	
+		  			</div>
+		  			<div style='float:left;width:230px;border-bottom:1px solid #ccc;text-align:center;'><b>{$date}</b></div>  		
+		  		</section>
+		  	</article>
+
+
+
+		  <p style='font-size:13px;border-top:2px dashed #ccc;padding-top:10px;margin-top:50px;'>
+	  	 	Note : Charges of PACKING  and similar services will not be allowed unless stated in bidder's quotation and authorized in order as place by us.
+	  	 	<br/>
+	  	 </p>
 
 
   </main>

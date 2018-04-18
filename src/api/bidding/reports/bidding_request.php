@@ -98,7 +98,7 @@ for($x = 0; $x < count($parts); $x++ ) {
 
 	  			$partsSec.= " <div style='text-align:left;margin-left:25px;'>
 			  		<p>
-			  			<b>{$req_count}) {$req_details[$z]->name}</b>
+			  			<b>{$req_count}) {$req_details[$z]->name} <em>({$req_details[$z]->quantity} {$req_details[$z]->unit})</em></b>
 			  		</p>";
 			  		if ($req_details[$z]->specs) {
 
@@ -257,8 +257,8 @@ $table .="	</td>
 
 	  <br/><br/>
 	 <div style='float:left;text-align:center; height:40px;width:300px;'>
-	 	<u><b>{$name}</b></u><br/>
-	 	{$data[0]->position}
+	 	<u><b style='text-transform:uppercase;'>{$data[0]->requested_by}</b></u><br/>
+	 	{$data[0]->requested_by_position}
 	 </div>
 
  	<div style='float:left;text-align:center; height:40px;width:300px;margin-left:100px;'> </div>

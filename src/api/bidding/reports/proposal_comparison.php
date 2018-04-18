@@ -44,14 +44,16 @@ $details = $Req->view($id);
 
 if(!isset($details[0])) exit;
 
-$budget_amount = number_format($details[0]->budget_amount, 2, ',', ',');
+$budget_amount = number_format($details[0]->budget_amount, 2, '.', ',');
 
 $specs = '';
 
 
 // consolidated values
 $conso_suppliers = [];
+$conso_suppliers_awarded = [];
 $conso_amount = [];
+$conso_remarks = [];
 $conso_discount = [];
 $conso_orig_specs = [];
 $conso_other_specs = [];
@@ -66,6 +68,14 @@ for($a = 0; $a < count($props_ids); $a++) {
 	 	array_push($conso_suppliers,$det[0]->company_name);
 	 	array_push($conso_amount,"{$det[0]->currency} {$det[0]->amount}");
 	 	array_push($conso_discount,"{$det[0]->currency} {$det[0]->discount}");
+	 	array_push($conso_remarks,$det[0]->remarks);
+
+	 	# detect winner bidders
+	 	if ($det[0]->status ==3) {
+	 		# total amount bid - discount
+	 		$discounted_price = number_format(($det[0]->amount-$det[0]->discount), 2, '.', ',');
+	 		array_push($conso_suppliers_awarded,array($det[0]->company_name => "{$det[0]->currency} {$discounted_price}"));
+	 	}
 	 	
 	 	// original specifications
 	 	foreach ($det[0]->orig_specs as $key => $value) {
@@ -79,6 +89,8 @@ for($a = 0; $a < count($props_ids); $a++) {
 	 		}
 	 		// add to store
 	 		$conso_orig_specs[$value->bidding_requirements_specs_id][$det[0]->company_name][] = $value;	
+
+
 	 	}
 
 
@@ -132,7 +144,8 @@ if ($remaining > 0) {
 
 // amount
 foreach ($conso_amount as $key => $value) {
-	$amount_td.="<td>{$value}</td>";
+	$val = @number_format(floatval(str_replace('PHP', '', $value)), 2, '.', ',');
+	$amount_td.="<td>{$val}</td>";
 }
 
 $remaining = (5 - count($conso_amount));
@@ -182,8 +195,8 @@ for ($x = 0; $x < count($details[0]->specs); $x++) {
 				
 				// mark specs with different value
 				$color = ($value2->value != $details[0]->specs[$x]->value) ? 'red' : '';
-					$specs_td.="<td style='color:{$color};'> {$value2->value} </td>";
-				 
+				$specs_td.="<td style='color:{$color};'> {$value2->value} </td>";
+				
 			}
 
 		} else {
@@ -203,7 +216,7 @@ for ($x = 0; $x < count($details[0]->specs); $x++) {
 }
 
 
-
+# other specs
 foreach ($conso_other_specs as $key => $value) {
 	$key_name = ucwords($key);
 
@@ -255,6 +268,25 @@ foreach ($conso_other_specs as $key => $value) {
 	
 }
 
+#remarks
+$remarks_td = '';
+$rem_count = 0;
+foreach ($conso_remarks as $key => $value) {
+	$remarks_td .= "<td>$value</td>";
+	$rem_count++;
+}
+
+for ($i=0; $i < (5-$rem_count); $i++) { 
+	$remarks_td .= "<td> </td>";
+}
+
+# bidders awarded
+$awarded_suppliers_p = '';
+foreach ($conso_suppliers_awarded as $key => $value) {
+	foreach ($value as $key2 => $value2) {
+		$awarded_suppliers_p.="<p><b>Name of bidder :{$key2}</b><br/><br/>For a total amount of <br/> <b>{$value2}</b> <b></b></p>";
+	}
+}
 
 
 $table= "
@@ -324,13 +356,93 @@ $table= "
 			<td></td>
 			<td></td>
 		</tr>
-
 		$other_specs
+		<tr>
+			<td  style='text-align:left;color:gray;'>
+				Remarks  
+			</td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+
+		
+		<tr>
+			<td  style='text-align:left;color:gray;'> </td>
+			<td> </td>
+			{$remarks_td}
+		</tr>
 
 		<tr>
 			<td  style='text-align:left;' colspan='7'>
 				We certify to the correctnes of entries of above bids. Based on our assessment, the most advantageous offer to the center is made by: 	
 			</td>
+		</tr>
+
+		<tr>
+			<td>
+				<b>Maria Cristeta N. Cuaresma</b><br/>
+				Internal Chair CBA
+			</td>
+			<td></td>
+			<td>
+				<b>Jaymark Warren T. Dia</b><br/>
+				Member
+			</td>
+			<td>
+				<b>Bidding procured noted and witnessed by :</b>
+			</td>
+			<td colspan='2'>
+				<b>Certified that the bidding procedure is in order</b>
+			</td>
+			<td>
+				{$awarded_suppliers_p}
+			</td>
+		</tr>
+
+
+
+		<tr>
+			<td>
+				<b>Maria Monina Cecilia A. Villena</b><br/>
+				Member
+			</td>
+			<td></td>
+			<td>
+				<b>Dexter A. Manset</b><br/>
+				Member
+			</td>
+			<td>
+				<b>Ricardo A. Menorca</b><br/>
+				Unit Head, General Services and ex-officio member
+			</td>
+			<td colspan='2'>
+				<b>Julita G. Ventenilla</b><br/>
+				Unit Head, Internal Audit and ex-officio ember
+			</td>
+			<td></td>
+		</tr>
+
+
+		<tr>
+			<td>
+				<b>Maria Teresa Lourdes B. Ferino</b><br/>
+				Member
+			</td>
+			<td></td>
+			<td>
+				<b>Rochella B. Lapitan</b><br/>
+				Member
+			</td>
+			<td>
+				<b>Fe D. dela Cruz</b><br/>
+				Recording Secretary, CBA
+			</td>
+			<td colspan='2'></td>
+			<td></td>
 		</tr>
 
 

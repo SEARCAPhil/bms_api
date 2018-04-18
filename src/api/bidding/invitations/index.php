@@ -41,7 +41,7 @@ if($method=="GET"){
 		$page=(int) htmlentities(htmlspecialchars($_GET['page']));
 	}
 
-		#serve with page request
+	#serve with page request
 	if(!isset($_GET['token'])){
 		exit;
 	}

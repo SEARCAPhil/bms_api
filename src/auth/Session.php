@@ -30,7 +30,7 @@ class Session{
 	}
 
 	public function get($token){
-		$SQL = 'SELECT account_session.* , profile.id as pid, account_role.role, profile.email, account.company_id FROM account_session LEFT JOIN profile on account_session.account_id = profile.account_id LEFT JOIN account_role on account_role.account_id = account_session.account_id LEFT JOIN account on account.id = account_session.account_id  WHERE account_session.token =:token ORDER BY profile.id DESC LIMIT 1';
+		$SQL = 'SELECT account_session.* , profile.id as pid, account_role.role, profile.email, profile.department, account.company_id FROM account_session LEFT JOIN profile on account_session.account_id = profile.account_id LEFT JOIN account_role on account_role.account_id = account_session.account_id LEFT JOIN account on account.id = account_session.account_id  WHERE account_session.token =:token ORDER BY profile.id DESC LIMIT 1';
 		$sth = $this->DB->prepare($SQL);
 		$sth->bindParam(':token',$token,\PDO::PARAM_STR);
 		$sth->execute();

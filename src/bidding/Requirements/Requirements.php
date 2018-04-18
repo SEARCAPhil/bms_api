@@ -281,15 +281,16 @@ class Requirements{
 
 	}
 
-	public function send($id,$supplier_id,$account_id){
+	public function send($id, $supplier_id, $account_id, $approved_by = ''){
 		//parameters
 		$results=[];
 		//query
-		$SQL='INSERT INTO bidding_requirements_invitation(bidding_requirements_id,supplier_id,account_id) values(:bidding_requirements_id,:supplier_id,:account_id)';
+		$SQL='INSERT INTO bidding_requirements_invitation(bidding_requirements_id,supplier_id,account_id, approved_by) values(:bidding_requirements_id,:supplier_id,:account_id, :approved_by)';
 		$sth=$this->DB->prepare($SQL);
-		$sth->bindParam(':bidding_requirements_id',$id);
+		$sth->bindParam(':bidding_requirements_id', $id);
 		$sth->bindParam(':supplier_id',$supplier_id);
-		$sth->bindParam(':account_id',$account_id);
+		$sth->bindParam(':account_id', $account_id);
+		$sth->bindParam(':approved_by', $approved_by);
 		$sth->execute();
 
 		return $this->DB->lastInsertId();

@@ -5,13 +5,18 @@ require_once('../../../../bidding/Particulars/Particulars.php');
 require_once('../../../../bidding/Requirements/Requirements.php');
 require_once('../../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../../config/database/connections.php');
+require_once('../../../../config/constants/reports.php');
 require_once('../../../../suppliers/Logs/Logs.php');
+require_once('../../../../auth/Session.php');
+
 
 use Bidding\Index as Index;
 use Bidding\Particulars as Particulars;
 use Bidding\Requirements as Requirements;
 use Suppliers\Logs as Logs;
 use Helpers\CleanStr as CleanStr;
+use Auth\Session as Session;
+
 
 $LIMIT=20;
 $status='all'; 
@@ -20,7 +25,9 @@ $page=1;
 $clean_str=new CleanStr();
 $logs = new Logs($DB);
 $part = new Particulars($DB);
-$req= new Requirements($DB);
+$req = new Requirements($DB);
+$Ses = new Session($DB);
+
 
 /**
  * GET suppliers list
@@ -41,6 +48,19 @@ if($method=="POST"){
 
 	$action=isset($data->action)?$clean_str->clean($data->action):'';
 	$id=(int) isset($data->id)?$data->id:null;
+	$token = isset($data->token) ? $clean_str->clean($data->token) : '';
+
+
+	// get privilege
+	// this is IMPORTANT for checking privilege
+	if(empty($token)){
+		exit;
+	}
+
+	$current_session = $Ses->get($token);
+
+
+	if(!@$current_session[0]->token) exit;
 
 
 	//required
@@ -64,7 +84,7 @@ if($method=="POST"){
 
 		if (!empty($specs_ids)) {
 			for ($x=0; $x < count($specs_ids); $x++) {
-				$result = $req->send($id,$specs_ids[$x],0);
+				$result = $req->send($id,$specs_ids[$x],$current_session[0]->account_id,APPROVED_BY_INVITATIONS);
 				// add to sent items
 				if ($result) {
 					$specs_sent[$specs_ids[$x]] = $result;
@@ -108,7 +128,7 @@ if($method=="POST"){
 
 			for ($a=0; $a < count($item_ids); $a++) {
 				for ($x=0; $x < count($specs_ids); $x++) {
-					$result = $req->send($item_ids[$a],$specs_ids[$x],0);
+					$result = $req->send($item_ids[$a],$specs_ids[$x],$current_session[0]->account_id,APPROVED_BY_INVITATIONS);
 					// add to sent items
 					if ($result) {
 						$specs_sent[$specs_ids[$x]] = $result;

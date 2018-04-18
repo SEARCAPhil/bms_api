@@ -38,23 +38,23 @@ if($method=="POST"){
 	$approved_position = isset($data->approving_position) ? trim($data->approving_position) :'';
 	$recommended = isset($data->recommended) ? trim($data->recommended) : '';
 	$recommended_position = isset($data->recommended_position) ? trim($data->recommended_position) : '';
-	$certified = isset($data->certified) ? trim($data->certified) : '';
-	$certified_position = isset($data->certified_position) ? trim($data->certified_position) : '';
+	$requested = isset($data->requested) ? trim($data->requested) : '';
+	$requested_position = isset($data->requested_position) ? trim($data->requested_position) : '';
 
 	if ($id) {
 		$res = $Index->view($id);
 		if ($res[0]) {
 			
 			$orig_recommended_by = empty($recommended) ? $res[0]->recommended_by : $recommended;
-			$orig_certified_by = empty($certified) ? $res[0]->certified_by : $certified;
+			$orig_requested_by = empty($requested) ? $res[0]->requested_by : $requested;
 			$orig_approved_by = empty($approved) ? $res[0]->approved_by : $approved;
 
 
 			$orig_recommended_by_position = empty($recommended_position) ? $res[0]->recommended_by_position : $recommended_position;
-			$orig_certified_by_position = empty($certified_position) ? $res[0]->certified_by_position : $certified_position;
+			$orig_requested_by_position = empty($requested_position) ? $res[0]->requested_by_position : $requested_position;
 			$orig_approved_by_position = empty($approved_position) ? $res[0]->approved_by_position : $approved_position;
 
-			echo $Index->change_signatories($id, $orig_recommended_by, $orig_recommended_by_position, $orig_certified_by, $orig_certified_by_position, $orig_approved_by, $orig_approved_by_position);
+			echo $Index->change_signatories($id, $orig_recommended_by, $orig_recommended_by_position, $orig_requested_by, $orig_requested_by_position, $orig_approved_by, $orig_approved_by_position);
 
 		}
 	}

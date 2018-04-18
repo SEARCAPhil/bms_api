@@ -34,7 +34,7 @@ class Index{
 		$excemption = (int) isset($params["excemption"])?$params["excemption"]:0;
 
 		//query
-		$SQL='INSERT INTO bidding(name,description,deadline,created_by,excemption,approved_by,recommended_by,certified_by,approved_by_position,recommended_by_position,certified_by_position) values(:name,:description,:deadline,:created_by,:excemption,:approved_by,:recommended_by,:certified_by,:approved_by_position,:recommended_by_position,:certified_by_position)';
+		$SQL='INSERT INTO bidding(name,description,deadline,created_by,excemption,approved_by,recommended_by,requested_by,approved_by_position,recommended_by_position,requested_by_position) values(:name,:description,:deadline,:created_by,:excemption,:approved_by,:recommended_by,:requested_by,:approved_by_position,:recommended_by_position,:requested_by_position)';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':name',$name);
 		$sth->bindParam(':description',$description);
@@ -43,10 +43,10 @@ class Index{
 		$sth->bindParam(':excemption',$excemption);
 		$sth->bindValue(':approved_by',@$params["approved_by"]);
 		$sth->bindValue('recommended_by',@$params["recommended_by"]);
-		$sth->bindValue(':certified_by',@$params["certified_by"]);
+		$sth->bindValue(':requested_by',@$params["requested_by"]);
 		$sth->bindValue(':approved_by_position',@$params["approved_by_position"]);
 		$sth->bindValue(':recommended_by_position',@$params["recommended_by_position"]);
-		$sth->bindValue(':certified_by_position',@$params["certified_by_position"]);
+		$sth->bindValue(':requested_by_position',@$params["requested_by_position"]);
 		$sth->execute();
 
 		return $this->DB->lastInsertId();
@@ -232,22 +232,35 @@ class Index{
 
 
 
-	public function change_signatories($id,$recommended_by, $recommended_by_position, $certified_by, $certified_by_position, $approved_by, $approved_by_position) {
+	public function change_signatories($id,$recommended_by, $recommended_by_position, $requested_by, $requested_by_position, $approved_by, $approved_by_position) {
 
-		$SQL='UPDATE bidding set recommended_by =:recommended_by, recommended_by_position=:recommended_by_position, certified_by =:certified_by, certified_by_position=:certified_by_position, approved_by=:approved_by, approved_by_position =:approved_by_position where id=:id';
+		$SQL='UPDATE bidding set recommended_by =:recommended_by, recommended_by_position=:recommended_by_position, requested_by =:requested_by, requested_by_position=:requested_by_position, approved_by=:approved_by, approved_by_position =:approved_by_position where id=:id';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindValue(':id',$id,\PDO::PARAM_INT);
 		$sth->bindValue(':recommended_by',$recommended_by);
 		$sth->bindValue(':recommended_by_position',$recommended_by_position);
-		$sth->bindValue(':certified_by',$certified_by);
-		$sth->bindValue(':certified_by_position',$certified_by_position);
+		$sth->bindValue(':requested_by',$requested_by);
+		$sth->bindValue(':requested_by_position',$requested_by_position);
 		$sth->bindValue(':approved_by',$approved_by);
 		$sth->bindValue(':approved_by_position',$approved_by_position);
 		$sth->execute();
 
 		return $sth->rowCount();
+	}
 
 
+	public function view_signatories($department_name) {
+		$results = [];
+		$SQL='SELECT * FROM signatories where department=:department_name and status = 0';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindValue(':department_name',$department_name);
+		$sth->execute();
+
+		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
+			$results[]=$row;
+		}
+
+		return $results;
 	}
 
 	public function set_status($id,$status){
