@@ -128,14 +128,14 @@ $other_specs = '';
 
 // supplier name
 foreach ($conso_suppliers as $key => $value) {
-	$suppliers_th.="<th width='130px;'>{$value}</th>";
+	$suppliers_th.="<th width='130px;' style='background:rgba(230,230,230,0.3);'>{$value}</th>";
 }
 
 $remaining = (5 - count($conso_suppliers));
 
 if ($remaining > 0) {
 	for($b = 0; $b < $remaining; $b++) {
-		$suppliers_th.="<th width='130px;'> </th>";	
+		$suppliers_th.="<th width='130px;' style='background:rgba(230,230,230,0.3);'> </th>";	
 	}
 }
 
@@ -317,7 +317,7 @@ $table= "
 
 <table class='ledger-table'> 
 	<thead>
-		<tr>
+		<tr style='background:rgba(230,230,230,0.3);'>
 			<th width='260px;' rowspan='2'>Specifications</th>
 			<th width='60px;' rowspan='2'>Quantity</th>
 			<th  width='200px;' colspan='5'>Participating Bidders</th>
@@ -346,27 +346,16 @@ $table= "
 		$specs
 
 		<tr>
-			<td  style='text-align:left;color:gray;'>
+			<td  style='text-align:left;background:rgba(200,200,200,0.3);' colspan='7'>
 				Other Specs  
 			</td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
+
 		</tr>
 		$other_specs
 		<tr>
-			<td  style='text-align:left;color:gray;'>
+			<td  style='text-align:left;background:rgba(200,200,200,0.3);' colspan='7'>
 				Remarks  
 			</td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
 		</tr>
 
 		

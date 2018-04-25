@@ -96,21 +96,30 @@ for($x = 0; $x < count($parts); $x++ ) {
 
 	  			$req_count ++;
 
-	  			$partsSec.= " <div style='text-align:left;margin-left:25px;'>
-			  		<p>
-			  			<b>{$req_count}) {$req_details[$z]->name} <em>({$req_details[$z]->quantity} {$req_details[$z]->unit})</em></b>
-			  		</p>";
+	  			$partsSec.= " <section>
+			  		<table class='partsec-table'>
+			  			<tr class='prod-name'>
+				  			<td colspan='2'>
+				  				<b>{$req_details[$z]->name} <em>({$req_details[$z]->quantity} {$req_details[$z]->unit})</em></b>
+				  			</td>
+				  		</tr>
+			  		</tr>";
 			  		if ($req_details[$z]->specs) {
 
 			  			for ($y = 0; $y < count($req_details[$z]->specs); $y++ ) {
-			  				$partsSec.= " <p>
-								&nbsp;&nbsp;&nbsp;&nbsp;{$req_details[$z]->specs[$y]->name} - {$req_details[$z]->specs[$y]->value} <br/>
-					  		</p>";
+			  				$partsSec.= " <tr class='prod-specs'>
+			  					<td>
+									&nbsp;&nbsp;&nbsp;&nbsp;{$req_details[$z]->specs[$y]->name}
+			  					</td>
+			  					<td>
+									{$req_details[$z]->specs[$y]->value}
+			  					</td>
+					  		</tr>";
 			  			}
 
 				  	}
 
-			  	$partsSec.= " </div>";
+			  	$partsSec.= " </table></section><br/>";
 	  		}
 
 		 }
@@ -123,7 +132,7 @@ for($x = 0; $x < count($parts); $x++ ) {
 $table= "
 	<div align='center'>
 <style>
-	.ledger-table {
+	.ledger-table, .partsec-table {
 		cellspacing:0px;
 		cellpadding:0px;
 		border-collapse:collapse;
@@ -131,7 +140,7 @@ $table= "
 		margin-left:20px;
 		width:90%;
 	}
-	.ledger-table td{
+	.ledger-table td, .partsec-table td{
 		border:1px solid #ccc;	
 	}
 	.ledger-table th, .ledger-table td{
@@ -149,6 +158,26 @@ $table= "
 	.no-border{
 		border-bottom:1px solid #fff !important;
 	}
+
+	.partsec-table tr.prod-name {
+		background:rgba(230,230,230,0.3);
+		
+
+	}
+
+	.partsec-table tr.prod-name > td {
+		padding: 5px;
+	}
+
+	.partsec-table tr.prod-specs {
+		text-align: center;
+	}
+
+	.partsec-table tr:nth-child(odd) {
+		background:rgba(230,230,230,0.5);
+	}
+
+
 </style>
 <br/>
 <br/><br/>
@@ -190,8 +219,11 @@ $table= "
 				$used_funds = [];
 
 				for($f = 0; $f < count($funds_per_particulars[$parts[$x]->name]['funds']); $f++ ) {
-					
-					$funds = "{$funds_per_particulars[$parts[$x]->name]['funds'][$f][0]->fund_type} - {$funds_per_particulars[$parts[$x]->name]['funds'][$f][0]->cost_center} - {$funds_per_particulars[$parts[$x]->name]['funds'][$f][0]->line_item}";
+					$funds = "";
+
+					if (isset($funds_per_particulars[$parts[$x]->name]['funds'][$f][0])) {
+						$funds = "{$funds_per_particulars[$parts[$x]->name]['funds'][$f][0]->fund_type} - {$funds_per_particulars[$parts[$x]->name]['funds'][$f][0]->cost_center} - {$funds_per_particulars[$parts[$x]->name]['funds'][$f][0]->line_item}";
+					}
 
 					// show in PDF and save to recetly used funding
 					if (!in_array($funds, $used_funds)) {
@@ -230,7 +262,7 @@ $table= "
 
 
 $table .="			<tr>
-			<td colspan='3'  style='height:50px;'></td>
+			<td colspan='3'  style='height:50px;text-align:right;'><b>Total :</b>&nbsp;&nbsp;&nbsp;</td>
 			<td>";
 				foreach ($funds_per_particulars['total_amount'] as $key => $value) {
 					$amount = number_format($value, 2, ',', ',');
@@ -256,7 +288,7 @@ $table .="	</td>
 
 
 	  <br/><br/>
-	 <div style='float:left;text-align:center; height:40px;width:300px;'>
+	 <div style='float:left;text-align:center; height:40px;width:300px;'><br/>
 	 	<u><b style='text-transform:uppercase;'>{$data[0]->requested_by}</b></u><br/>
 	 	{$data[0]->requested_by_position}
 	 </div>
@@ -280,12 +312,12 @@ $table .="	</td>
 	 </p>
 
 	
-	<div style='float:left;text-align:center; height:100px;width:300px;'>
+	<div style='float:left;text-align:center; height:100px;width:300px;'><br/>
 	 	<u> <b style='text-transform:uppercase;'>{$data[0]->recommended_by}</b></u><br/>
 	 	{$data[0]->recommended_by_position}
 	 </div>
 
- 	<div style='float:left;text-align:center; height:100px;width:300px;margin-left:100px;'>
+ 	<div style='float:left;text-align:center; height:100px;width:300px;margin-left:100px;'><br/>
 	 	<u><b style='text-transform:uppercase;'>{$data[0]->approved_by}</b></u><br/>
 	 {$data[0]->approved_by_position}
 	</div>

@@ -76,6 +76,8 @@ if($method=="POST"){
 		$specs = isset($data->suppliers)?$data->suppliers:[];
 		$specs_ids = [];
 		$specs_sent = [];
+		$result = [];
+		$specs_allowed_to_be_sent = 0;
 		foreach ($specs as $key => $value) {
 			if(!empty(trim($value))) {
 				array_push($specs_ids, (int) $key);
@@ -84,36 +86,55 @@ if($method=="POST"){
 
 		if (!empty($specs_ids)) {
 			for ($x=0; $x < count($specs_ids); $x++) {
-				$result = $req->send($id,$specs_ids[$x],$current_session[0]->account_id,APPROVED_BY_INVITATIONS);
-				// add to sent items
-				if ($result) {
-					$specs_sent[$specs_ids[$x]] = $result;
-				}
-			}
-			
 
-			$data=["data"=> $specs_sent];
-			echo @json_encode($data);
+				# MUST not send an invitation if item has no deadline yet
+				$res = $req->view($id);
+
+				if($res[0]->deadline != '0000-00-00' && !empty($res[0]->deadline) && ($res[0]->deadline)) {
+
+					$specs_allowed_to_be_sent++;
+				}
+				
+			}
+			# all items must have a deadline
+			# if one of those are not, DO NOT send an invitation
+			if(count($specs_ids) == $specs_allowed_to_be_sent) {
+				for ($x=0; $x < count($specs_ids); $x++) {
+					$result = $req->send($id,$specs_ids[$x],$current_session[0]->account_id,APPROVED_BY_INVITATIONS);
+					# add to sent items
+					if ($result) {
+						$specs_sent[$specs_ids[$x]] = $result;
+					}
+				}
+				# send data
+				$data=["data"=> $specs_sent];
+				echo @json_encode($data);
+			}
+			# stop script
 			exit;	
 		}
 
 	}
 
 
-	// general sending
+	# general sending
 	if($action == 'send_items') {
 		$items = isset($data->items)?$data->items:[];
-		// specs
+		# specs
 		$specs = isset($data->suppliers)?$data->suppliers:[];
 		$specs_ids = [];
 		$specs_sent = [];
+		$result = [];
+		$specs_allowed_to_be_sent = 0;
+		$item_ids = [];
+
 		foreach ($specs as $key => $value) {
 			if(!empty(trim($value))) {
 				array_push($specs_ids, (int) $key);
 			}
 		}
 
-		$item_ids = [];
+		
 		foreach ($items as $key => $value) {
 			if(!empty(trim($value))) {
 				array_push($item_ids, (int) $key);
@@ -127,19 +148,38 @@ if($method=="POST"){
 		if (!empty($specs_ids)) {
 
 			for ($a=0; $a < count($item_ids); $a++) {
-				for ($x=0; $x < count($specs_ids); $x++) {
-					$result = $req->send($item_ids[$a],$specs_ids[$x],$current_session[0]->account_id,APPROVED_BY_INVITATIONS);
-					// add to sent items
-					if ($result) {
-						$specs_sent[$specs_ids[$x]] = $result;
+
+				# MUST not send an invitation if item has no deadline yet
+				$res = $req->view($item_ids[$a]);
+
+				if($res[0]->deadline != '0000-00-00' && !empty($res[0]->deadline) && ($res[0]->deadline)) {
+
+					$specs_allowed_to_be_sent++;
+				}
+				
+			}
+
+			# all items must have a deadline
+			# if one of those are not, DO NOT send an invitation
+			if(count($item_ids) == $specs_allowed_to_be_sent) {
+
+				for ($a=0; $a < count($item_ids); $a++) {
+					for ($x=0; $x < count($specs_ids); $x++) {
+						$result = $req->send($item_ids[$a],$specs_ids[$x],$current_session[0]->account_id,APPROVED_BY_INVITATIONS);
+						// add to sent items
+						if ($result) {
+							$specs_sent[$specs_ids[$x]] = $result;
+						}
 					}
 				}
+				# send data			
+				$data=["data"=> $specs_sent];
+				echo @json_encode($data);
+				exit;	
 			}
+
 			
 
-			$data=["data"=> $specs_sent];
-			echo @json_encode($data);
-			exit;	
 		}
 
 	}
@@ -151,6 +191,7 @@ if($method=="POST"){
 		$sup = isset($data->suppliers)?$data->suppliers:[];
 		$sup_ids = [];
 		$sup_sent = [];
+		$viewable = false;
 		foreach ($sup as $key => $value) {
 			if(!empty(trim($value))) {
 				array_push($sup_ids, (int) $key);
@@ -160,6 +201,10 @@ if($method=="POST"){
 		if (!empty($sup_ids)) {
 
 			if ($sup_ids[0]) {
+				
+				// MUST not send an invitation if item has no deadline yet
+				$res = $req->view($id);
+				if($res[0]->deadline == '0000-00-00' || empty($res[0]->deadline) || (!$res[0]->deadline)) exit;
 				// award($id,$supplier_id,$remarks)
 				$data = $req->award($id,$sup_ids[0],$remarks);
 				echo @json_encode($data);

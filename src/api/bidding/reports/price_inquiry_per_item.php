@@ -7,7 +7,7 @@ require_once('../../../auth/Session.php');
 require_once('../../../bidding/Requirements/Requirements.php');
 require_once('../../../bidding/Invitations.php');
 require_once('../../../auth/Session.php');
-require_once('../../../suppliers/Accounts/Accounts.php');
+require_once('../../../suppliers/Index/Index.php');
 
 
 include_once(dirname(__FILE__).'/../../../../vendor/dompdf/lib/html5lib/Parser.php');
@@ -20,7 +20,7 @@ use Bidding\Requirements as Requirements;
 use Bidding\Invitations as Invitations;
 use Helpers\CleanStr as CleanStr;
 use Auth\Session as Session;
-use Suppliers\Accounts as Suppliers;
+use Suppliers\Index as Suppliers;
 
 
 
@@ -45,15 +45,15 @@ $current_session = $Ses->get($token);
 if(!@$current_session[0]->token) exit;
 
 
-// suppliers information
-$suppliers_info = $Supp->view($current_session[0]->account_id);
-if (!isset($suppliers_info[0])) exit;
-$company_name = strtoupper($suppliers_info[0]->company);
-
-
 // non emty invitation
 $inv_details = $Inv->view($id);
 if (!isset($inv_details[0])) exit;
+
+// suppliers information
+$suppliers_info = $Supp->view($inv_details[0]->supplier_id);
+if (!isset($suppliers_info[0])) exit;
+$company_name = strtoupper($suppliers_info[0]->name);
+
 
 // get all requirements details
 $details = $Req->view($inv_details[0]->bidding_requirements_id);
@@ -128,10 +128,11 @@ $html = "<html>
 	}
 	.ledger-table th, .ledger-table td{
 		border:1px solid #ccc;	
+		padding:0px;
 		padding-left:15px;
 	}
 	.ledger-table tbody td {
-		height:50px;
+		height:25px;
 	}
 	.breaker {
 		text-align:left;
@@ -228,11 +229,7 @@ $html = "<html>
 	  	 	<table class='ledger-table'>
 	  	 		<tr>
 	  	 			<td style='width:200px;'>Product / Service Name: </td>
-	  	 			<td><b>{$details[0]->name}</b></td>
-	  	 		</tr>
-	  	 		<tr>
-	  	 			<td style='width:200px;'>Quantity : </td>
-	  	 			<td><b>{$details[0]->quantity} {$details[0]->unit}</b></td>
+	  	 			<td><b>{$details[0]->name} ({$details[0]->quantity} {$details[0]->unit})</b></td>
 	  	 		</tr>
 	  	 		{$tr_specs}
 	  	 	</table>

@@ -32,13 +32,13 @@ class Index{
 	}
 
 	public function view($id){
-		$results=['data'=>[]];	
+		$results=[];	
 		$SQL='SELECT * FROM company WHERE id=:id';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id',$id,\PDO::PARAM_INT);
 		$sth->execute();
 		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
-			$results['data'][]=$row;
+			$results[]=$row;
 		}
 
 		return $results;
