@@ -1,13 +1,19 @@
 <?php 
 header('Access-Control-Allow-Origin: *');
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
 require_once('../../../bidding/Proposals.php');
+require_once('../../../bidding/Proposals/Mailer.php');
 require_once('../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../config/database/connections.php');
 require_once('../../../bidding/Requirements/Requirements.php');
 require_once('../../../suppliers/Logs/Logs.php');
 require_once('../../../auth/Session.php');
 
+
 use Bidding\Proposals as Proposals;
+use Bidding\Proposals\Mailer as Mailer;
 use Bidding\Requirements as Requirements;
 use Suppliers\Logs as Logs;
 use Helpers\CleanStr as CleanStr;
@@ -188,7 +194,24 @@ if($method=="POST"){
 	if ($action == 'send') {
 		$id = (int) isset($data->id) ? $clean_str->clean($data->id) : '';
 
-		echo @$Prop->send($id);
+		# view original proposal
+		$submitted_proposal = ($Prop->view($id));
+
+		if ($submitted_proposal[0]) {
+			$unit_price = ($submitted_proposal[0]->amount / $submitted_proposal[0]->quantity);
+
+			# Use email template
+			# src : http://templates.cakemail.com/details/blitz
+			$message = include_once('proposal_email_template.php');
+			
+			# send email to CBA the submit
+			$MailerClass = new Mailer();
+
+			if($MailerClass->send($message)) {
+				 echo @$Prop->send($id);
+			}
+		}
+		
 		exit;
 	}
 

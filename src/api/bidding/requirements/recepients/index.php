@@ -3,6 +3,7 @@ header('Access-Control-Allow-Origin: *');
 require_once('../../../../bidding/Index/Index.php');
 require_once('../../../../bidding/Particulars/Particulars.php');
 require_once('../../../../bidding/Requirements/Requirements.php');
+require_once('../../../../bidding/Requirements/Mailer.php');
 require_once('../../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../../config/database/connections.php');
 require_once('../../../../config/constants/reports.php');
@@ -11,6 +12,7 @@ require_once('../../../../auth/Session.php');
 
 
 use Bidding\Index as Index;
+use Bidding\Proposals\Mailer as Mailer;
 use Bidding\Particulars as Particulars;
 use Bidding\Requirements as Requirements;
 use Suppliers\Logs as Logs;
@@ -78,6 +80,7 @@ if($method=="POST"){
 		$specs_sent = [];
 		$result = [];
 		$specs_allowed_to_be_sent = 0;
+		$requirements_profile = [];
 		foreach ($specs as $key => $value) {
 			if(!empty(trim($value))) {
 				array_push($specs_ids, (int) $key);
@@ -89,6 +92,7 @@ if($method=="POST"){
 
 				# MUST not send an invitation if item has no deadline yet
 				$res = $req->view($id);
+				$requirements_profile[$id] = $res;
 
 				if($res[0]->deadline != '0000-00-00' && !empty($res[0]->deadline) && ($res[0]->deadline)) {
 
@@ -96,15 +100,26 @@ if($method=="POST"){
 				}
 				
 			}
+			# send email to CBA the submit
+			$MailerClass = new Mailer();
+
 			# all items must have a deadline
 			# if one of those are not, DO NOT send an invitation
 			if(count($specs_ids) == $specs_allowed_to_be_sent) {
 				for ($x=0; $x < count($specs_ids); $x++) {
-					$result = $req->send($id,$specs_ids[$x],$current_session[0]->account_id,APPROVED_BY_INVITATIONS);
-					# add to sent items
-					if ($result) {
-						$specs_sent[$specs_ids[$x]] = $result;
+
+					$message = include_once('proposal_email_inv_template.php');
+
+					if(!$requirements_profile[$id][0]) exit;
+
+					if($MailerClass->send($message)) {
+						$result = $req->send($id,$specs_ids[$x],$current_session[0]->account_id,APPROVED_BY_INVITATIONS);
+						# add to sent items
+						if ($result) {
+							$specs_sent[$specs_ids[$x]] = $result;
+						}
 					}
+
 				}
 				# send data
 				$data=["data"=> $specs_sent];

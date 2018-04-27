@@ -399,6 +399,40 @@ class Requirements{
 	public function remove($id){
 		return self::set_status($id,1);
 	}
+
+
+	public function feedback($id, $account_id, $feedback){
+		//parameters
+		$results=[];
+		
+		//query
+		$SQL='INSERT INTO bidding_requirements_awardees_feedback(account_id,bidding_requirements_awardees_id,feedback) values(:account_id,:bidding_requirements_awardees_id,:feedback)';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':bidding_requirements_awardees_id',$id);
+		$sth->bindParam(':account_id',$account_id);
+		$sth->bindParam(':feedback',$feedback);
+		$sth->execute();
+
+		return $this->DB->lastInsertId();
+
+	}
+
+
+	public function rate($id, $name, $value){
+		//parameters
+		$results=[];
+		
+		//query
+		$SQL='INSERT INTO bidding_requirements_awardees_feedback_ratings(bidding_requirements_awardees_feedback_id, name, value) values(:bidding_requirements_awardees_feedback_id, :name, :value)';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':bidding_requirements_awardees_feedback_id',$id);
+		$sth->bindParam(':name',$name);
+		$sth->bindParam(':value',$value);
+		$sth->execute();
+
+		return $this->DB->lastInsertId();
+
+	}
 }
 
 ?>
