@@ -91,5 +91,24 @@ class Account{
 
 		return $results;
 	}
+
+
+	public function get_accounts_per_supplier($id){
+		$results=[];
+
+		$SQL='SELECT account.username,account.id as id FROM account  WHERE account.status!=1 and company_id = :id';
+		$sth=$this->DB->prepare($SQL);
+		
+
+		$sth->bindParam(':id',$id,\PDO::PARAM_INT);
+		$sth->execute();
+
+		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
+			$results[]=$row;
+
+		}
+
+		return $results;
+	}
 }
 ?>

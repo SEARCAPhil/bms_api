@@ -250,17 +250,13 @@ $html = "<html>
 	}
 
 	.ledger-table th, .ledger-table tr td{
-
 		border:1px solid #ccc;	
-
+		padding:0px;
 		padding-left:15px;
-
 	}
 
 	.ledger-table tr td {
-
-		height:50px;
-
+		height:25px;
 	}
 
 	.breaker {
@@ -367,7 +363,7 @@ $html = "<html>
 
 		  	<article class='text-center'>
 
-	  	  		<h3>PRICE INQUIRY</h3><br/>
+	  	  		<h3>PRICE INQUIRY</h3>
 
 			 </article>
 
@@ -377,7 +373,7 @@ $html = "<html>
 
 
 
-	 	<section style='height:200px;'>
+	 	<section style='height:160px;'>
 
 		  	<div style='float:left;text-align:left;width:30%;'>
 
@@ -416,21 +412,8 @@ $html = "<html>
 		  			</p>
 
 		  		</small>
-
-		  		<br/>
-
-
-
 		  	</div>
-
 		</section>
-
-
-
-
-
-
-
 
 
 		<div style='width:95%;'>
@@ -449,7 +432,25 @@ $html = "<html>
 
 
 
-	  	 <article class='text-center'  style='float:left;text-align:center;width:100%;'>
+		   <article class='text-center'  style='float:left;text-align:center;width:100%;'>
+		   
+		   <p style='font-size:13px;text-align:justify;'><b>INSTRUCTIONS:</b><br/> 
+			1.) INDICATE ON THE RIGHT TOP MOST PORTION OF THE ENVELOPE THE ITEM YOU ARE BIDDING FOR<br/> 
+			
+			2.) PLEASE DO NOT SEND YOUR QUOTATION THRU FAX. <br/>
+			
+			3.) ADDRESS YOUR SEALED BID TO: <br/>
+			
+			<b>ADORACION T. ROBLES</b>  <br/>
+			<b>CHAIR, COMMITTEE ON BIDS AND AWARDS</b> <br/>
+			
+			<b>SEAMEO – SEARCA</b> <br/>
+			<b>4031 COLLEGE, LAGUNA</b><br/><br/> 
+			
+				OR E-MAIL YOUR QUOTATION TO: <b> cba@searca.org</b> <br/>
+			
+			ALSO CONSIDER THAT UNDER PD 1171, SEARCA ENJOYS A <b>COMPREHENSIVE TAX EXEMPTION</b> PRIVILEGE.
+		</p><br/>
 
 	  	 	<table class='ledger-table'>
 
@@ -475,11 +476,21 @@ $html = "<html>
 
 	  	
 
+		   <article>
 
+				<section style='width:100%;height:30px;font-size:13px;'>
 
+					<div style='float:left;width:100px;'>
 
+						Emailed: 	
 
+					</div>
 
+					<div style='float:left;width:230px;border-bottom:1px solid #ccc;text-align:center;'><b>{$date}</b></div>  		
+
+				</section>
+
+			</article>
 
 		   	<article>
 
@@ -510,32 +521,6 @@ $html = "<html>
 		  		</section>
 
 		  	</article>
-
-
-
-
-
-		  	<article>
-
-		  		<section style='width:100%;height:20px;font-size:13px;'>
-
-		  			<div style='float:left;width:100px;'>
-
-		  				Emailed: 	
-
-		  			</div>
-
-		  			<div style='float:left;width:230px;border-bottom:1px solid #ccc;text-align:center;'><b>{$date}</b></div>  		
-
-		  		</section>
-
-		  	</article>
-
-
-
-
-
-
 
 		  <p style='font-size:13px;border-top:2px dashed #ccc;padding-top:10px;margin-top:50px;'>
 

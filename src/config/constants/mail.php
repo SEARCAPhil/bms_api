@@ -1,6 +1,6 @@
 <?php
 # MAIL Configuration
 # Receives formal quotations submitted by the suppliers
-const PROPOSAL_MAIL_RECEIVERS = ['email here'];
+const PROPOSAL_MAIL_RECEIVERS = ['johnkennethgibasabella@gmail.com'];
 
 ?>

@@ -180,8 +180,7 @@ for ($x = 0; $x < count($details[0]->specs); $x++) {
 	$specs.="<tr>
 		<td style='text-align:left;'>
 			{$details[0]->specs[$x]->name} - {$details[0]->specs[$x]->value} <br/>	
-		</td>
-		<td></td>";
+		</td>";
 
 	// specs
 	$specs_td = '';
@@ -221,7 +220,7 @@ foreach ($conso_other_specs as $key => $value) {
 	$key_name = ucwords($key);
 
 	$other_specs.="<tr>
-		<td style='text-align:left;'>{$key_name}</td><td></td>";
+		<td style='text-align:left;'>{$key_name}</td>";
 
 		$remaining = 5;
 
@@ -319,7 +318,7 @@ $table= "
 	<thead>
 		<tr style='background:rgba(230,230,230,0.3);'>
 			<th width='260px;' rowspan='2'>Specifications</th>
-			<th width='60px;' rowspan='2'>Quantity</th>
+
 			<th  width='200px;' colspan='5'>Participating Bidders</th>
 		</tr>
 		<tr>
@@ -332,28 +331,26 @@ $table= "
 			<td  style='text-align:left;'>
 				Amount : {$details[0]->budget_currency} {$budget_amount} <br/>	
 			</td>
-			<td></td>
 			{$amount_td}
 		</tr>
 		<tr>
 			<td  style='text-align:left;'>
 				DISCOUNT :  <br/>	
 			</td>
-			<td></td>
 			{$discount_td}
 		</tr>
 
 		$specs
 
 		<tr>
-			<td  style='text-align:left;background:rgba(200,200,200,0.3);' colspan='7'>
+			<td  style='text-align:left;background:rgba(200,200,200,0.3);' colspan='6'>
 				Other Specs  
 			</td>
 
 		</tr>
 		$other_specs
 		<tr>
-			<td  style='text-align:left;background:rgba(200,200,200,0.3);' colspan='7'>
+			<td  style='text-align:left;background:rgba(200,200,200,0.3);' colspan='6'>
 				Remarks  
 			</td>
 		</tr>
@@ -361,22 +358,20 @@ $table= "
 		
 		<tr>
 			<td  style='text-align:left;color:gray;'> </td>
-			<td> </td>
 			{$remarks_td}
 		</tr>
 
 		<tr>
-			<td  style='text-align:left;' colspan='7'>
+			<td  style='text-align:left;' colspan='6'>
 				We certify to the correctnes of entries of above bids. Based on our assessment, the most advantageous offer to the center is made by: 	
 			</td>
 		</tr>
 
 		<tr>
 			<td>
-				<b>Maria Cristeta N. Cuaresma</b><br/>
-				Internal Chair CBA
+				<b>Adoracion T. Robles </b><br/>
+				Chair
 			</td>
-			<td></td>
 			<td>
 				<b>Jaymark Warren T. Dia</b><br/>
 				Member
@@ -397,9 +392,8 @@ $table= "
 		<tr>
 			<td>
 				<b>Maria Monina Cecilia A. Villena</b><br/>
-				Member
+				Vice Chair
 			</td>
-			<td></td>
 			<td>
 				<b>Dexter A. Manset</b><br/>
 				Member
@@ -421,13 +415,12 @@ $table= "
 				<b>Maria Teresa Lourdes B. Ferino</b><br/>
 				Member
 			</td>
-			<td></td>
 			<td>
-				<b>Rochella B. Lapitan</b><br/>
+				<b>Maria Katrina R. Punto </b><br/>
 				Member
 			</td>
 			<td>
-				<b>Fe D. dela Cruz</b><br/>
+				<b>Christine Joy B. Manalo</b><br/>
 				Recording Secretary, CBA
 			</td>
 			<td colspan='2'></td>
@@ -478,12 +471,10 @@ $html = "<html>
 		  	<br/>
 	  	</p><br/>
 	  	<h3>Proposal Comparison</h3>
-
 	  </article>
 
 	  <article class='text-center'  style='float:left;text-align:center;width:100%;'>
 		<div style='float:left;text-align:center;width:100%;'>
-
 			<div style='margin-left:80%;text-align:center;'>
 				<div style='height:2px;'><p><b>{$date}</b></p></div>
 				<div style='height:2px;border-bottom:1px solid #ccc;'>Date</div>

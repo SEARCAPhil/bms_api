@@ -26,7 +26,7 @@ class Requirements{
 		$SQL3='SELECT bidding_requirements_invitation.*, company.name, company.alias FROM bidding_requirements_invitation LEFT JOIN company on company.id = bidding_requirements_invitation.supplier_id WHERE bidding_requirements_invitation.bidding_requirements_id = :id and bidding_requirements_invitation.status = 0';
 
 		$SQL4 = 'SELECT bidding_requirements_funds.* FROM bidding_requirements_funds WHERE bidding_requirements_funds.bidding_requirements_id = :id AND bidding_requirements_funds.status !=1';
-		$SQL5 = 'SELECT bidding_requirements_awardees.* , company.name, company.alias FROM bidding_requirements_awardees LEFT JOIN company on company.id = bidding_requirements_awardees.company_id  WHERE bidding_requirements_awardees.bidding_requirements_id = :id AND bidding_requirements_awardees.status !=1';
+		$SQL5 = 'SELECT bidding_requirements_awardees.* , company.name, company.alias, bidding_requirements_proposals.status as proposal_status FROM bidding_requirements_awardees LEFT JOIN bidding_requirements_proposals on bidding_requirements_proposals.id = bidding_requirements_awardees.proposal_id   LEFT JOIN company on company.id = bidding_requirements_awardees.company_id  WHERE bidding_requirements_awardees.bidding_requirements_id = :id AND bidding_requirements_awardees.status !=1';
 
 
 
@@ -414,6 +414,142 @@ class Requirements{
 		$sth->execute();
 
 		return $this->DB->lastInsertId();
+
+	}
+
+
+
+	public function get_feedback_per_awardee($id){
+		
+		//query
+		$SQL='SELECT bidding_requirements_awardees_feedback.*, bidding_requirements_awardees.company_id, company.name as company_name FROM bidding_requirements_awardees_feedback LEFT JOIN bidding_requirements_awardees ON bidding_requirements_awardees.id = bidding_requirements_awardees_feedback.bidding_requirements_awardees_id LEFT JOIN company on company.id = bidding_requirements_awardees.company_id WHERE bidding_requirements_awardees_feedback.bidding_requirements_awardees_id = :id ';
+
+		$SQL2 = 'SELECT profile_name, department from profile WHERE account_id = :id ORDER BY profile.id DESC LIMIT 1';
+		$SQL3 = 'SELECT * from bidding_requirements_awardees_feedback_ratings WHERE bidding_requirements_awardees_feedback_ratings.bidding_requirements_awardees_feedback_id = :id ORDER BY name ASC';
+
+		$sth = $this->DB->prepare($SQL);
+		$sth2 = $this->DB->prepare($SQL2);
+		$sth3 = $this->DB->prepare($SQL3);
+
+		$sth->bindParam(':id',$id);
+		$sth->execute();
+
+		$results = [];
+
+		while ($row = $sth->fetch(\PDO::FETCH_OBJ)) {
+			$row->feedback = nl2br($row->feedback);
+
+			# profile
+			$sth2->bindParam(':id',$row->account_id);
+			$sth2->execute();
+			$row->author = [];
+			while($row2 = $sth2->fetch(\PDO::FETCH_OBJ)) {
+				$row->author[] = $row2;
+			}
+
+
+			# ratings
+			$sth3->bindParam(':id',$row->id);
+			$sth3->execute();
+			$row->ratings = [];
+			while($row3 = $sth3->fetch(\PDO::FETCH_OBJ)) {
+				$row->ratings[] = $row3;
+			}
+
+			$results[] = $row;
+		}
+
+		return $results;
+
+	}
+
+
+	public function get_feedback_per_bidding_request($id){
+		
+		//query
+		$SQL='SELECT bidding_requirements_awardees_feedback.*, bidding_requirements_awardees.company_id, company.name as company_name, particulars.bidding_id , bidding_requirements.name as product_name FROM bidding_requirements_awardees_feedback LEFT JOIN bidding_requirements_awardees ON bidding_requirements_awardees.id = bidding_requirements_awardees_feedback.bidding_requirements_awardees_id LEFT JOIN company on company.id = bidding_requirements_awardees.company_id LEFT JOIN bidding_requirements on bidding_requirements.id = bidding_requirements_awardees.bidding_requirements_id LEFT JOIN particulars on particulars.id = bidding_requirements.particular_id WHERE particulars.bidding_id = :id ';
+
+		$SQL2 = 'SELECT profile_name, department from profile WHERE account_id = :id ORDER BY profile.id DESC LIMIT 1';
+		$SQL3 = 'SELECT * from bidding_requirements_awardees_feedback_ratings WHERE bidding_requirements_awardees_feedback_ratings.bidding_requirements_awardees_feedback_id = :id ORDER BY name ASC';
+
+		$sth = $this->DB->prepare($SQL);
+		$sth2 = $this->DB->prepare($SQL2);
+		$sth3 = $this->DB->prepare($SQL3);
+
+		$sth->bindParam(':id',$id);
+		$sth->execute();
+
+		$results = [];
+
+		while ($row = $sth->fetch(\PDO::FETCH_OBJ)) {
+			$row->feedback = nl2br($row->feedback);
+
+			# profile
+			$sth2->bindParam(':id',$row->account_id);
+			$sth2->execute();
+			$row->author = [];
+			while($row2 = $sth2->fetch(\PDO::FETCH_OBJ)) {
+				$row->author[] = $row2;
+			}
+
+
+			# ratings
+			$sth3->bindParam(':id',$row->id);
+			$sth3->execute();
+			$row->ratings = [];
+			while($row3 = $sth3->fetch(\PDO::FETCH_OBJ)) {
+				$row->ratings[] = $row3;
+			}
+
+			$results[] = $row;
+		}
+
+		return $results;
+
+	}
+
+
+	public function get_feedback($id){
+		
+		//query
+		$SQL='SELECT bidding_requirements_awardees_feedback.*, bidding_requirements_awardees.company_id, company.name as company_name, particulars.bidding_id , bidding_requirements.name as product_name, bidding_requirements.deadline , bidding_requirements_proposals.amount, bidding_requirements_proposals.currency FROM bidding_requirements_awardees_feedback LEFT JOIN bidding_requirements_awardees ON bidding_requirements_awardees.id = bidding_requirements_awardees_feedback.bidding_requirements_awardees_id LEFT JOIN bidding_requirements_proposals on bidding_requirements_proposals.id = bidding_requirements_awardees.proposal_id LEFT JOIN company on company.id = bidding_requirements_awardees.company_id LEFT JOIN bidding_requirements on bidding_requirements.id = bidding_requirements_awardees.bidding_requirements_id LEFT JOIN particulars on particulars.id = bidding_requirements.particular_id WHERE bidding_requirements_awardees_feedback.id = :id ';
+
+		$SQL2 = 'SELECT profile_name, department from profile WHERE account_id = :id ORDER BY profile.id DESC LIMIT 1';
+		$SQL3 = 'SELECT * from bidding_requirements_awardees_feedback_ratings WHERE bidding_requirements_awardees_feedback_ratings.bidding_requirements_awardees_feedback_id = :id ORDER BY name ASC';
+
+		$sth = $this->DB->prepare($SQL);
+		$sth2 = $this->DB->prepare($SQL2);
+		$sth3 = $this->DB->prepare($SQL3);
+
+		$sth->bindParam(':id',$id);
+		$sth->execute();
+
+		$results = [];
+
+		while ($row = $sth->fetch(\PDO::FETCH_OBJ)) {
+			$row->feedback = nl2br($row->feedback);
+
+			# profile
+			$sth2->bindParam(':id',$row->account_id);
+			$sth2->execute();
+			$row->author = [];
+			while($row2 = $sth2->fetch(\PDO::FETCH_OBJ)) {
+				$row->author[] = $row2;
+			}
+
+
+			# ratings
+			$sth3->bindParam(':id',$row->id);
+			$sth3->execute();
+			$row->ratings = [];
+			while($row3 = $sth3->fetch(\PDO::FETCH_OBJ)) {
+				$row->ratings[] = $row3;
+			}
+
+			$results[] = $row;
+		}
+
+		return $results;
 
 	}
 

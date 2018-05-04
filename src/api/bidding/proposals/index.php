@@ -124,7 +124,7 @@ if($method=="GET"){
 
 		if ($current_session[0]->role === 'gsu') {
 			// all received
-			echo @json_encode($Prop->lists_all_by_status($id,$page,200,3));	
+			echo @json_encode($Prop->lists_all_winner_and_awarded($id,$page,200));	
 		}
 
 		
@@ -228,8 +228,22 @@ if($method=="POST"){
 	}
 
 
-		// send
+	// send
 	if ($action == 'award') {
+		$id = (int) isset($data->id) ? $clean_str->clean($data->id) : '';
+
+		$original_proposal = $Prop->view($id);
+
+		if (@$original_proposal[0]->company_id) {
+			echo @$Prop->award($id);
+		}	
+		exit;
+	}
+
+
+
+	# winner
+	if ($action == 'winner') {
 		$id = (int) isset($data->id) ? $clean_str->clean($data->id) : '';
 		$remarks = (int) isset($data->remarks) ? $clean_str->clean($data->remarks) : '';
 		$original_proposal = $Prop->view($id);
@@ -238,11 +252,9 @@ if($method=="POST"){
 			$lastId = $Req->award($original_proposal[0]->bidding_requirements_id,$original_proposal[0]->company_id,$remarks,$id);
 
 			if ($lastId) {
-				echo @$Prop->award($id);
+				echo @$Prop->winner($id);
 			}
-		}
-		
-		
+		}	
 		exit;
 	}
 

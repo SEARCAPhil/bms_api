@@ -28,10 +28,6 @@ $method=($_SERVER['REQUEST_METHOD']);
 
 
 if($method=="POST"){
-	/**
-	 * POST product
-	 */  
-	$index=new Index($DB);
 	
 	$input=file_get_contents("php://input");
 
@@ -74,6 +70,19 @@ if($method=="POST"){
 
 	}
 
+}
+
+if($method=="GET"){
+	if (!isset($_GET['id']) || !isset($_GET['token'])) exit;
+	# bidding requirements
+	$id = (int) $clean_str->clean($_GET['id']);
+
+	if (isset($_GET['bidding_request'])) {
+		$res = $Req->get_feedback_per_bidding_request($id);
+	} else {
+		$res = $Req->get_feedback_per_awardee($id);
+	}
+	echo json_encode($res);
 }
 
 ?>

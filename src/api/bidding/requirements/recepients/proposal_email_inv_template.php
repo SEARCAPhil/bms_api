@@ -313,17 +313,17 @@ td[class="spechide"]
 
                           <tr>
                             <td align='center'>
-                              <table>
+                              <!--<table>
                                 <tr>
                                   <td align='center' bgcolor='#1A54BA' style='background:#DC2828; padding:15px 18px;-webkit-border-radius: 4px; -moz-border-radius: 4px; border-radius: 4px;'>
                                     <div class="contentEditableContainer contentTextEditable">
                                       <div class="contentEditable" align='center'>
-                                        <a target='_blank' href='#' class='link2' style='color:#ffffff;'>View details in BMS</a>
+                                        <a target='_blank' href='#' class='link2' style='color:#ffffff;'>View details</a>
                                       </div>
                                     </div>
                                   </td>
                                 </tr>
-                              </table>
+                              </table>-->
                             </td>
                           </tr>
                           <tr><td height='20'></td></tr>

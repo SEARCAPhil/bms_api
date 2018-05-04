@@ -1,8 +1,8 @@
 <?php 
 # SMTP Mail Credentials
-const SMTP_SENDER = 'sender name';
-const SMTP_USERNAME = 'email here';
-const SMTP_PASSWORD = 'email password here';
+const SMTP_SENDER = 'no-reply';
+const SMTP_USERNAME = 'no-reply@mail.local';
+const SMTP_PASSWORD = 'hello@1234';
 
 ?>
 

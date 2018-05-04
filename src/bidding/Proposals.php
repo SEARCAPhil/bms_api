@@ -129,6 +129,25 @@ class Proposals{
 	}
 
 
+	public function lists_all_winner_and_awarded($req_id,$page=0,$limit=200){
+		$results=[];
+		$page=$page<2?0:$page-1;
+
+		$SQL='SELECT bidding_requirements_proposals.*, bidding_requirements.name, quantity, unit, username, company_id FROM  bidding_requirements_proposals LEFT JOIN bidding_requirements on bidding_requirements.id = bidding_requirements_proposals.bidding_requirements_id LEFT JOIN account on account.id = bidding_requirements_proposals.account_id WHERE (bidding_requirements_proposals.bidding_requirements_id = :id AND (bidding_requirements_proposals.status = 3 OR bidding_requirements_proposals.status = 5 )) ORDER BY bidding_requirements_proposals.date_created DESC LIMIT :offset,:lim';
+
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindValue(':id',$req_id,\PDO::PARAM_INT);
+		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
+		$sth->bindParam(':offset',$page,\PDO::PARAM_INT);
+		$sth->execute();
+		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
+			$results[]=$row;
+		}
+
+		return $results;
+	}
+
+
 	public function view($id){
 		$results=[];	
 
@@ -298,6 +317,10 @@ class Proposals{
 
 	public function award($id){
 		return (int) self::set_status($id, 3);
+	}
+
+	public function winner($id){
+		return (int) self::set_status($id, 5);
 	}
 
 	public function request_for_changes($id,$reason){
