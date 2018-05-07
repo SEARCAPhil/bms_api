@@ -148,6 +148,21 @@ class Proposals{
 	}
 
 
+
+	public function get_all_awardees_per_proposal($req_id,$page=0,$limit=200){
+		$results=[];
+		$SQL='SELECT bidding_requirements_awardees.* FROM  bidding_requirements_awardees  WHERE proposal_id = :id';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindValue(':id',$req_id,\PDO::PARAM_INT);
+		$sth->execute();
+		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
+			$results[]=$row;
+		}
+
+		return $results;
+	}
+
+
 	public function view($id){
 		$results=[];	
 

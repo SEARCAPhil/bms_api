@@ -235,7 +235,15 @@ if($method=="POST"){
 		$original_proposal = $Prop->view($id);
 
 		if (@$original_proposal[0]->company_id) {
-			echo @$Prop->award($id);
+			# award
+			$is_awarded = @$Prop->award($id);
+			# change status of all awardees with the same proposal_id
+			$awardees = ($Prop->get_all_awardees_per_proposal($original_proposal[0]->id));
+			foreach($awardees as $key => $value) {
+				$Req->award_winner($value->id);
+			}
+
+			echo $is_awarded;
 		}	
 		exit;
 	}

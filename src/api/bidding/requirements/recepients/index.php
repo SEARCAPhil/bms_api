@@ -215,7 +215,7 @@ if($method=="POST"){
 
 
 	
-	if($action == 'award') {
+	if($action == 'winner') {
 		$remarks = isset($data->remarks)?$data->remarks:'';
 		$sup = isset($data->suppliers)?$data->suppliers:[];
 		$sup_ids = [];
@@ -244,6 +244,13 @@ if($method=="POST"){
 		}
 
 	}
+
+
+	if($action == 'award') {
+		echo $req->award_winner($id);
+		exit;
+	}
+
 
 
 	if($action == 'remove_awardee') {

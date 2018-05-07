@@ -61,7 +61,6 @@ $conso_other_specs = [];
 $props_ids = array_unique(explode(',', $prop));
 
 for($a = 0; $a < count($props_ids); $a++) {
-
 	$det = $Prop->view($props_ids[$a]);
 
 	if(@$det[0]->id) {
@@ -359,79 +358,80 @@ $table= "
 		<tr>
 			<td  style='text-align:left;color:gray;'> </td>
 			{$remarks_td}
-		</tr>
+		</tr>";
 
-		<tr>
-			<td  style='text-align:left;' colspan='6'>
-				We certify to the correctnes of entries of above bids. Based on our assessment, the most advantageous offer to the center is made by: 	
-			</td>
-		</tr>
+	#show signatories only if needed
+	if(isset($_GET['signatories'])) {	
 
-		<tr>
-			<td>
-				<b>Adoracion T. Robles </b><br/>
-				Chair
-			</td>
-			<td>
-				<b>Jaymark Warren T. Dia</b><br/>
-				Member
-			</td>
-			<td>
-				<b>Bidding procured noted and witnessed by :</b>
-			</td>
-			<td colspan='2'>
-				<b>Certified that the bidding procedure is in order</b>
-			</td>
-			<td>
-				{$awarded_suppliers_p}
-			</td>
-		</tr>
+		$table.="	<tr>
+				<td  style='text-align:left;' colspan='6'>
+					We certify to the correctnes of entries of above bids. Based on our assessment, the most advantageous offer to the center is made by: 	
+				</td>
+			</tr>
 
-
-
-		<tr>
-			<td>
-				<b>Maria Monina Cecilia A. Villena</b><br/>
-				Vice Chair
-			</td>
-			<td>
-				<b>Dexter A. Manset</b><br/>
-				Member
-			</td>
-			<td>
-				<b>Ricardo A. Menorca</b><br/>
-				Unit Head, General Services and ex-officio member
-			</td>
-			<td colspan='2'>
-				<b>Julita G. Ventenilla</b><br/>
-				Unit Head, Internal Audit and ex-officio ember
-			</td>
-			<td></td>
-		</tr>
+			<tr>
+				<td>
+					<b>Adoracion T. Robles </b><br/>
+					Chair
+				</td>
+				<td>
+					<b>Jaymark Warren T. Dia</b><br/>
+					Member
+				</td>
+				<td>
+					<b>Bidding procured noted and witnessed by :</b>
+				</td>
+				<td colspan='2'>
+					<b>Certified that the bidding procedure is in order</b>
+				</td>
+				<td>
+					{$awarded_suppliers_p}
+				</td>
+			</tr>
 
 
-		<tr>
-			<td>
-				<b>Maria Teresa Lourdes B. Ferino</b><br/>
-				Member
-			</td>
-			<td>
-				<b>Maria Katrina R. Punto </b><br/>
-				Member
-			</td>
-			<td>
-				<b>Christine Joy B. Manalo</b><br/>
-				Recording Secretary, CBA
-			</td>
-			<td colspan='2'></td>
-			<td></td>
-		</tr>
+
+			<tr>
+				<td>
+					<b>Maria Monina Cecilia A. Villena</b><br/>
+					Vice Chair
+				</td>
+				<td>
+					<b>Dexter A. Manset</b><br/>
+					Member
+				</td>
+				<td>
+					<b>Ricardo A. Menorca</b><br/>
+					Unit Head, General Services and ex-officio member
+				</td>
+				<td colspan='2'>
+					<b>Julita G. Ventenilla</b><br/>
+					Unit Head, Internal Audit and ex-officio ember
+				</td>
+				<td></td>
+			</tr>
 
 
+			<tr>
+				<td>
+					<b>Maria Teresa Lourdes B. Ferino</b><br/>
+					Member
+				</td>
+				<td>
+					<b>Maria Katrina R. Punto </b><br/>
+					Member
+				</td>
+				<td>
+					<b>Christine Joy B. Manalo</b><br/>
+					Recording Secretary, CBA
+				</td>
+				<td colspan='2'></td>
+				<td></td>
+			</tr>";
+	}
+
+$table.="
 	</tbody>
- <tbody>
- 	
- </tbody>
  </table>
 ";
 

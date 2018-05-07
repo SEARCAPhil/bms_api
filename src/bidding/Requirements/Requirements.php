@@ -400,6 +400,10 @@ class Requirements{
 		return self::set_status($id,1);
 	}
 
+	public function award_winner($id){
+		return self::set_awardee_status($id,2);
+	}
+
 
 	public function feedback($id, $account_id, $feedback){
 		//parameters
