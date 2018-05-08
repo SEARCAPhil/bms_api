@@ -73,7 +73,9 @@ class Index{
 
 	public function lists_all_received($account_id,$page=0,$limit=20,$status=0){
 		$results=[];
-		$page=$page<2?0:$page-1;
+		$page = $page > 1 ? $page : 1;
+		#set starting limit(page 1=10,page 2=20)
+		$start_page = $page < 2 ? 0 :(integer)($page-1) * $limit;
 		//$SQL='SELECT bidding.*, profile.profile_name, profile.email, bidding_collaborators.*  FROM bidding LEFT JOIN profile on profile.id = bidding.created_by LEFT JOIN bidding_collaborators on bidding_collaborators.account_id = profile.account_id WHERE (bidding.status !=4 and bidding.status !=0) AND (profile.account_id = :account_id) OR (account.id =:account_id) ORDER BY bidding.name ASC LIMIT :offset,:lim';
 
 		$SQL='SELECT bidding.*, bidding_collaborators.account_id,profile.profile_name FROM bidding_collaborators LEFT JOIN bidding on bidding.id = bidding_collaborators.bidding_id LEFT JOIN profile on profile.id = bidding.created_by  WHERE (bidding.status !=4 and bidding.status != 0) AND ((bidding.created_by = :account_id) OR ( bidding_collaborators.account_id = :account_id)) ORDER BY bidding.id DESC LIMIT :offset,:lim';
@@ -81,7 +83,7 @@ class Index{
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindValue(':account_id',$account_id);
 		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
-		$sth->bindParam(':offset',$page,\PDO::PARAM_INT);
+		$sth->bindParam(':offset',$start_page,\PDO::PARAM_INT);
 		$sth->execute();
 		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
 			$results[]=$row;
@@ -93,14 +95,16 @@ class Index{
 
 	public function lists_all_approved($page=0,$limit=20,$status=0){
 		$results=[];
-		$page=$page<2?0:$page-1;
+		$page = $page > 1 ? $page : 1;
+		#set starting limit(page 1=10,page 2=20)
+		$start_page = $page < 2 ? 0 :(integer)($page-1) * $limit;
 		//$SQL='SELECT bidding.*, profile.profile_name, profile.email, bidding_collaborators.*  FROM bidding LEFT JOIN profile on profile.id = bidding.created_by LEFT JOIN bidding_collaborators on bidding_collaborators.account_id = profile.account_id WHERE (bidding.status !=4 and bidding.status !=0) AND (profile.account_id = :account_id) OR (account.id =:account_id) ORDER BY bidding.name ASC LIMIT :offset,:lim';
 
 		$SQL='SELECT bidding.*, bidding_collaborators.account_id,profile.profile_name FROM bidding_collaborators LEFT JOIN bidding on bidding.id = bidding_collaborators.bidding_id LEFT JOIN profile on profile.id = bidding.created_by  WHERE bidding.status = 3 OR bidding.status = 5 ORDER BY bidding.id DESC LIMIT :offset,:lim';
 
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
-		$sth->bindParam(':offset',$page,\PDO::PARAM_INT);
+		$sth->bindParam(':offset',$start_page,\PDO::PARAM_INT);
 		$sth->execute();
 		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
 			$results[]=$row;
@@ -111,12 +115,14 @@ class Index{
 
 	public function lists_all_drafts($pid, $page=0,$limit=20,$status=0){
 		$results=[];
-		$page=$page<2?0:$page-1;
+		$page = $page > 1 ? $page : 1;
+		#set starting limit(page 1=10,page 2=20)
+		$start_page = $page < 2 ? 0 :(integer)($page-1) * $limit;
 		$SQL='SELECT bidding.*, profile.profile_name FROM bidding LEFT JOIN profile on profile.id = bidding.created_by WHERE (bidding.status !=4 and bidding.status = 0) AND bidding.created_by = :pid ORDER BY bidding.name ASC LIMIT :offset,:lim';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':pid',$pid,\PDO::PARAM_INT);
 		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
-		$sth->bindParam(':offset',$page,\PDO::PARAM_INT);
+		$sth->bindParam(':offset',$start_page,\PDO::PARAM_INT);
 		$sth->execute();
 		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
 			$results[]=$row;
@@ -128,12 +134,14 @@ class Index{
 
 	public function lists_by_status($page=0,$limit=20,$status=0){
 		$results=[];
-		$page=$page<2?0:$page-1;
+		$page = $page > 1 ? $page : 1;
+		#set starting limit(page 1=10,page 2=20)
+		$start_page = $page < 2 ? 0 :(integer)($page-1) * $limit;
 		$SQL='SELECT bidding.*, profile.profile_name FROM bidding LEFT JOIN profile on profile.id = bidding.created_by WHERE bidding.status =:status ORDER BY bidding.name ASC LIMIT :offset,:lim';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':status',$status,\PDO::PARAM_INT);
 		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
-		$sth->bindParam(':offset',$page,\PDO::PARAM_INT);
+		$sth->bindParam(':offset',$start_page,\PDO::PARAM_INT);
 		$sth->execute();
 		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
 			$results[]=$row;
@@ -145,14 +153,42 @@ class Index{
 
 	public function lists_by_status_admin($page=0,$limit=20,$status=0){
 		$results=[];
-		$page=$page<2?0:$page-1;
+		$page = $page > 1 ? $page : 1;
+		#set starting limit(page 1=10,page 2=20)
+		$start_page = $page < 2 ? 0 :(integer)($page-1) * $limit;
 		$SQL='SELECT bidding.*, profile.profile_name FROM bidding LEFT JOIN profile on profile.id = bidding.created_by WHERE bidding.status =:status ORDER BY bidding.name ASC LIMIT :offset,:lim';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':status',$status,\PDO::PARAM_INT);
 		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
-		$sth->bindParam(':offset',$page,\PDO::PARAM_INT);
+		$sth->bindParam(':offset',$start_page,\PDO::PARAM_INT);
 		$sth->execute();
 		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
+			$results[]=$row;
+		}
+
+		return $results;
+	}
+
+
+	public function lists_all_between_dates($from, $to,$page=0,$limit=20,$status=0){
+		$results=[];
+		$page = $page > 1 ? $page : 1;
+		#set starting limit(page 1=10,page 2=20)
+		$start_page = $page < 2 ? 0 :(integer)($page-1) * $limit;
+
+		$SQL='SELECT bidding.*, CAST(bidding.date_created as DATE) as date_created, profile.profile_name FROM  bidding  LEFT JOIN profile on profile.id = bidding.created_by  WHERE (bidding.status !=4 and bidding.status != 0) AND CAST(bidding.date_created as DATE) BETWEEN CAST(:froms AS DATE) and CAST(:tos AS DATE) ORDER BY bidding.date_created ASC LIMIT :offset,:lim';
+
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindValue(':froms',$from);
+		$sth->bindValue(':tos',$to);
+		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
+		$sth->bindParam(':offset',$start_page,\PDO::PARAM_INT);
+		$sth->execute();
+		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
+			# get particulars
+			$part = new Particulars($this->DB);
+			$row->particulars = $part->lists_by_parent($row->id,true);
+	
 			$results[]=$row;
 		}
 
@@ -189,7 +225,9 @@ class Index{
 
 	public function search_all_received($account_id,$param,$page=0,$limit=20,$status=0){
 		$results=[];
-		$page=$page<2?0:$page-1;
+		$page = $page > 1 ? $page : 1;
+		#set starting limit(page 1=10,page 2=20)
+		$start_page = $page < 2 ? 0 :(integer)($page-1) * $limit;
 		//$SQL='SELECT bidding.*, profile.profile_name, profile.email, bidding_collaborators.*  FROM bidding LEFT JOIN profile on profile.id = bidding.created_by LEFT JOIN bidding_collaborators on bidding_collaborators.account_id = profile.account_id WHERE (bidding.status !=4 and bidding.status !=0) AND (profile.account_id = :account_id) OR (account.id =:account_id) ORDER BY bidding.name ASC LIMIT :offset,:lim';
 
 		$SQL='SELECT bidding.*, bidding_collaborators.account_id,profile.profile_name FROM bidding_collaborators LEFT JOIN bidding on bidding.id = bidding_collaborators.bidding_id LEFT JOIN profile on profile.id = bidding.created_by  WHERE bidding.id LIKE :param AND ((bidding.status !=4 and bidding.status != 0) AND (bidding.created_by = :account_id OR bidding_collaborators.account_id = :account_id))  ORDER BY bidding.id DESC LIMIT :offset,:lim';
@@ -200,7 +238,7 @@ class Index{
 		$sth->bindParam(':param',$params);
 		$sth->bindParam(':account_id',$account_id);
 		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
-		$sth->bindParam(':offset',$page,\PDO::PARAM_INT);
+		$sth->bindParam(':offset',$start_page,\PDO::PARAM_INT);
 		$sth->execute();
 		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
 			$results[]=$row;
@@ -212,7 +250,9 @@ class Index{
 
 	public function search_all_approved($page=0,$param,$limit=20,$status=0){
 		$results=[];
-		$page=$page<2?0:$page-1;
+		$page = $page > 1 ? $page : 1;
+		#set starting limit(page 1=10,page 2=20)
+		$start_page = $page < 2 ? 0 :(integer)($page-1) * $limit;
 		$params = '%'.$param.'%';
 		//$SQL='SELECT bidding.*, profile.profile_name, profile.email, bidding_collaborators.*  FROM bidding LEFT JOIN profile on profile.id = bidding.created_by LEFT JOIN bidding_collaborators on bidding_collaborators.account_id = profile.account_id WHERE (bidding.status !=4 and bidding.status !=0) AND (profile.account_id = :account_id) OR (account.id =:account_id) ORDER BY bidding.name ASC LIMIT :offset,:lim';
 
@@ -221,7 +261,7 @@ class Index{
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':param',$params);
 		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
-		$sth->bindParam(':offset',$page,\PDO::PARAM_INT);
+		$sth->bindParam(':offset',$start_page,\PDO::PARAM_INT);
 		$sth->execute();
 		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
 			$results[]=$row;

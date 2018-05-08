@@ -297,8 +297,11 @@ if($method=="GET" && isset($_GET['id'])){
 
 	$current_session = $Ses->get($token);
 
+	if ($current_session[0]->role) {
+		$res = $req->view($id);
+	}
 
-	if(!$current_session[0]->role) {
+	/*if(!$current_session[0]->role) {
 		$res = $req->view($id);
 		$viewable = false;
 
@@ -309,6 +312,7 @@ if($method=="GET" && isset($_GET['id'])){
 				$viewable = true;
 			}
 		}
+		
 		// if one of the recepients
 		if ($viewable) {
 			$res = $req->view($id);	
@@ -316,7 +320,7 @@ if($method=="GET" && isset($_GET['id'])){
 		
 	} else {
 		$res = $req->view($id);
-	}
+	}*/
 
 
 

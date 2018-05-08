@@ -131,10 +131,33 @@ if($method=="GET"){
 
 	# Bidding Request preview
 	if(isset($_GET['id'])){
+		$is_viewable = false;
+		$id = (int) trim(strip_tags(htmlentities(htmlspecialchars($_GET['id']))));
+		$details = $index->view($id,1);
 
-		$id=(int) trim(strip_tags(htmlentities(htmlspecialchars($_GET['id']))));
-		$result=["data"=>@$index->view($id,1)];
-		echo @json_encode($result);
+		/* -----------------------------------------
+		| check details if viewable
+		| Only allow if permission meets the ff:
+		| OWNER, Collaborator / CBA asst, Admin, GSU
+		| -----------------------------------------*/
+		# OWNER
+		if ($current_session[0]->pid == $details[0]->created_by)  $is_viewable = true;
+
+		# SENT TO
+		$sent_to = [];
+		foreach ($details[0]->collaborators as $key => $value) {
+			array_push($sent_to, $value->account_id);
+		}
+		if (in_array($current_session[0]->account_id, $sent_to)) $is_viewable = true;
+
+		# GSU or ADMIN
+		if ($current_session[0]->role === 'gsu' || $current_session[0]->role === 'admin') $is_viewable = true;
+
+		# show results
+		if ($is_viewable) {
+			$result=["data"=>@$details];
+			echo @json_encode($result);
+		}
 	}
 }
 
@@ -164,19 +187,19 @@ if($method=="POST"){
 	$requested_by = '';
 	$requested_by_position = '';
 	
-	if($sign[0]) {
+	if(isset($sign[0])) {
 		$requested_by = $sign[0]->name;
 		$requested_by_position = $sign[0]->position;
 	}
 
 
 	# remove
-	if($action=='remove'){
+	if($action=='remove'){ 
 		$id=(int)isset($data->id)?$clean_str->clean($data->id):'';
 
 		$res=@$index->remove($id);
 		$data=["data"=>$res];
-		echo @json_encode($data);
+		echo json_encode($data);
 		return 0;
 	}
 
