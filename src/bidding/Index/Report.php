@@ -23,7 +23,7 @@ class Report{
 	public function lists_all_between_dates($from, $to){
 		$results=[];
 
-		$SQL='SELECT bidding.*, CAST(bidding.date_created as DATE) as date_created, profile.profile_name FROM  bidding  LEFT JOIN profile on profile.id = bidding.created_by  WHERE (bidding.status !=4 and bidding.status != 0) AND CAST(bidding.date_created as DATE) BETWEEN CAST(:froms AS DATE) and CAST(:tos AS DATE) ORDER BY bidding.date_created ASC';
+		$SQL='SELECT bidding.*, CAST(bidding.date_created as DATE) as date_created, profile.profile_name, profile.department, profile.department_alias FROM  bidding  LEFT JOIN profile on profile.id = bidding.created_by  WHERE (bidding.status !=4 and bidding.status != 0) AND CAST(bidding.date_created as DATE) BETWEEN CAST(:froms AS DATE) and CAST(:tos AS DATE) ORDER BY bidding.date_created ASC';
 
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindValue(':froms',$from);

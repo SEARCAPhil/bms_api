@@ -21,6 +21,8 @@ $to = isset($_GET['to']) ? strip_tags($_GET['to']) : date('Y-m-d');
 # this might take long
 $data = ($Rep->lists_all_between_dates($from, $to));
 
+$data_per_department = [];
+
 # count data
 foreach ($data as $key => $value) {
     # TOTAL
@@ -40,6 +42,51 @@ foreach ($data as $key => $value) {
     } else {
         $normal ++; 
     }
+
+    # aggregate data by department
+    # create empty stack
+    if (!isset($data_per_department[$value->department])) {
+         $data_per_department[$value->department] = [];
+        $data_per_department[$value->department] = array(
+            'name' => $value->department,
+            'alias' => $value->department_alias,
+            'exempted' =>0,
+            'normal' => 0,
+            'total' => 0,
+            'in_progress' => 0,
+            'closed' => 0,
+            'failed' => 0,
+            'in_review' => 0,
+            'engagement' => '0%'
+        );
+    }
+    # count total
+    $data_per_department[$value->department]['total']++;
+    # count excemption
+    if ($value->excemption) {
+            $data_per_department[$value->department]['exempted']++;
+    } else {
+            $data_per_department[$value->department]['normal']++;
+    }
+    # count per dept status
+    #in review
+    if ($value->status == 1 ) {
+        $data_per_department[$value->department]['in_review']++;
+   }
+    # in progress
+    if ($value->status == 3 ) {
+        $data_per_department[$value->department]['in_progress']++;
+    }
+
+    # closed
+    if ($value->status == 5 ) {
+        $data_per_department[$value->department]['closed']++;
+    }
+
+    # failed
+    if ($value->status == 6 ) {
+        $data_per_department[$value->department]['failed']++;
+    }
 }
 
 # analysis
@@ -47,13 +94,27 @@ foreach ($data as $key => $value) {
 $analysis = [];
 # too many pending , not all item is pending
 if ($in_progress > $closed && ($in_progress!=$total)) {
-    $message = array('message' => 'Too many pending request', 'severity' => 'warning');
+    $message = array('message' => 'Too many pending requests', 'severity' => 'warning');
     array_push($analysis, $message);
 }
 
 if ($in_progress==$total) {
     $message = array('message' => 'You haven\'t closed any bidding request during this period', 'severity' => 'warning');
     array_push($analysis, $message);
+}
+
+
+# engagement per department
+# measure in percentage
+# number of bidding request made by department / total number of bidding
+foreach ($data_per_department as $key => $value) {
+    $perc = 0;
+
+    # compute
+    $perc = ($value['total'] / $total) * 100;
+    # change percentage value
+    $data_per_department[$value['name']]['engagement'] = "{$perc}%";
+
 }
 
 
@@ -65,6 +126,7 @@ $data = json_encode(array('total' => $total,
 'in_review' => $in_review, 
 'breakdown' => array('normal' => $normal, 'exempted' => $exempted),
 'analysis' => $analysis,
+'department' => $data_per_department,
 'from' => $from,
 'to' => $to));
 
