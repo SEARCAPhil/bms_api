@@ -1,5 +1,6 @@
 <?php 
 header('Access-Control-Allow-Origin: *');
+require_once('../../../config/server.php');
 require_once('../../../bidding/Attachments.php');
 require_once('../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../config/database/connections.php');
@@ -17,11 +18,11 @@ $clean_str=new CleanStr();
 $logs = new Logs($DB);
 $att = new Attachments($DB);
 
-$dir = './../../../../public/uploads/';
-$method=($_SERVER['REQUEST_METHOD']);
+
+$method = ($_SERVER['REQUEST_METHOD']);
 
 function download($db,$id){
-	
+	$dir = UPLOAD_DIR;
 	try{
 		$db->beginTransaction();
 		$id=htmlentities(htmlspecialchars($id));
@@ -48,8 +49,18 @@ function download($db,$id){
 							$bid = $row2->bidding_id;
 						}
 					}
+
+					// Get document root
+					$doc_root = $_SERVER['DOCUMENT_ROOT'];  
+
+					// Account for possible trailing slash
+					if( substr( $doc_root, strlen( $doc_root )-1, 1 ) == '/' ){
+						$doc_root = substr( $doc_root, 0, strlen( $doc_root - 1 ) );
+					}
+
+					$absolute_dir = $doc_root.'/'.parse_url($dir)['host'].parse_url($dir)['path'].$row->filename;
 				
-					if(file_exists($_SERVER['DOCUMENT_ROOT'].'/bms_api/public/uploads/'.$row->filename)){
+					if(file_exists($absolute_dir)){
 						$file_exists=1;
 						#headers to force download
 						$returnFile=header("Content-Description: File Transfer"); 
@@ -57,7 +68,7 @@ function download($db,$id){
 						$returnFile.=header("Content-Disposition: attachment; filename=\"$row->filename\"");
 						$returnFile.=ob_clean();
 						$returnFile.=flush();
-						$returnFile.=readfile ($_SERVER['DOCUMENT_ROOT'].'/bms_api/public/uploads/'.$row->filename);	
+						$returnFile.=readfile ($absolute_dir);	
 					}
 			}
 

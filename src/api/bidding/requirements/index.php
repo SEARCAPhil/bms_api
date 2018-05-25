@@ -296,10 +296,15 @@ if($method=="GET" && isset($_GET['id'])){
 	$token=htmlentities(htmlspecialchars($_GET['token']));
 
 	$current_session = $Ses->get($token);
+	
+	$res = $req->view($id);
 
-	if ($current_session[0]->role) {
-		$res = $req->view($id);
+	# clear recepients if request came from supplier
+	if(is_null($current_session[0]->role) && $res[0]) {
+		if(isset($res[0]->recepients)) $res[0]->recepients = [];
 	}
+	
+	
 
 	/*if(!$current_session[0]->role) {
 		$res = $req->view($id);

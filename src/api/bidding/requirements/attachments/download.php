@@ -1,5 +1,6 @@
 <?php 
 header('Access-Control-Allow-Origin: *');
+require_once('../../../../config/server.php');
 require_once('../../../../bidding/Attachments.php');
 require_once('../../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../../config/database/connections.php');
@@ -17,11 +18,12 @@ $clean_str=new CleanStr();
 $logs = new Logs($DB);
 $att = new Attachments($DB);
 
-$dir = './../../../../../public/uploads/';
+
 $method=($_SERVER['REQUEST_METHOD']);
 
 function download($db,$id){
-	
+	# Upload directory
+	$dir = UPLOAD_DIR;
 	try{
 		$db->beginTransaction();
 		$id=htmlentities(htmlspecialchars($id));
@@ -44,22 +46,30 @@ function download($db,$id){
 						$attach_statement2->execute();
 
 						if($row2=$attach_statement2->fetch(PDO::FETCH_OBJ)){
-							
-							//original basket where file is located on the server
+							//original location where file is located on the server
 							$bid = $row->bidding_requirements_id;
 						}
 					}
 
-				
-					if(file_exists($_SERVER['DOCUMENT_ROOT'].'/bms_api/public/uploads/'.$bid.'/'.$row->filename)){
+					// Get document root
+					$doc_root = $_SERVER['DOCUMENT_ROOT'];  
+
+					// Account for possible trailing slash
+					if( substr( $doc_root, strlen( $doc_root )-1, 1 ) == '/' ){
+						$doc_root = substr( $doc_root, 0, strlen( $doc_root - 1 ) );
+					}
+
+					$absolute_dir = $doc_root.'/'.parse_url($dir)['host'].parse_url($dir)['path'].$bid.'/'.$row->filename;
+					// read files
+					if(file_exists($absolute_dir)){
 						$file_exists=1;
 						#headers to force download
-						$returnFile=header("Content-Description: File Transfer"); 
-						$returnFile.=header("Content-Type: application/octet-stream"); 
-						$returnFile.=header("Content-Disposition: attachment; filename=\"$row->filename\"");
-						$returnFile.=ob_clean();
-						$returnFile.=flush();
-						$returnFile.=readfile ($_SERVER['DOCUMENT_ROOT'].'/bms_api/public/uploads/'.$bid.'/'.$row->filename);	
+						$returnFile = header("Content-Description: File Transfer"); 
+						$returnFile.= header("Content-Type: application/octet-stream"); 
+						$returnFile.= header("Content-Disposition: attachment; filename=\"$row->filename\"");
+						$returnFile.= ob_clean();
+						$returnFile.= flush();
+						$returnFile.= readfile ($absolute_dir);	
 					}
 			}
 

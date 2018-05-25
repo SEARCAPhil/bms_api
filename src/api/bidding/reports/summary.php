@@ -94,7 +94,7 @@ foreach ($data as $key => $value) {
 $analysis = [];
 # too many pending , not all item is pending
 if ($in_progress > $closed && ($in_progress!=$total)) {
-    $message = array('message' => 'Too many pending requests', 'severity' => 'warning');
+    $message = array('message' => 'Too many requests in progress', 'severity' => 'warning');
     array_push($analysis, $message);
 }
 

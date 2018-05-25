@@ -118,7 +118,7 @@ class Index{
 		$page = $page > 1 ? $page : 1;
 		#set starting limit(page 1=10,page 2=20)
 		$start_page = $page < 2 ? 0 :(integer)($page-1) * $limit;
-		$SQL='SELECT bidding.*, profile.profile_name FROM bidding LEFT JOIN profile on profile.id = bidding.created_by WHERE (bidding.status !=4 and bidding.status = 0) AND bidding.created_by = :pid ORDER BY bidding.name ASC LIMIT :offset,:lim';
+		$SQL='SELECT bidding.*, profile.profile_name FROM bidding LEFT JOIN profile on profile.id = bidding.created_by WHERE (bidding.status !=4 and bidding.status = 0) AND bidding.created_by = :pid ORDER BY bidding.id DESC LIMIT :offset,:lim';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':pid',$pid,\PDO::PARAM_INT);
 		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
@@ -137,7 +137,7 @@ class Index{
 		$page = $page > 1 ? $page : 1;
 		#set starting limit(page 1=10,page 2=20)
 		$start_page = $page < 2 ? 0 :(integer)($page-1) * $limit;
-		$SQL='SELECT bidding.*, profile.profile_name FROM bidding LEFT JOIN profile on profile.id = bidding.created_by WHERE bidding.status =:status ORDER BY bidding.name ASC LIMIT :offset,:lim';
+		$SQL='SELECT bidding.*, profile.profile_name FROM bidding LEFT JOIN profile on profile.id = bidding.created_by WHERE bidding.status =:status ORDER BY bidding.id DESC LIMIT :offset,:lim';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':status',$status,\PDO::PARAM_INT);
 		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
