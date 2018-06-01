@@ -5,13 +5,13 @@ require_once('../../../bidding/Particulars/Particulars.php');
 require_once('../../../bidding/Requirements/Requirements.php');
 require_once('../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../config/database/connections.php');
-require_once('../../../suppliers/Logs/Logs.php');
+require_once('../../../bidding/Logs.php');
 require_once('../../../auth/Session.php');
 
 use Bidding\Index as Index;
 use Bidding\Particulars as Particulars;
 use Bidding\Requirements as Requirements;
-use Suppliers\Logs as Logs;
+use Bidding\Logs as Logs;
 use Helpers\CleanStr as CleanStr;
 use Auth\Session as Session;
 
@@ -40,10 +40,11 @@ if($method=="POST"){
 	$input=file_get_contents("php://input");
 
 
-	$data=(@json_decode($input));
+	$data = (@json_decode($input));
 
-	$action=isset($data->action)?$clean_str->clean($data->action):'';
-	$id=(int) isset($data->id)?$data->id:null;
+	$action = isset($data->action)?$clean_str->clean($data->action):'';
+	$id = (int) isset($data->id)?$data->id:null;
+	$token = isset($data->token) ? $data->token : '';
 
 
 	//proceed to adding
@@ -69,9 +70,19 @@ if($method=="POST"){
 	//required
 	if(empty($id)) return 0;
 
+	# session
+	$current_session = $Ses->get($token);
+	if(!@$current_session[0]->role) exit;
+
+
 	if($action == 'remove') {
 		$result = $req->remove($id);
-		$data=["data"=> $result];
+		# log
+		if ($result) {
+			$logs->log($current_session[0]->account_id, 'delete', 'requirement', $id);
+		}
+		
+		$data = ["data"=> $result];
 		echo @json_encode($data);	
 	}
 
@@ -89,13 +100,16 @@ if($method=="POST"){
 
 		if (!empty($specs_ids)) {
 			for ($x=0; $x < count($specs_ids); $x++) {
+				$supplier_id = $specs_ids[$x];
 				$result = $req->send($id,$specs_ids[$x],0);
 				// add to sent items
 				if ($result) {
 					$specs_sent[$specs_ids[$x]] = $result;
+					#log
+					$logs->log($current_session[0]->account_id, 'invite', 'supplier', $id, "{'supplier_id: {$supplier_id}, invitation_id:{$result}");
+					
 				}
 			}
-			
 
 			$data=["data"=> $specs_sent];
 			echo @json_encode($data);
@@ -112,8 +126,7 @@ if($method=="POST"){
 	if(empty($name)) return 0;
 
 	if($action == 'create') {
-
-		$result=$req->create([
+		$payload = [
 			"name"=>$name,
 			"quantity"=>$quantity,
 			'unit'=>$unit,
@@ -121,7 +134,13 @@ if($method=="POST"){
 			'budget_currency'=>$currency,
 			'bidding_excemption_request'=>$excempted,
 			"id"=>$id
-		]);
+		];
+		$result = $req->create($payload);
+		
+		# log
+		if ($result) {
+			$logs->log($current_session[0]->account_id, 'add', 'requirement', $result, json_encode($payload));
+		}
 
 	
 
@@ -140,12 +159,19 @@ if($method=="POST"){
 				}
 
 				// insert
-				$req->funds([
+				$payload = [
 					'id'=>$result,
 					'fund_type'=>$fund_type,
 					'cost_center'=>$cost_center,
 					'line_item'=>$line_item,
-				]);
+				];
+
+				$req_result = $req->funds($payload);
+
+				# log
+				if ($req_result) {
+					$logs->log($current_session[0]->account_id, 'add', 'fund', $req_result, json_encode($payload));
+				}
 			}
 		}
 
@@ -154,7 +180,17 @@ if($method=="POST"){
 		if (count($specs) > 0 && $result > 0) {
 			for ($i=0; $i < count($specs) ; $i++) { 
 				if(!empty($specs[$i]->name) && !empty($specs[$i]->value)) {
-					$req->add_specs($result,$specs[$i]->name,$specs[$i]->value);	
+					$payload = [
+						'id' => $result,
+						'name' => $specs[$i]->name,
+						'value' => $specs[$i]->value,
+					];
+
+					$req_specs = $req->add_specs($result,$specs[$i]->name,$specs[$i]->value);
+					# log
+					if ($req_specs) {
+						$logs->log($current_session[0]->account_id, 'add', 'spec', $req_specs, json_encode($payload));
+					}	
 				}
 			}
 		}
@@ -166,16 +202,22 @@ if($method=="POST"){
 
 	// update
 	if($action == 'update') {
-
-		$result=$req->update([
+		$payload = [
 			"name"=>$name,
 			"quantity"=>$quantity,
 			'unit'=>$unit,
 			'budget_amount'=>$amount,
 			'budget_currency'=>$currency,
-			'bidding_excemption_request'=>$excempted,
+			'bidding_exemption_request'=>$excempted,
 			"id"=>$id
-		]);
+		];
+		$result = $req->update($payload);
+
+		# log
+		if ($result) {
+			$logs->log($current_session[0]->account_id, 'update', 'requirement', $id, json_encode($payload));
+		}
+		
 
 		$fund_result = 0;
 		$specs_result = 0;
@@ -200,23 +242,37 @@ if($method=="POST"){
 
 				// insert
 				if (!$fund_id) {
-					$fund_res = $req->funds([
+					$payload = [
 						'id'=>$id,
 						'fund_type'=>$fund_type,
 						'cost_center'=>$cost_center,
 						'line_item'=>$line_item,
-					]);
+					];
+
+					$fund_res = $req->funds($payload);
+
+					# log
+					if ($fund_res) {
+						$logs->log($current_session[0]->account_id, 'add', 'fund', $fund_res, json_encode($payload));
+					}
 
 				}else{
 					// update
-					$fund_res = $req->fund_update([
+					$payload = [
 						'id'=>$fund_id,
 						'fund_type'=>$fund_type,
 						'cost_center'=>$cost_center,
 						'line_item'=>$line_item,
-					]);
-					
+					];
+
+					$fund_res = $req->fund_update($payload);
+
+					# log
+					if ($fund_res) {
+						$logs->log($current_session[0]->account_id, 'update', 'fund', $fund_id, json_encode($payload));
+					}	
 				}
+
 				// proceed even if there is no changes in requirements
 				if($fund_res) $fund_result = 1;
 			}
@@ -226,12 +282,15 @@ if($method=="POST"){
 
 
 		// remove funds
-
 		if (!is_null($fundsToRemove)) {
 			foreach($fundsToRemove as $key => $val) {
 				$fund_res = $req->remove_fund($key);
 				// proceed even if there is no changes in requirements
 				if($fund_res) $fund_result = 1;
+				# log
+				if ($fund_res) {
+					$logs->log($current_session[0]->account_id, 'delete', 'fund', $key);
+				}
 			}
 		}
 
@@ -243,6 +302,10 @@ if($method=="POST"){
 				$specs_res = $req->remove_specs($key);
 				// proceed even if there is no changes in requirements
 				if($specs_res) $specs_result = 1;
+				# log
+				if ($specs_res) {
+					$logs->log($current_session[0]->account_id, 'delete', 'spec', $key);
+				}
 			}
 		}
 
@@ -261,10 +324,20 @@ if($method=="POST"){
 					// insert
 					if (!$specs_id) {
 						$specs_res = $req->add_specs($id,$specs[$i]->name,$specs[$i]->value);
+						$payload = ['id' => $id, 'name' =>$specs[$i]->name, 'value' => $specs[$i]->value];
+						# log
+						if ($specs_res) {
+							$logs->log($current_session[0]->account_id, 'add', 'spec', $specs_res, json_encode($payload));
+						}
 						
 					}else{
 						// update
 						$specs_res = $req->update_specs($specs_id,$specs[$i]->name,$specs[$i]->value);
+						# log
+						$payload = ['id' => $specs_id, 'name' =>$specs[$i]->name, 'value' => $specs[$i]->value];
+						if ($specs_res) {
+							$logs->log($current_session[0]->account_id, 'update', 'spec', $specs_id, json_encode($payload));
+						}
 					}
 					// proceed even if there is no changes in requirements
 					if($specs_res) {

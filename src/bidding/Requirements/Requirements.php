@@ -188,10 +188,10 @@ class Requirements{
 		$unit=isset($params["unit"])?$params["unit"]:'';
 		$budget_amount=isset($params["budget_amount"])?$params["budget_amount"]:0;
 		$budget_currency=isset($params["budget_currency"])?$params["budget_currency"]:'PHP';
-		$bidding_excemption_request=(int) isset($params["bidding_excemption_request"])?$params["bidding_excemption_request"]:0;
+		$bidding_exemption_request=(int) isset($params["bidding_exemption_request"])?$params["bidding_exemption_request"]:0;
 
 		//query
-		$SQL='UPDATE bidding_requirements SET name=:name,quantity=:quantity,unit=:unit,budget_amount=:budget_amount,budget_currency=:budget_currency,bidding_excemption_request=:bidding_excemption_request WHERE id=:id';
+		$SQL='UPDATE bidding_requirements SET name=:name,quantity=:quantity,unit=:unit,budget_amount=:budget_amount,budget_currency=:budget_currency,bidding_excemption_request=:bidding_exemption_request WHERE id=:id';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id',$id);
 		$sth->bindParam(':name',$name);
@@ -199,7 +199,7 @@ class Requirements{
 		$sth->bindParam(':unit',$unit);
 		$sth->bindParam(':budget_amount',$budget_amount);
 		$sth->bindParam(':budget_currency',$budget_currency);
-		$sth->bindParam(':bidding_excemption_request',$bidding_excemption_request);
+		$sth->bindParam(':bidding_exemption_request',$bidding_exemption_request);
 		$sth->execute();
 
 		return $sth->rowCount();

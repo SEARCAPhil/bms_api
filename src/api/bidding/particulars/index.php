@@ -4,12 +4,12 @@ require_once('../../../bidding/Index/Index.php');
 require_once('../../../bidding/Particulars/Particulars.php');
 require_once('../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../config/database/connections.php');
-require_once('../../../suppliers/Logs/Logs.php');
+require_once('../../../bidding/Logs.php');
 require_once('../../../auth/Session.php');
 
 use Bidding\Index as Index;
 use Bidding\Particulars as Particulars;
-use Suppliers\Logs as Logs;
+use Bidding\Logs as Logs;
 use Helpers\CleanStr as CleanStr;
 use Auth\Session as Session;
 
@@ -25,7 +25,7 @@ $Ses = new Session($DB);
 /**
  * GET suppliers list
  */ 
-$method=($_SERVER['REQUEST_METHOD']);
+$method = ($_SERVER['REQUEST_METHOD']);
 
 
 if($method=="POST"){
@@ -39,16 +39,17 @@ if($method=="POST"){
 
 	$data=(@json_decode($input));
 
-	$action=isset($data->action)?$clean_str->clean($data->action):'';
-
-	//proceed to adding
-	$name=isset($data->name)?$clean_str->clean($data->name):'';
-
-	$deadline=isset($data->deadline)?$data->deadline:null;
-	$id=(int) isset($data->id)?$data->id:null;
+	$action=isset($data->action) ? $clean_str->clean($data->action) : '';
+	$name = isset($data->name) ? $clean_str->clean($data->name) : '';
+	$deadline = isset($data->deadline) ? $data->deadline : null;
+	$id = (int) isset($data->id) ? $data->id : null;
+	$token = isset($data->token) ? $data->token : '';
 	
 	if(empty($id)) return 0;
-	
+
+	# session
+	$current_session = $Ses->get($token);
+	if(!@$current_session[0]->role) exit;
 
 
 
@@ -56,26 +57,40 @@ if($method=="POST"){
 		//required
 		if(empty($name) || empty($id)) return 0;
 
-		$result=$part->create([	
+		$result = $part->create([	
 			"name"=>$name,
 			"deadline"=>$deadline,
 			"id"=>$id
 		]);
+
+		
+		if ($result) {
+			$logs->log($current_session[0]->account_id, 'add', 'particular', $result);
+		}
+
 	}
 
 	if ($action === 'update') {
 		//required
 		if(empty($name) || empty($id)) return 0;
-		$result=$part->update([
+		$payload = [
 			"name"=>$name,
 			"deadline"=>$deadline,
 			"id"=>$id
-		]);
+		];
+		
+		$result = $part->update($payload);
+		if ($result) {
+			$logs->log($current_session[0]->account_id, 'update', 'particular', $id, json_encode($payload));
+		}
 	}
 
 	if ($action === 'remove') {
 
-		$result=$part->remove($id);
+		$result = $part->remove($id);
+		if ($result) {
+			$logs->log($current_session[0]->account_id, 'delete', 'particular', $id);
+		}
 	}
 
 

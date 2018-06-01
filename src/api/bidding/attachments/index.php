@@ -3,11 +3,11 @@ header('Access-Control-Allow-Origin: *');
 require_once('../../../bidding/Attachments.php');
 require_once('../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../config/database/connections.php');
-require_once('../../../suppliers/Logs/Logs.php');
+require_once('../../../bidding/Logs.php');
 require_once('../../../auth/Session.php');
 
 use Bidding\Attachments as Attachments;
-use Suppliers\Logs as Logs;
+use Bidding\Logs as Logs;
 use Helpers\CleanStr as CleanStr;
 use Auth\Session as Session;
 
@@ -71,7 +71,19 @@ if($method=="POST" && isset($_FILES['files'])){
 		if(move_uploaded_file($tmp_name, $dir.''.$new_file_name)){
 
 			$last_id = $att->create($id, $bidding_id, $new_file_name, $name, $size, $ext, 'original');
-
+			if ($last_id) {
+				#log
+				$payload = [
+					'id' => $bidding_id,
+					'original_filename' => $name,
+					'filename' => $new_file_name,
+					'size' => $size,
+					'type' => $ext,
+					'copy' => 'original'
+				];
+				$logs->log($current_session[0]->account_id, 'attach', 'bidding_attachment', $bidding_id, json_encode($payload));	
+			}
+			
 			echo $last_id;
 		}
 	}
@@ -84,14 +96,23 @@ if($method=="POST" && !isset($_FILES['files'])){
 
 
 	$data=(@json_decode($input));
-
 	$action=isset($data->action)?$clean_str->clean($data->action):'';
+	// get privilege
+	// this is IMPORTANT for checking privilege
+	$token = isset($data->token) ? $clean_str->clean($data->token):'';
+	$current_session = $Ses->get($token);
+	if(!@$current_session[0]->role) exit;
+
 
 	//remove
 	if($action=='remove'){
-		$id=(int)isset($data->id)?$clean_str->clean($data->id):'';
+		$id = (int)isset($data->id) ? $clean_str->clean($data->id):'';
+		$res = @$att->remove($id);
 
-		$res=@$att->remove($id);
+		if ($res) {
+			$logs->log($current_session[0]->account_id, 'delete', 'bidding_attachment', $id);	
+		}
+
 		$data=["data"=>$res];
 		echo @json_encode($data);
 		return 0;

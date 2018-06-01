@@ -3,13 +3,13 @@ header('Access-Control-Allow-Origin: *');
 require_once('../../bidding/Index/Index.php');
 require_once('../../helpers/CleanStr/CleanStr.php');
 require_once('../../config/database/connections.php');
-require_once('../../suppliers/Logs/Logs.php');
+require_once('../../bidding/Logs.php');
 require_once('../../auth/Session.php');
 require_once('../../config/constants/reports.php');
 
 # Namespace
 use Bidding\Index as Index;
-use Suppliers\Logs as Logs;
+use Bidding\Logs as Logs;
 use Helpers\CleanStr as CleanStr;
 use Auth\Session as Session;
 
@@ -195,15 +195,18 @@ if($method=="POST"){
 
 	# remove
 	if($action=='remove'){ 
-		$id=(int)isset($data->id)?$clean_str->clean($data->id):'';
-
-		$res=@$index->remove($id);
-		$data=["data"=>$res];
+		$id = (int)isset($data->id)?$clean_str->clean($data->id):'';
+		$res = @$index->remove($id);
+		# log
+		if ($res) {
+			$logs->log($current_session[0]->account_id, 'delete', 'bidding_request', $id);
+		}
+		$data = ["data"=>$res];
 		echo json_encode($data);
 		return 0;
 	}
 
-	# block
+	/*# block
 	if($action=='block'){
 		$id=isset($data->id)?$clean_str->clean($data->id):'';
 
@@ -227,17 +230,22 @@ if($method=="POST"){
 		if(!empty($res)){
 			$logs->log($data->id,'Account has been unblocked','account');
 		}
-	}
+	}*/
 
 
 	# update
 	if($action=='update'){
 		# ID is required
-		$id=(int) isset($data->id)?$clean_str->clean($data->id):'';
+		$id = (int) isset($data->id)?$clean_str->clean($data->id):'';
 		if(empty($id)) return 0;
 
 		# update
-		$result=$index->update($id,$name,$description,$deadline,$excemption);
+		$result = $index->update($id,$name,$description,$deadline,$excemption);
+
+		if ($result) {
+			$logs->log($current_session[0]->account_id, 'update', 'bidding_request', $id);
+		}
+
 		#result in JSON format
 		$data=["data"=>$result];
 		echo @json_encode($data);
@@ -251,7 +259,7 @@ if($method=="POST"){
 
 		# insert to DB
 		if (@$tok[0]->pid) {
-			$result=$index->create([
+			$result = $index->create([
 				"name"=>$name,
 				"description"=>$description,
 				"deadline"=>$deadline,
@@ -264,10 +272,14 @@ if($method=="POST"){
 				"recommended_by_position" => RECOMMENDED_BY_POSITION,
 				"requested_by_position" => $requested_by_position
 			]);
+
+			if ($result) {
+				$logs->log($current_session[0]->account_id, 'add', 'bidding_request', $result);
+			}
 		}
 
 		# results
-		$data=["data"=>$result];
+		$data = ["data"=>$result];
 		echo @json_encode($data);
 	}
 	

@@ -3,11 +3,11 @@ header('Access-Control-Allow-Origin: *');
 require_once('../../../../../bidding/Requirements/Attachments.php');
 require_once('../../../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../../../config/database/connections.php');
-require_once('../../../../../suppliers/Logs/Logs.php');
+require_once('../../../../../bidding/Logs.php');
 require_once('../../../../../auth/Session.php');
 
 use Bidding\Requirements\Attachments as Attachments;
-use Suppliers\Logs as Logs;
+use Bidding\Logs as Logs;
 use Helpers\CleanStr as CleanStr;
 use Auth\Session as Session;
 
@@ -68,20 +68,23 @@ if($method=="POST"){
 	/**
 	 * POST product
 	 */  
-	$att=new Attachments($DB);
+	$att = new Attachments($DB);
+	$input = file_get_contents("php://input");
+	$data = (@json_decode($input));
+	$action = isset($data->action) ? $clean_str->clean($data->action): '';
+	$atts = isset($data->attachments) ? $data->attachments: null;
+	$id = (int) isset($data->id) ? $data->id: null;
+	$token = isset($data->token) ? $data->token : null;
 	
-	$input=file_get_contents("php://input");
-
-
-	$data=(@json_decode($input));
-
-	$action = isset($data->action)?$clean_str->clean($data->action):'';
-	$atts = isset($data->attachments)?$data->attachments:null;
-	$id = (int) isset($data->id)?$data->id:null;
 
 	if (!$id) exit;
+
+	# session
+	$current_session = $Ses->get($token);
+	if(!@$current_session[0]->role) exit;
+
 	// profile id here
-	$pid =1;
+	$pid = $current_session[0]->pid;
 	$result = [];
 
 	if($action === 'create') {
@@ -90,11 +93,13 @@ if($method=="POST"){
 				// attach
 				$preview = $att->view($key);
 				if ($preview[0]) {
-
 					$lastId = $att->create($pid, $id, $preview[0]->filename, $preview[0]->original_filename, $preview[0]->size, $preview[0]->type, 'duplicate', $preview[0]->id);
-					
 					// success
-					if( $lastId > 0) $result[] = array('id' => $lastId, 'filename' => $preview[0]->filename, 'original_filename' => $preview[0]->original_filename, 'type' => $preview[0]->type);
+					$payload = array('id' => $lastId, 'original_copy_id' => $preview[0]->id, 'filename' => $preview[0]->filename, 'original_filename' => $preview[0]->original_filename, 'type' => $preview[0]->type, 'copy' => 'duplicate');
+					if($lastId > 0) {
+						$result[] = $payload;
+						$logs->log($current_session[0]->account_id, 'attach', 'requirement_attachment', $lastId, json_encode($payload));
+					}
 				}
 			}
 		}

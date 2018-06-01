@@ -3,11 +3,11 @@ header('Access-Control-Allow-Origin: *');
 require_once('../../../../bidding/Requirements/Attachments.php');
 require_once('../../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../../config/database/connections.php');
-require_once('../../../../suppliers/Logs/Logs.php');
+require_once('../../../../bidding/Logs.php');
 require_once('../../../../auth/Session.php');
 
 use Bidding\Requirements\Attachments as Attachments;
-use Suppliers\Logs as Logs;
+use Bidding\Logs as Logs;
 use Helpers\CleanStr as CleanStr;
 use Auth\Session as Session;
 
@@ -34,7 +34,7 @@ if($method=="POST" && isset($_FILES['files'])){
 
 	// get privilege
 	// this is IMPORTANT for checking privilege
-	$token=htmlentities(htmlspecialchars($_POST['token']));
+	$token = htmlentities(htmlspecialchars($_POST['token']));
 
 	$current_session = $Ses->get($token);
 
@@ -71,6 +71,18 @@ if($method=="POST" && isset($_FILES['files'])){
 		if(move_uploaded_file($tmp_name, $dir.''.$bidding_requirements_id.'/'.$new_file_name)){
 
 			$last_id = $att->create($id, $bidding_requirements_id, $new_file_name, $name, $size, $ext, 'original');
+			if ($last_id) {
+				#log
+				$payload = [
+					'id' => $bidding_requirements_id,
+					'original_filename' => $name,
+					'filename' => $new_file_name,
+					'size' => $size,
+					'type' => $ext,
+					'copy' => 'original'
+				];
+				$logs->log($current_session[0]->account_id, 'attach', 'requirement_attachment', $last_id, json_encode($payload));	
+			}
 
 			echo $last_id;
 		}
@@ -79,21 +91,27 @@ if($method=="POST" && isset($_FILES['files'])){
 
 // remove or update attachments
 if($method=="POST" && !isset($_FILES['files'])){
-	$input=file_get_contents("php://input");
+	$input = file_get_contents("php://input");
+	$data = (@json_decode($input));
+	$action = isset($data->action)?$clean_str->clean($data->action):'';
+	$id = (int) isset($data->id)?$data->id:null;
+	$token = isset($data->token)?$data->token:null;
 
-	$data=(@json_decode($input));
+	if (empty($id) || empty($action)|| empty($token)) return 0;
 
-	$action=isset($data->action)?$clean_str->clean($data->action):'';
+	$current_session = $Ses->get($token);
 
-	$id=(int) isset($data->id)?$data->id:null;
-
-	if (empty($id) || empty($action)) return 0;
+	if(!@$current_session[0]->role) exit;
 
 	//remove
 	if($action == 'remove'){
 
-		$res=@$att->remove($id);
-		$data=["data"=>$res];
+		$res = @$att->remove($id);
+		if ($res) {
+			$logs->log($current_session[0]->account_id, 'delete', 'requirement_attachment', $id);	
+		}
+
+		$data = ["data"=>$res];
 		echo @json_encode($data);
 		return 0;
 	}
