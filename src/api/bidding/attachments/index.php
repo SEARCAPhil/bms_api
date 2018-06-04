@@ -81,7 +81,7 @@ if($method=="POST" && isset($_FILES['files'])){
 					'type' => $ext,
 					'copy' => 'original'
 				];
-				$logs->log($current_session[0]->account_id, 'attach', 'bidding_attachment', $bidding_id, json_encode($payload));	
+				$logs->log($current_session[0]->account_id, 'attach', 'bidding_attachment', $last_id, json_encode($payload));	
 			}
 			
 			echo $last_id;

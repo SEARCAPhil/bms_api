@@ -7,7 +7,7 @@ require_once('../../../../bidding/Requirements/Mailer.php');
 require_once('../../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../../config/database/connections.php');
 require_once('../../../../config/constants/reports.php');
-require_once('../../../../suppliers/Logs/Logs.php');
+require_once('../../../../bidding/Logs.php');
 require_once('../../../../auth/Session.php');
 require_once('../../../../auth/Account.php');
 
@@ -15,7 +15,7 @@ use Bidding\Index as Index;
 use Bidding\Proposals\Mailer as Mailer;
 use Bidding\Particulars as Particulars;
 use Bidding\Requirements as Requirements;
-use Suppliers\Logs as Logs;
+use Bidding\Logs as Logs;
 use Helpers\CleanStr as CleanStr;
 use Auth\Session as Session;
 use Auth\Account as Account;
@@ -38,30 +38,27 @@ if($method=="POST"){
 
 	$index=new Index($DB);
 	# read from input stream
-	$input=file_get_contents("php://input");
-	$data=(@json_decode($input));
+	$input = file_get_contents("php://input");
+	$data = (@json_decode($input));
 
-	$action=isset($data->action)?$clean_str->clean($data->action):'';
-	$id=(int) isset($data->id)?$data->id:null;
+	$action = isset($data->action) ? $clean_str->clean($data->action) : '';
+	$id = (int) isset($data->id) ? $data->id : null;
 	$token = isset($data->token) ? $clean_str->clean($data->token) : '';
 
 	# get privilege
 	# this is IMPORTANT for checking privilege
-	if(empty($token)){
-		exit;
-	}
-
+	if(empty($token) || empty($id)) return 0;
+	
 	$current_session = $Ses->get($token);
-
-
 	if(!@$current_session[0]->token) exit;
-
-	# required
-	if(empty($id)) return 0;
 
 	if($action == 'remove') {
 		$result = $req->remove_recepients($id);
-		$data=["data"=> $result];
+		if ($result) {
+			$logs->log($current_session[0]->account_id, 'delete', 'bidding_requirement_invitation', $id);
+		}
+
+		$data = ["data"=> $result];
 		echo @json_encode($data);	
 	}
 
@@ -117,6 +114,10 @@ if($method=="POST"){
 							$result = $req->send($id,$specs_ids[$x],$current_session[0]->account_id,APPROVED_BY_INVITATIONS);
 							# add to sent items
 							if ($result) {
+								# log 
+								$payload = ['id' => $id, 'supplier_id' => $specs_ids[$x], 'approved_by' => APPROVED_BY_INVITATIONS];
+								$logs->log($current_session[0]->account_id, 'send', 'bidding_requirement_invitation', $result, json_encode($payload));
+
 								$specs_sent[$specs_ids[$x]] = $result;
 							}
 						}			
@@ -196,6 +197,9 @@ if($method=="POST"){
 							$result = $req->send($item_ids[$a],$specs_ids[$x],$current_session[0]->account_id,APPROVED_BY_INVITATIONS);
 							// add to sent items
 							if ($result) {
+								# log 
+								$payload = ['id' => $item_ids[$a], 'supplier_id' => $specs_ids[$x], 'approved_by' => APPROVED_BY_INVITATIONS];
+								$logs->log($current_session[0]->account_id, 'send', 'bidding_requirement_invitation', $result, json_encode($payload));
 								$specs_sent[$specs_ids[$x]] = $result;
 							}
 						}
@@ -236,6 +240,11 @@ if($method=="POST"){
 				if($res[0]->deadline == '0000-00-00' || empty($res[0]->deadline) || (!$res[0]->deadline)) exit;
 				// award($id,$supplier_id,$remarks)
 				$data = $req->award($id,$sup_ids[0],$remarks);
+				if ($data) {
+					# log 
+					$payload = ['id' => $id, 'supplier_id' => $sup_ids[0], 'remarks' => $remarks];
+					$logs->log($current_session[0]->account_id, 'winner', 'bidding_requirement_invitation', $data, json_encode($payload));
+				}
 				echo @json_encode($data);
 				exit;	
 			}
@@ -247,14 +256,25 @@ if($method=="POST"){
 
 
 	if($action == 'award') {
-		echo $req->award_winner($id);
+		$isAwarded = $req->award_winner($id);
+		if ($isAwarded) {
+			# log 
+			$payload = ['id' => $id];
+			$logs->log($current_session[0]->account_id, 'awarded', 'bidding_requirement_invitation', $id, json_encode($payload));
+		}
+		echo $isAwarded;
 		exit;
 	}
 
 
 
 	if($action == 'remove_awardee') {
-		echo $req->remove_awardee($id);
+		$isRemoved =  $req->remove_awardee($id);
+		if ($isRemoved) {
+			# log 
+			$logs->log($current_session[0]->account_id, 'awarded', 'bidding_requirement_invitation', $id);
+		}
+		echo $isRemoved;
 		exit;
 	}
 

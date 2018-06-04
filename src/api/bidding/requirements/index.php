@@ -278,9 +278,6 @@ if($method=="POST"){
 			}
 		}
 
-
-
-
 		// remove funds
 		if (!is_null($fundsToRemove)) {
 			foreach($fundsToRemove as $key => $val) {
@@ -296,7 +293,6 @@ if($method=="POST"){
 
 
 		// remove specs
-
 		if (!is_null($specsToRemove)) {
 			foreach($specsToRemove as $key => $val) {
 				$specs_res = $req->remove_specs($key);
@@ -308,8 +304,6 @@ if($method=="POST"){
 				}
 			}
 		}
-
-
 
 
 		//** This still proceeds with updating specs **
@@ -367,7 +361,6 @@ if($method=="GET" && isset($_GET['id'])){
 	// get privilege
 	// this is IMPORTANT for checking privilege
 	$token=htmlentities(htmlspecialchars($_GET['token']));
-
 	$current_session = $Ses->get($token);
 	
 	$res = $req->view($id);
@@ -399,10 +392,6 @@ if($method=="GET" && isset($_GET['id'])){
 	} else {
 		$res = $req->view($id);
 	}*/
-
-
-
-	
 
 	echo @json_encode($res);
 }

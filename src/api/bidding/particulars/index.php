@@ -57,15 +57,16 @@ if($method=="POST"){
 		//required
 		if(empty($name) || empty($id)) return 0;
 
-		$result = $part->create([	
+		$payload = [	
 			"name"=>$name,
 			"deadline"=>$deadline,
 			"id"=>$id
-		]);
+		];
 
-		
+		$result = $part->create($payload);
+
 		if ($result) {
-			$logs->log($current_session[0]->account_id, 'add', 'particular', $result);
+			$logs->log($current_session[0]->account_id, 'add', 'particular', $result, json_encode($payload));
 		}
 
 	}

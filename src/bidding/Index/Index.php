@@ -31,16 +31,16 @@ class Index{
 		$description=isset($params["description"])?$params["description"]:'';
 		$deadline=isset($params["deadline"])?$params["deadline"]:null;
 		$created_by=isset($params["created_by"])?$params["created_by"]:null;
-		$excemption = (int) isset($params["excemption"])?$params["excemption"]:0;
+		$exemption = (int) isset($params["exemption"])?$params["exemption"]:0;
 
 		//query
-		$SQL='INSERT INTO bidding(name,description,deadline,created_by,excemption,approved_by,recommended_by,requested_by,approved_by_position,recommended_by_position,requested_by_position) values(:name,:description,:deadline,:created_by,:excemption,:approved_by,:recommended_by,:requested_by,:approved_by_position,:recommended_by_position,:requested_by_position)';
+		$SQL='INSERT INTO bidding(name,description,deadline,created_by,excemption,approved_by,recommended_by,requested_by,approved_by_position,recommended_by_position,requested_by_position) values(:name,:description,:deadline,:created_by,:exemption,:approved_by,:recommended_by,:requested_by,:approved_by_position,:recommended_by_position,:requested_by_position)';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':name',$name);
 		$sth->bindParam(':description',$description);
 		$sth->bindParam(':deadline',$deadline);
 		$sth->bindParam(':created_by',$created_by);
-		$sth->bindParam(':excemption',$excemption);
+		$sth->bindParam(':exemption',$exemption);
 		$sth->bindValue(':approved_by',@$params["approved_by"]);
 		$sth->bindValue('recommended_by',@$params["recommended_by"]);
 		$sth->bindValue(':requested_by',@$params["requested_by"]);

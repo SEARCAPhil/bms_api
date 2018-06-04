@@ -98,6 +98,7 @@ if($method=="POST"){
 					$payload = array('id' => $lastId, 'original_copy_id' => $preview[0]->id, 'filename' => $preview[0]->filename, 'original_filename' => $preview[0]->original_filename, 'type' => $preview[0]->type, 'copy' => 'duplicate');
 					if($lastId > 0) {
 						$result[] = $payload;
+						# log
 						$logs->log($current_session[0]->account_id, 'attach', 'requirement_attachment', $lastId, json_encode($payload));
 					}
 				}

@@ -3,11 +3,11 @@ header('Access-Control-Allow-Origin: *');
 require_once('../../../../bidding/Attachments.php');
 require_once('../../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../../config/database/connections.php');
-require_once('../../../../suppliers/Logs/Logs.php');
+require_once('../../../../bidding/Logs.php');
 require_once('../../../../auth/Session.php');
 
 use Bidding\Attachments as Attachments;
-use Suppliers\Logs as Logs;
+use Bidding\Logs as Logs;
 use Helpers\CleanStr as CleanStr;
 use Auth\Session as Session;
 
@@ -54,10 +54,6 @@ if($method=="GET"){
 	if(!@$current_session[0]->role) exit;
 
 
-	/**
-	 * Preview
-	 */  
-
 	$att=new Attachments($DB);
 	$id=$current_session[0]->pid;
 	$result=["data"=>$att->lists_original_copy_only($id,$page)];
@@ -67,9 +63,7 @@ if($method=="GET"){
 
 
 if($method=="POST"){
-	/**
-	 * POST product
-	 */  
+
 	$att=new Attachments($DB);
 	
 	$input=file_get_contents("php://input");
@@ -104,7 +98,12 @@ if($method=="POST"){
 					$lastId = $att->create($pid, $id, $preview[0]->filename, $preview[0]->original_filename, $preview[0]->size, $preview[0]->type, 'duplicate', $preview[0]->id);
 					
 					// success
-					if( $lastId > 0) $result[] = array('id' => $lastId, 'filename' => $preview[0]->filename, 'original_filename' => $preview[0]->original_filename, 'type' => $preview[0]->type);
+					if( $lastId > 0) {
+						$payload = array('id' => $lastId, 'filename' => $preview[0]->filename, 'original_filename' => $preview[0]->original_filename, 'size' => $preview[0]->size, 'type' => $preview[0]->type, 'copy' => 'duplicate');
+						$result[] = $payload;
+						# log
+						$logs->log($current_session[0]->account_id, 'attach', 'bidding_attachment', $lastId, json_encode($payload));	
+					} 
 				}
 			}
 		}

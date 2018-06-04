@@ -4,11 +4,12 @@ require_once('../../../bidding/Index/Index.php');
 require_once('../../../bidding/Requirements/Requirements.php');
 require_once('../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../config/database/connections.php');
+require_once('../../../bidding/Logs.php');
 require_once('../../../auth/Session.php');
 
 use Bidding\Index as Index;
 use Bidding\Requirements as Requirements;
-use Suppliers\Logs as Logs;
+use Bidding\Logs as Logs;
 use Helpers\CleanStr as CleanStr;
 use Auth\Session as Session;
 
@@ -20,6 +21,7 @@ $clean_str=new CleanStr();
 
 $Req = new Requirements($DB);
 $Ses = new Session($DB);
+$logs = new Logs($DB);
 
 /**
  * GET suppliers list
@@ -63,6 +65,10 @@ if($method=="POST"){
 				foreach ($ratings as $key => $value) {
 					$Req->rate($feedbackId,$key,$value);
 				}
+
+				# log
+				$payload = ['id' =>$feedbackId, 'feedback' =>$feedback,'ratings' => $ratings];
+				$logs->log($current_session[0]->account_id, 'feedback', 'bidding_requirement_invitation', $feedbackId, json_encode($payload));
 
 				echo $feedbackId;
 			}

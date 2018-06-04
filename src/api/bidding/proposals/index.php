@@ -8,14 +8,14 @@ require_once('../../../bidding/Proposals/Mailer.php');
 require_once('../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../config/database/connections.php');
 require_once('../../../bidding/Requirements/Requirements.php');
-require_once('../../../suppliers/Logs/Logs.php');
+require_once('../../../bidding/Logs.php');
 require_once('../../../auth/Session.php');
 
 
 use Bidding\Proposals as Proposals;
 use Bidding\Proposals\Mailer as Mailer;
 use Bidding\Requirements as Requirements;
-use Suppliers\Logs as Logs;
+use Bidding\Logs as Logs;
 use Helpers\CleanStr as CleanStr;
 use Auth\Session as Session;
 
@@ -24,7 +24,7 @@ $status='all';
 $page=1;
 
 $clean_str = new CleanStr();
-$logs = new Logs($DB);
+$Logs = new Logs($DB);
 $Ses = new Session($DB);
 $Req = new Requirements($DB);
 
@@ -160,14 +160,14 @@ if($method=="POST"){
 	/**
 	 * POST product
 	 */  
-	$Prop=new Proposals($DB);
+	$Prop = new Proposals($DB);
 	
-	$input=file_get_contents("php://input");
+	$input = file_get_contents("php://input");
 
 
-	$data=(@json_decode($input));
+	$data = (@json_decode($input));
 
-	$action=isset($data->action)?$clean_str->clean($data->action):'';
+	$action = isset($data->action)?$clean_str->clean($data->action):'';
 	$token = isset($data->token)?trim($data->token):'';
 
 	if(empty($token)) exit;
@@ -176,8 +176,6 @@ if($method=="POST"){
 	// this is IMPORTANT for checking privilege
 
 	$current_session = $Ses->get($token);
-
-
 	if(!@$current_session[0]->token) exit;
 
 	
@@ -186,7 +184,11 @@ if($method=="POST"){
 	if ($action == 'remove') {
 		$id = (int) isset($data->id) ? $clean_str->clean($data->id) : '';
 
-		echo @$Prop->remove($id);
+		$isRemoved =  @$Prop->remove($id);
+		if ($isRemoved) {
+			$Logs->log($current_session[0]->account_id, 'delete', 'bidding_proposal', $id);
+		}
+		echo $isRemoved;
 		exit;
 	}
 
@@ -208,7 +210,11 @@ if($method=="POST"){
 			$MailerClass = new Mailer();
 
 			if($MailerClass->send($message)) {
-				 echo @$Prop->send($id);
+				 $isSend = @$Prop->send($id);
+				 if ($isSend) {
+					$Logs->log($current_session[0]->account_id, 'send', 'bidding_proposal', $id);
+				 }
+				 echo $isSend;
 			}
 		}
 		
@@ -216,22 +222,25 @@ if($method=="POST"){
 	}
 
 
-	// send
+	# return
 	if ($action == 'change') {
 		$id = (int) isset($data->id) ? $clean_str->clean($data->id) : '';
 		$reason = (int) isset($data->reason) ? $clean_str->clean($data->reason) : '';
 
 		if (empty($reason)) exit;
-
-		echo @$Prop->request_for_changes($id,$reason);
+		$isNeededChanges =  @$Prop->request_for_changes($id,$reason);
+		# log
+		if ($isNeededChanges) {
+			$Logs->log($current_session[0]->account_id, 'return', 'bidding_proposal', $id);
+		}
+		echo $isNeededChanges;
 		exit;
 	}
 
 
-	// send
+	# award
 	if ($action == 'award') {
 		$id = (int) isset($data->id) ? $clean_str->clean($data->id) : '';
-
 		$original_proposal = $Prop->view($id);
 
 		if (@$original_proposal[0]->company_id) {
@@ -243,6 +252,9 @@ if($method=="POST"){
 				$Req->award_winner($value->id);
 			}
 
+			if ($is_awarded) {
+				$Logs->log($current_session[0]->account_id, 'award', 'bidding_proposal', $id);
+			}
 			echo $is_awarded;
 		}	
 		exit;
@@ -261,6 +273,15 @@ if($method=="POST"){
 
 			if ($lastId) {
 				echo @$Prop->winner($id);
+				# log
+				$payload = [
+					'bidding_requirements_id' => $original_proposal[0]->bidding_requirements_id,
+					'supplier_id' => $original_proposal[0]->company_id,
+					'remarks' => $remarks,
+					'proposal_id' => $id
+				];
+
+				$Logs->log($current_session[0]->account_id, 'winner', 'bidding_proposal', $lastId, json_encode($payload));
 			}
 		}	
 		exit;
@@ -311,11 +332,23 @@ if($method=="POST"){
 					}
 				}
 
-				for ($o=0; $o < count($others) ; $o++) { 
+				for ($o = 0; $o < count($others) ; $o++) { 
 					if (!empty($others[$o]->name) && !empty($others[$o]->value)) {
 						$Prop->add_specs($lastId,$others[$o]->name,$others[$o]->value);	
 					}
 				}
+
+				# log
+				$payload = [
+					'id' => $id,
+					'amount' => $amount,
+					'discount' => $discount,
+					'remarks' => $remarks,
+					'original_specs' => $original_specs,
+					'other_specs' => $others
+				];
+
+				$Logs->log($current_session[0]->account_id, 'create', 'bidding_proposal', $lastId, json_encode($payload));
 			}
 
 			echo $lastId;
@@ -378,6 +411,22 @@ if($method=="POST"){
 					
 					$specs_update +=$spId;	
 				}
+			}
+
+			
+			if ($lastId || $specs_update) {
+				# log
+				$payload = [
+					'id' => $id,
+					'amount' => $amount,
+					'discount' => $discount,
+					'remarks' => $remarks,
+					'original_specs' => $original,
+					'other_specs' => $others,
+					'removed_specs' => $otherSpecsToBeRemoved
+				];
+				
+				$Logs->log($current_session[0]->account_id, 'update', 'bidding_proposal', $id, json_encode($payload));
 			}
 
 			echo $lastId || $specs_update;

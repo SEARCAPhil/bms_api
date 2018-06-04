@@ -52,7 +52,7 @@ if($method=="GET"){
 
 		#filter blocked or active companies
 		if(isset($_GET['status'])){
-			$status=trim(strip_tags(htmlentities(htmlspecialchars($_GET['status']))));
+			$status = trim(strip_tags(htmlentities(htmlspecialchars($_GET['status']))));
 		}
 
 		switch ($status) {
@@ -175,7 +175,7 @@ if($method=="POST"){
 	$name = '';
 	$description = '';
 	$deadline = '';
-	$excemption = isset($data->excemption)?$data->excemption:0;
+	$exemption = isset($data->excemption)?$data->excemption:0;
 
 	# session
 	$current_session = $Ses->get($token);
@@ -240,10 +240,11 @@ if($method=="POST"){
 		if(empty($id)) return 0;
 
 		# update
-		$result = $index->update($id,$name,$description,$deadline,$excemption);
+		$payload = ['id' => $id, 'name' => $name, 'description' => $description, 'deadline' => $deadline, 'exemption' => $exemption];
+		$result = $index->update($id,$name,$description,$deadline,$exemption);
 
 		if ($result) {
-			$logs->log($current_session[0]->account_id, 'update', 'bidding_request', $id);
+			$logs->log($current_session[0]->account_id, 'update', 'bidding_request', $id, json_encode($payload));
 		}
 
 		#result in JSON format
@@ -263,7 +264,7 @@ if($method=="POST"){
 				"name"=>$name,
 				"description"=>$description,
 				"deadline"=>$deadline,
-				"excemption" => $excemption,
+				"exemption" => $exemption,
 				"created_by"=> $tok[0]->pid,
 				"approved_by" => APPROVED_BY,
 				"recommended_by" => RECOMMENDED_BY, 
