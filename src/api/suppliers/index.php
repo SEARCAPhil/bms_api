@@ -4,6 +4,7 @@ require_once('../../suppliers/Index/Index.php');
 require_once('../../helpers/CleanStr/CleanStr.php');
 require_once('../../config/database/connections.php');
 require_once('../../suppliers/Logs/Logs.php');
+require_once('../../config/server.php');
 
 use Suppliers\Index as Index;
 use Suppliers\Logs as Logs;
@@ -15,11 +16,95 @@ $page=1;
 
 $clean_str=new CleanStr();
 $logs = new Logs($DB);
+$dir = UPLOAD_ABSOLUTE_PATH.'logo/';
 
 /**
  * GET suppliers list
  */ 
 $method=($_SERVER['REQUEST_METHOD']);
+
+/**
+ * Insert new company profile
+ */
+function create ($pdo, $data, $file , $dir) {
+	$clean_str = new CleanStr();
+
+	//proceed to adding
+	$name=isset($data['name'])?$clean_str->clean($data['name']):'';
+	$tagline=isset($data['tagline'])?$clean_str->clean($data['tagline']):'';
+	$about=isset($data['about'])?$clean_str->clean($data['about']):'';
+	$established_date=isset($data['established_date'])?$clean_str->clean($data['established_date']):'';
+	$established_month=isset($data['established_month'])?$clean_str->clean($data['established_month']):'';
+	$established_year=isset($data['established_year'])?$clean_str->clean($data['established_year']):'';
+	$location=isset($data['location'])?$clean_str->clean($data['location']):'';
+	$industry=isset($data['industry'])?$clean_str->clean($data['industry']):'';
+	$alias=isset($data['alias'])?$clean_str->clean($data['alias']):'';
+	$website=isset($data['website'])?$clean_str->clean($data['website']):'';
+	
+	//required
+	if(empty($name)) return 0;
+
+	$result=$pdo->create([
+		"name"=>$name,
+		"tagline"=>$tagline,
+		"about"=>$about,
+		"established_date"=>$established_date,
+		"established_month"=>$established_month,
+		"established_year"=>$established_year,
+		"location"=>$location,
+		"industry"=>$industry,
+		"website"=>$website
+	]);
+
+	
+	if ($result) {
+		// add contact information
+		foreach(@$data['contact_type'] as $key => $value) {
+			if(!empty($data['contact_value'][$key])) $pdo->add_contact($value,@$data['contact_value'][$key]);
+		}
+
+		//add logo
+		if (isset($file['name'])) uploadImage ($pdo, $result, $file, $dir);
+
+	}
+
+	$data=["data"=>$result];
+	echo @json_encode($data);
+}
+
+/**
+ * Upload Logo
+ */
+function uploadImage ($pdo, $id, $file, $dir) {
+	
+	if(!isset($file['name'])) return 0;
+
+	$allowed_format = array('png','jpg','jpeg','pdf','PDF','doc','docx','xls','xlsx');
+	$allowed_size = 1943040;#40MB
+
+	$name = $file['name'];
+	$type = $file['type'];
+	$size= $file['size'];
+	$tmp_name = $file['tmp_name'];
+	$base_name = basename($name);
+	$ext = pathinfo($name, PATHINFO_EXTENSION);
+	#new file name to be unique
+	$new_file_name=date('mdyhsi').rand().'.'.$ext;
+
+	#check extension && file size
+	if(in_array($ext, $allowed_format) && $size<$allowed_size){
+
+		// create directory if not exist
+		if(!is_dir($dir)) mkdir($dir,0777, true);
+
+		// upload
+		if(move_uploaded_file($tmp_name, $dir.'/'.$new_file_name)){
+
+			return $pdo->update_logo($id, $new_file_name);
+
+		}
+	}
+}
 
 if($method=="GET"){
 
@@ -89,14 +174,16 @@ if($method=="POST"){
 	/**
 	 * POST product
 	 */  
-	$index=new Index($DB);
+	$index = new Index($DB);
 	
-	$input=file_get_contents("php://input");
+	$input = file_get_contents("php://input");
 
 
 	$data=(@json_decode($input));
 
 	$action=isset($data->action)?$clean_str->clean($data->action):'';
+
+	if(@$_POST['action'] == 'create') create($index, $_POST, $_FILES['logo'], $dir);
 
 	//remove
 	if($action=='remove'){

@@ -3,6 +3,7 @@ header('Access-Control-Allow-Origin: *');
 require_once('../../../bidding/Attachments.php');
 require_once('../../../helpers/CleanStr/CleanStr.php');
 require_once('../../../config/database/connections.php');
+require_once('../../../config/server.php');
 require_once('../../../bidding/Logs.php');
 require_once('../../../auth/Session.php');
 
@@ -19,9 +20,7 @@ $clean_str=new CleanStr();
 $logs = new Logs($DB);
 $att = new Attachments($DB);
 $Ses = new Session($DB);
-
-$dir = './../../../../public/uploads/';
-
+$dir = UPLOAD_ABSOLUTE_PATH;
 
 /**
  * GET suppliers list

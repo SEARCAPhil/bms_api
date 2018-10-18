@@ -3,12 +3,15 @@
  * @namespace Index
  * @description Handles company information
  * */
-namespace Suppliers; 
+namespace Suppliers;
+require_once('../../config/server.php'); 
+
 
 class Index{
 
 	public function __construct(\PDO $DB_CONNECTION){
 		$this->DB=$DB_CONNECTION;
+		$this->dir = UPLOAD_DIR.'logo/';
 	}
 
 	public function lists($page=1,$limit=20,$status=0){
@@ -25,6 +28,7 @@ class Index{
 		$sth->bindParam(':offset',$start_page,\PDO::PARAM_INT);
 		$sth->execute();
 		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
+			$row->logo = "{$this->dir}{$row->logo}";
 			$results['data'][]=$row;
 		}
 
@@ -43,6 +47,21 @@ class Index{
 
 		return $results;
 	}
+
+	public function stat(){
+		$results=[];
+
+		$SQL = 'SELECT status, count(*) as total FROM `company` WHERE status != 1 GROUP BY status';
+		$sth = $this->DB->prepare($SQL);
+		$sth->execute();
+
+		while($row = $sth->fetch(\PDO::FETCH_OBJ)) {
+			$results[] = $row;
+		}
+
+		return $results;
+	}
+
 
 	public function search($param,$page = 1,$limit=2){
 		$results=[];
@@ -81,8 +100,9 @@ class Index{
 		$established_year=isset($params["established_year"])?$params["established_year"]:'0000';
 		$location=isset($params["location"])?$params["location"]:'';	
 		$industry=isset($params["industry"])?$params["industry"]:'';
+		$website=isset($params["website"])?$params["website"]:'';
 		//query
-		$SQL='INSERT INTO company(name,tagline,about,established_month,established_date,established_year,location,industry) values(:name,:tagline,:about,:established_month,:established_date,:established_year,:location,:industry)';
+		$SQL='INSERT INTO company(name,tagline,about,established_month,established_date,established_year,location,industry,website) values(:name,:tagline,:about,:established_month,:established_date,:established_year,:location,:industry,:website)';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':name',$name);
 		$sth->bindParam(':tagline',$tagline);
@@ -92,6 +112,7 @@ class Index{
 		$sth->bindParam(':established_year',$established_year);
 		$sth->bindParam(':location',$location);
 		$sth->bindParam(':industry',$industry);
+		$sth->bindParam(':website',$website);
 		$sth->execute();
 
 		return $this->DB->lastInsertId();
@@ -132,6 +153,34 @@ class Index{
 
 		return $sth->rowCount();
 
+	}
+
+		/**
+	 * CREATE Supplier
+	 */
+	public function add_contact($type, $value){
+	
+		$SQL='INSERT INTO company_contact_info(id, type, value) values (:id, :type, :value)';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':id',$id);
+		$sth->bindParam(':type',$type);
+		$sth->bindParam(':value',$value);
+		$sth->execute();
+
+		return $this->DB->lastInsertId();
+	}
+
+		/**
+	 * UPDATE Supplier
+	 */
+	public function update_logo($id, $logo){
+		$SQL='UPDATE company set logo = :logo where id=:id';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':logo',$logo);
+		$sth->bindParam(':id',$id);
+		$sth->execute();
+
+		return $sth->rowCount();
 	}
 
 	public function set_status($id,$status){
