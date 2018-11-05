@@ -42,6 +42,23 @@ class Index{
 		$sth->bindParam(':id',$id,\PDO::PARAM_INT);
 		$sth->execute();
 		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
+			$row->logo = "{$this->dir}{$row->logo}";
+			$row->about = nl2br(mb_convert_encoding($row->about, "UTF-8"));
+			$row->contact_info = $this->contact_info($row->id);
+			$results[]=$row;
+		}
+
+		return $results;
+	}
+
+
+	public function contact_info($id){
+		$results=[];	
+		$SQL='SELECT * FROM company_contact_info WHERE company_id=:id';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':id',$id,\PDO::PARAM_INT);
+		$sth->execute();
+		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
 			$results[]=$row;
 		}
 
@@ -63,7 +80,7 @@ class Index{
 	}
 
 
-	public function search($param,$page = 1,$limit=2){
+	public function search($param,$page = 1,$limit=50){
 		$results=[];
 		$page=$page>1?$page:1;
 
@@ -71,7 +88,7 @@ class Index{
 		$start_page=$page<2?0:(integer)($page-1)*$limit;
 		$par = '%'.$param.'%';
 
-		$SQL='SELECT * FROM company WHERE (name LIKE :param or alias LIKE :param) and status!=4 ORDER BY name ASC LIMIT :offset,:lim';
+		$SQL='SELECT * FROM company WHERE (name LIKE :param or alias LIKE :param) and status!=1 ORDER BY name ASC LIMIT :offset,:lim';
 		$sth=$this->DB->prepare($SQL);
 
 		$sth->bindValue(':param',$par);
@@ -80,7 +97,10 @@ class Index{
 		$sth->execute();
 
 		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
-			$results[]=$row;
+			$row->logo = "{$this->dir}{$row->logo}";
+			$row->about = nl2br(mb_convert_encoding($row->about, "UTF-8"));
+			$row->contact_info = $this->contact_info($row->id);
+			$results[] = $row;
 		}
 
 		return $results;
@@ -135,9 +155,10 @@ class Index{
 		$established_year=isset($params["established_year"])?$params["established_year"]:'0000';
 		$location=isset($params["location"])?$params["location"]:'';	
 		$industry=isset($params["industry"])?$params["industry"]:'';
+		$website=isset($params["website"])?$params["website"]:'';
 		$id=isset($params["id"])?$params["id"]:'';
 		//query
-		$SQL='UPDATE company set name=:name,tagline=:tagline,about=:about,established_month=:established_month,established_date=:established_date,established_year=:established_year,location=:location,industry=:industry,alias=:alias where id=:id';
+		$SQL='UPDATE company set name=:name,tagline=:tagline,about=:about,established_month=:established_month,established_date=:established_date,established_year=:established_year,location=:location,industry=:industry,alias=:alias, website=:website where id=:id';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':name',$name);
 		$sth->bindParam(':tagline',$tagline);
@@ -148,6 +169,7 @@ class Index{
 		$sth->bindParam(':location',$location);
 		$sth->bindParam(':industry',$industry);
 		$sth->bindParam(':alias',$alias);
+		$sth->bindParam(':website',$website);
 		$sth->bindParam(':id',$id);
 		$sth->execute();
 
@@ -158,9 +180,9 @@ class Index{
 		/**
 	 * CREATE Supplier
 	 */
-	public function add_contact($type, $value){
+	public function add_contact($id, $type, $value){
 	
-		$SQL='INSERT INTO company_contact_info(id, type, value) values (:id, :type, :value)';
+		$SQL='INSERT INTO company_contact_info(company_id, type, value) values (:id, :type, :value)';
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id',$id);
 		$sth->bindParam(':type',$type);
@@ -168,6 +190,35 @@ class Index{
 		$sth->execute();
 
 		return $this->DB->lastInsertId();
+	}
+
+
+	/**
+	 * removeContacst
+	 */
+	public function remove_contact($id){
+	
+		$SQL='DELETE FROM company_contact_info WHERE id =:id';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':id',$id);
+		$sth->execute();
+
+		return $sth->rowCount();
+	}
+
+	/**
+	 * update Contact
+	 */
+	public function update_contact($id, $type, $value){
+	
+		$SQL='UPDATE company_contact_info SET type =:type, value = :value WHERE id =:id';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':id',$id);
+		$sth->bindParam(':type',$type);
+		$sth->bindParam(':value',$value);
+		$sth->execute();
+
+		return $sth->rowCount();
 	}
 
 		/**

@@ -41,5 +41,22 @@ class Session{
 
 		return $result;
 	}
+
+	public function get_all_sessions($id, $page = 0 , $limit = 20){
+		$results = [];	
+		$start_page = $page<2?0:(integer)($page-1)*$limit;
+		$SQL='SELECT * FROM account_session WHERE account_id = :id ORDER BY date_created DESC LIMIT :offset,:lim';
+		$sth=$this->DB->prepare($SQL);
+		$sth->bindParam(':id',$id,\PDO::PARAM_STR);
+		$sth->bindParam(':lim',$limit,\PDO::PARAM_INT);
+		$sth->bindParam(':offset',$start_page,\PDO::PARAM_INT);
+		$sth->execute();
+		while($row=$sth->fetch(\PDO::FETCH_OBJ)) {
+			$results[]=$row;
+		}
+
+		return $results;
+	}
+
 }
 ?>

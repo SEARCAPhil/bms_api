@@ -40,35 +40,85 @@ function create ($pdo, $data, $file , $dir) {
 	$industry=isset($data['industry'])?$clean_str->clean($data['industry']):'';
 	$alias=isset($data['alias'])?$clean_str->clean($data['alias']):'';
 	$website=isset($data['website'])?$clean_str->clean($data['website']):'';
-	
+	$action = isset($data['action'])?$clean_str->clean($data['action']):'';
+	$id = isset($data['id'])?$clean_str->clean($data['id']):'';
+	$contacts = isset($data['contacts'])?$data['contacts']:[];
+
+	$is_contact_removed = $is_contact_added = 0;
 	//required
 	if(empty($name)) return 0;
 
-	$result=$pdo->create([
-		"name"=>$name,
-		"tagline"=>$tagline,
-		"about"=>$about,
-		"established_date"=>$established_date,
-		"established_month"=>$established_month,
-		"established_year"=>$established_year,
-		"location"=>$location,
-		"industry"=>$industry,
-		"website"=>$website
-	]);
+	if ($action== 'create') {
+		$result=$pdo->create([
+			"name"=>$name,
+			"tagline"=>$tagline,
+			"alias" => $alias,
+			"about"=>$about,
+			"established_date"=>$established_date,
+			"established_month"=>$established_month,
+			"established_year"=>$established_year,
+			"location"=>$location,
+			"industry"=>$industry,
+			"website"=>$website
+		]);
 
+		$id = $result;
+	}
+
+	if($action =='update' && $id) {
+		$result = $pdo->update([
+			"id" => $id,
+			"name" => $name,
+			"tagline" => $tagline,
+			"alias" => $alias,
+			"about" => $about,
+			"established_date" => $established_date,
+			"established_month" => $established_month,
+			"established_year" => $established_year,
+			"location" => $location,
+			"industry" => $industry,
+			"website" => $website
+		]);
+
+		if ($result) $result = $id;
+	}
 	
-	if ($result) {
+	if ($id) {
 		// add contact information
-		foreach(@$data['contact_type'] as $key => $value) {
-			if(!empty($data['contact_value'][$key])) $pdo->add_contact($value,@$data['contact_value'][$key]);
+		foreach(@$contacts as $key => $value) {
+			$__con = explode(',', $value);
+
+			// add new
+			if(empty(@$__con[2])&&(!empty(@$__con[1]))) { 
+				$is_contact_added = $pdo->add_contact($id,$__con[0],@$__con[1]) > 0 ? $is_contact_added+1 : $is_contact_added; 
+			} else {
+				// update
+				if(isset($__con[2])&&!empty(@$__con[1])) {
+					$is_contact_added = $pdo->update_contact($__con[2],$__con[0],@$__con[1]) > 0 ? $is_contact_added+1 : $is_contact_added;
+				 }  
+			}
 		}
 
-		//add logo
-		if (isset($file['name'])) uploadImage ($pdo, $result, $file, $dir);
+		// remove contacts
+		$contacts_to_remove = explode(',', $data['contacts_to_remove']);
+
+		foreach($contacts_to_remove as $key => $value) {
+			$is_contact_removed = $pdo->remove_contact($value) > 0 ? $is_contact_removed+1 : $is_contact_removed;
+		}
 
 	}
 
-	$data=["data"=>$result];
+	//add logo
+	if (isset($file['name']) && !empty($id)) {
+		$is_uploaded = uploadImage ($pdo, $id, $file, $dir);
+		$result = $is_uploaded ? $id : $result;
+	} 
+
+	// changes marker
+	$__something_changed = ($result + $is_contact_added + $is_contact_removed);
+	if($action =='update' && $__something_changed) $result = $id;
+
+	$data=["data" => $result];
 	echo @json_encode($data);
 }
 
@@ -183,7 +233,7 @@ if($method=="POST"){
 
 	$action=isset($data->action)?$clean_str->clean($data->action):'';
 
-	if(@$_POST['action'] == 'create') create($index, $_POST, $_FILES['logo'], $dir);
+	if(@$_POST['action'] == 'create' ||  @$_POST['action'] == 'update') create($index, $_POST, $_FILES['logo'], $dir);
 
 	//remove
 	if($action=='remove'){
@@ -236,34 +286,9 @@ if($method=="POST"){
 
 	//update
 	// ID is required
-	if($action=='update'){
+	//if(@$_POST['action'] == 'update') create($index, $_POST, $_FILES['logo'], $dir);
 
-		$id=(int) isset($data->id)?$clean_str->clean($data->id):'';
-
-		//must not be epty
-		if(empty($id)) return 0;
-
-
-		$result=$index->update([
-			"name"=>$name,
-			"tagline"=>$tagline,
-			"about"=>$about,
-			"established_date"=>$established_date,
-			"established_month"=>$established_month,
-			"established_year"=>$established_year,
-			"location"=>$location,
-			"industry"=>$industry,
-			"alias"=>$alias,
-			"id"=>$id
-		]);
-
-		$data=["data"=>$result];
-		echo @json_encode($data);
-		return 0;
-
-	}
-
-	$result=$index->create([
+	/*$result=$index->create([
 		"name"=>$name,
 		"tagline"=>$tagline,
 		"about"=>$about,
@@ -272,7 +297,7 @@ if($method=="POST"){
 		"established_year"=>$established_year,
 		"location"=>$location,
 		"industry"=>$industry
-	]);
+	]);*/
 
 	$data=["data"=>$result];
 	echo @json_encode($data);

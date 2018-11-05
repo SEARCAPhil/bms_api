@@ -18,9 +18,9 @@ class Logs{
 		$sth=$this->DB->prepare($SQL);
 		$sth->bindParam(':id',$id,\PDO::PARAM_INT);
 		$sth->bindParam(':event',$event,\PDO::PARAM_STR);
-        $sth->bindParam(':action',$action,\PDO::PARAM_STR);
-        $sth->bindParam(':reference_id',$reference_id,\PDO::PARAM_INT);
-        $sth->bindParam(':data',$data,\PDO::PARAM_STR);
+		$sth->bindParam(':action',$action,\PDO::PARAM_STR);
+		$sth->bindParam(':reference_id',$reference_id,\PDO::PARAM_INT);
+		$sth->bindParam(':data',$data,\PDO::PARAM_STR);
 
 		if($sth->execute())	return $this->DB->lastInsertId();
 		return 0;
